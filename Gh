@@ -1,0 +1,54 @@
+Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
+    Dim updateTypeColumn As Integer
+    Dim newRow As Long
+    Dim headerRow As Long
+    Dim newBlockRow As Long
+    Dim numOperations As Integer
+    Dim blockHeaders As Variant
+    Dim headersDictionary As Object
+    
+    ' Define the column index for "Update Type"
+    updateTypeColumn = 2 ' Assuming "Update Type" is in the 2nd column
+    
+    ' Create a dictionary for custom block headers based on drop-down options
+    Set headersDictionary = CreateObject("Scripting.Dictionary")
+    headersDictionary.Add "Option 1", Array("Header A1", "Header A2", "Header A3", "Header A4")
+    headersDictionary.Add "Option 2", Array("Header B1", "Header B2", "Header B3", "Header B4")
+    headersDictionary.Add "Option 3", Array("Header C1", "Header C2", "Header C3", "Header C4")
+    
+    ' Ensure the change occurred in a valid sheet and the "Update Type" column
+    If Sh.Name <> "Mapping" And Not Intersect(Target, Sh.Columns(updateTypeColumn)) Is Nothing Then
+        ' Calculate the number of operations
+        numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn))
+        Sh.Cells(Target.Row, 1).Value = numOperations
+        
+        ' Create a new block based on the selected option
+        If Target.Cells.Count = 1 And headersDictionary.Exists(Target.Value) Then
+            newRow = Target.Row + 1
+            headerRow = newRow + 1
+            newBlockRow = headerRow + 1
+            
+            ' Insert a new row for the next operation
+            Sh.Rows(newRow).Insert Shift:=xlDown
+            Sh.Cells(newRow, updateTypeColumn).Validation.Delete
+            Sh.Cells(newRow, updateTypeColumn).Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+                xlBetween, Formula1:="Option 1, Option 2, Option 3"
+            Sh.Cells(newRow, updateTypeColumn).Validation.IgnoreBlank = True
+            Sh.Cells(newRow, updateTypeColumn).Validation.InCellDropdown = True
+            Sh.Cells(newRow, updateTypeColumn).Validation.ShowInput = True
+            Sh.Cells(newRow, updateTypeColumn).Validation.ShowError = True
+            
+            ' Insert headers for the new block
+            Sh.Cells(headerRow, 1).Value = "No. of Operations " & numOperations & " - Update Type " & Target.Value
+            
+            Dim i As Integer
+            blockHeaders = headersDictionary(Target.Value)
+            For i = LBound(blockHeaders) To UBound(blockHeaders)
+                Sh.Cells(headerRow, i + 2).Value = blockHeaders(i)
+            Next i
+            
+            ' Insert a blank row under the new headers
+            Sh.Rows(newBlockRow).Insert Shift:=xlDown
+        End If
+    End If
+End Sub
