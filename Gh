@@ -1,146 +1,57 @@
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     Dim updateTypeColumn As Integer
-    Dim newRow As Long
-    Dim headerRow As Long
-    Dim newBlockRow As Long
-    Dim numOperations As Integer
-    Dim blockHeaders As Variant
-    Dim headersDictionary As Object
-    Dim selectedOption As String
-    Dim i As Integer
+    updateTypeColumn = 2 ' Assuming "Update Type" column is column 2
     
-    On Error GoTo ErrorHandler
-    
-    ' Define the column index for "Update Type"
-    updateTypeColumn = 2 ' Assuming "Update Type" is in the 2nd column
-    
-    ' Create a dictionary for custom block headers based on drop-down options
-    Set headersDictionary = CreateObject("Scripting.Dictionary")
-    headersDictionary.Add "Option 1", Array("Header A1", "Header A2", "Header A3", "Header A4")
-    headersDictionary.Add "Option 2", Array("Header B1", "Header B2", "Header B3", "Header B4")
-    headersDictionary.Add "Option 3", Array("Header C1", "Header C2", "Header C3", "Header C4")
-    
-    ' Ensure the change occurred in a valid sheet and the "Update Type" column
-    If Sh.Name <> "Mapping" And Not Intersect(Target, Sh.Columns(updateTypeColumn)) Is Nothing Then
-        Application.EnableEvents = False ' Disable events to prevent infinite loop
+    ' Check if the change is on a sheet other than "Mapping" and in the specified column
+    If Sh.Name <> "Mapping" And Target.Column = updateTypeColumn Then
+        Application.EnableEvents = False ' Disable events temporarily
         
-        ' Get the selected option from the drop-down
-        selectedOption = Target.Value
-        
-        ' Calculate the number of operations
+        ' Determine the number of operations based on entries in "Update Type" column
+        Dim numOperations As Integer
         numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
-        Sh.Cells(Target.Row, 1).Value = numOperations
         
-        ' Create a new block based on the selected option
-        If Target.Cells.Count = 1 And headersDictionary.Exists(selectedOption) Then
-            newRow = Target.Row + 1
-            headerRow = newRow + 1
-            newBlockRow = headerRow + 1
+        ' Insert a new block based on the selected option in the "Update Type" dropdown
+        If Target.Cells.Count = 1 Then
+            Dim selectedOption As String
+            selectedOption = Target.Value
             
-            ' Insert a new row for the next operation
+            ' Insert a new row for the new block
+            Dim newRow As Long
+            newRow = Target.Row + 1
             Sh.Rows(newRow).Insert Shift:=xlDown
-            Sh.Cells(newRow, updateTypeColumn).Validation.Delete
-            Sh.Cells(newRow, updateTypeColumn).Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-                xlBetween, Formula1:="Option 1, Option 2, Option 3"
-            Sh.Cells(newRow, updateTypeColumn).Validation.IgnoreBlank = True
-            Sh.Cells(newRow, updateTypeColumn).Validation.InCellDropdown = True
-            Sh.Cells(newRow, updateTypeColumn).Validation.ShowInput = True
-            Sh.Cells(newRow, updateTypeColumn).Validation.ShowError = True
             
             ' Insert headers for the new block
+            Dim headerRow As Long
+            headerRow = newRow + 1
             Sh.Cells(headerRow, 1).Value = "No. of Operations " & numOperations & " - Update Type " & selectedOption
             
-            blockHeaders = headersDictionary(selectedOption)
-            For i = LBound(blockHeaders) To UBound(blockHeaders)
-                Sh.Cells(headerRow, i + 2).Value = blockHeaders(i)
+            ' Add additional headers based on the selected option
+            Dim headers As Variant
+            Select Case selectedOption
+                Case "Option 1"
+                    headers = Array("Header A1", "Header A2", "Header A3", "Header A4")
+                Case "Option 2"
+                    headers = Array("Header B1", "Header B2", "Header B3", "Header B4")
+                Case "Option 3"
+                    headers = Array("Header C1", "Header C2", "Header C3", "Header C4")
+                ' Add more cases as needed
+                Case Else
+                    ' Default case if none of the above options match
+                    headers = Array("Default Header 1", "Default Header 2", "Default Header 3", "Default Header 4")
+            End Select
+            
+            ' Populate headers in the new block
+            Dim i As Integer
+            For i = LBound(headers) To UBound(headers)
+                Sh.Cells(headerRow, i + 2).Value = headers(i)
             Next i
             
-            ' Insert a blank row under the new headers
+            ' Insert a blank row underneath the headers
+            Dim newBlockRow As Long
+            newBlockRow = headerRow + 1
             Sh.Rows(newBlockRow).Insert Shift:=xlDown
         End If
         
         Application.EnableEvents = True ' Re-enable events
     End If
-
-    Exit Sub
-
-ErrorHandler:
-    Application.EnableEvents = True
-    MsgBox "Error: " & Err.Description, vbCritical
-
 End Sub
-
-Sub CreateSheetsFromMapping()
-    Dim mappingSheet As Worksheet
-    Dim newSheetName As String
-    Dim header As Range
-    Dim targetColumn As Range
-    Dim cell As Range
-    Dim newSheet As Worksheet
-    Dim ws As Worksheet
-    Dim sheetExists As Boolean
-    Dim customHeaders As Variant
-    Dim dropDownOptions As Variant
-    
-    ' Set the mapping sheet
-    Set mappingSheet = ThisWorkbook.Sheets("Mapping")
-    
-    ' Find the "Mapping Page" column header
-    Set header = mappingSheet.Rows(1).Find(What:="Mapping Page", LookIn:=xlValues, LookAt:=xlWhole)
-    
-    ' Define custom headers for new sheets
-    customHeaders = Array("No. of Operations", "Update Type")
-    
-    ' Define options for the drop-down list
-    dropDownOptions = Array("Option 1", "Option 2", "Option 3")
-    
-    If Not header Is Nothing Then
-        ' Set the target column to the cells under the "Mapping Page" header
-        Set targetColumn = mappingSheet.Range(header.Offset(1, 0), mappingSheet.Cells(mappingSheet.Rows.Count, header.Column).End(xlUp))
-        
-        ' Loop through each cell in the target column
-        For Each cell In targetColumn
-            If cell.Value <> "" Then
-                newSheetName = cell.Value
-                sheetExists = False
-                
-                ' Check if a sheet with this name already exists
-                For Each ws In ThisWorkbook.Sheets
-                    If ws.Name = newSheetName Then
-                        sheetExists = True
-                        Exit For
-                    End If
-                Next ws
-                
-                If Not sheetExists Then
-                    ' Create the new sheet with the given name
-                    Set newSheet = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
-                    newSheet.Name = newSheetName
-                    
-                    ' Add custom headers to the new sheet
-                    newSheet.Cells(1, 1).Value = customHeaders(0)
-                    newSheet.Cells(1, 2).Value = customHeaders(1)
-                    
-                    ' Add drop-down list to the "Update Type" column (assuming it is the 2nd column)
-                    With newSheet.Range("B2").Validation
-                        .Delete
-                        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-                        xlBetween, Formula1:=Join(dropDownOptions, ",")
-                        .IgnoreBlank = True
-                        .InCellDropdown = True
-                        .ShowInput = True
-                        .ShowError = True
-                    End With
-                    
-                    ' Initialize "No. of Operations" for the first row
-                    newSheet.Cells(2, 1).Value = 1
-                Else
-                    MsgBox "A sheet with the name " & newSheetName & " already exists.", vbExclamation
-                End If
-            End If
-        Next cell
-    Else
-        MsgBox "The column 'Mapping Page' was not found in the 'Mapping' sheet.", vbExclamation
-    End If
-End Sub
-
