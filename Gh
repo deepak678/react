@@ -6,6 +6,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     Dim numOperations As Integer
     Dim blockHeaders As Variant
     Dim headersDictionary As Object
+    Dim selectedOption As String
     
     ' Define the column index for "Update Type"
     updateTypeColumn = 2 ' Assuming "Update Type" is in the 2nd column
@@ -18,12 +19,17 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     
     ' Ensure the change occurred in a valid sheet and the "Update Type" column
     If Sh.Name <> "Mapping" And Not Intersect(Target, Sh.Columns(updateTypeColumn)) Is Nothing Then
+        Application.EnableEvents = False ' Disable events to prevent infinite loop
+        
+        ' Get the selected option from the drop-down
+        selectedOption = Target.Value
+        
         ' Calculate the number of operations
         numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn))
         Sh.Cells(Target.Row, 1).Value = numOperations
         
         ' Create a new block based on the selected option
-        If Target.Cells.Count = 1 And headersDictionary.Exists(Target.Value) Then
+        If Target.Cells.Count = 1 And headersDictionary.Exists(selectedOption) Then
             newRow = Target.Row + 1
             headerRow = newRow + 1
             newBlockRow = headerRow + 1
@@ -39,10 +45,10 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
             Sh.Cells(newRow, updateTypeColumn).Validation.ShowError = True
             
             ' Insert headers for the new block
-            Sh.Cells(headerRow, 1).Value = "No. of Operations " & numOperations & " - Update Type " & Target.Value
+            Sh.Cells(headerRow, 1).Value = "No. of Operations " & numOperations & " - Update Type " & selectedOption
             
             Dim i As Integer
-            blockHeaders = headersDictionary(Target.Value)
+            blockHeaders = headersDictionary(selectedOption)
             For i = LBound(blockHeaders) To UBound(blockHeaders)
                 Sh.Cells(headerRow, i + 2).Value = blockHeaders(i)
             Next i
@@ -50,5 +56,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
             ' Insert a blank row under the new headers
             Sh.Rows(newBlockRow).Insert Shift:=xlDown
         End If
+        
+        Application.EnableEvents = True ' Re-enable events
     End If
 End Sub
