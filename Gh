@@ -53,7 +53,7 @@ Private Sub InsertBlankLine(ByVal Sh As Worksheet)
 End Sub
 
 Private Sub InsertTableHeading(ByVal Sh As Worksheet, ByVal selectedOption As String)
-    ' Insert table heading "No. of Operations: Update Type" above the new table
+    ' Insert table heading "No. of Operations: Update Type"
     Dim lastRow As Long
     If Sh.ListObjects.Count > 0 Then
         lastRow = Sh.ListObjects(Sh.ListObjects.Count).Range.Row + Sh.ListObjects(Sh.ListObjects.Count).Range.Rows.Count - 1
@@ -78,7 +78,7 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal startRow As Long, B
     Dim headerRow As Long
     headerRow = startRow ' Start from the specified startRow
     Dim tableStart As Range
-    Set tableStart = Sh.Cells(headerRow, 1) ' Start from the row with headers
+    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below the header row
     Dim tableEnd As Range
     Set tableEnd = Sh.Cells(headerRow + 1, 1) ' Assuming the table has one row initially
 
@@ -95,7 +95,7 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal startRow As Long, B
         ' Add serial number column as the first column
         newTbl.ListColumns.Add Position:=1
         newTbl.HeaderRowRange.Cells(1, 1).Value = "Serial No."
-
+        
         ' Add headers based on selected option
         Select Case selectedOption
             Case "Update Paragraph"
