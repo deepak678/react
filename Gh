@@ -62,7 +62,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 DisableSelectedOption Sh, Target, selectedOption
 
                 ' Add provision to add new rows to the table
-                CreateNewTable Sh, headerRow, headers
+                CreateOrUpdateTable Sh, headerRow, headers
             End If
         End If
     End If
@@ -105,7 +105,7 @@ Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, 
     End If
 End Sub
 
-Private Sub CreateNewTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
+Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
     Dim lastRow As Long
     lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
 
@@ -114,24 +114,16 @@ Private Sub CreateNewTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal
     Dim tableEnd As Range
     Set tableEnd = Sh.Cells(lastRow + 1, UBound(headers) + 1)
 
-    ' Check if there's enough space for the new table
-    If Not Intersect(tableStart, Sh.UsedRange) Is Nothing And Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
-        Sh.Rows(headerRow + 1).Insert Shift:=xlDown
-        headerRow = headerRow + 1
-        Set tableStart = Sh.Cells(headerRow + 1, 1)
-        Set tableEnd = Sh.Cells(lastRow + 1, UBound(headers) + 1)
-    End If
-
-    ' Check if a table exists in the target range and delete it if found
+    ' Check if there's an existing table in the target range
     Dim tbl As ListObject
     For Each tbl In Sh.ListObjects
         If Not Intersect(tbl.Range, Sh.Range(tableStart, tableEnd)) Is Nothing Then
-            tbl.Delete
-            Exit For
+            ' If existing table overlaps, do not delete it and exit the subroutine
+            Exit Sub
         End If
     Next tbl
 
-    ' Add new table
+    ' Add new table if no overlapping table is found
     Dim newTbl As ListObject
     Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
     newTbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
