@@ -42,9 +42,8 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     Case "Placeholder Update"
                         headers = Array("Serial No.", "Placeholder Key", "Placeholder Value")
                     Case Else
-                        ' Handle case where an invalid option is selected
-                        MsgBox "Invalid selection in Update Type column."
-                        GoTo ExitHandler
+                        ' Default case if none of the above options match
+                        headers = Array("Please select an option in Update Type")
                 End Select
 
                 ' Populate headers in the new block
@@ -54,7 +53,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 Next i
 
                 ' Apply table formatting
-                FormatAsTable Sh, headerRow, headers
+                CreateOrUpdateTable Sh, headerRow, headers
 
                 ' Disable the selected option in the drop-down
                 DisableSelectedOption Sh, Target, selectedOption
@@ -71,15 +70,15 @@ ErrorHandler:
     Resume ExitHandler
 End Sub
 
-Private Sub FormatAsTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
+Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
     Dim lastRow As Long
     lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
 
     ' Define table range
     Dim tableStart As Range
-    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below headers
+    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row with headers
     Dim tableEnd As Range
-    Set tableEnd = Sh.Cells(lastRow, UBound(headers))
+    Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1) ' Assume the table has one row initially
 
     ' Check if a table exists in the target range and delete it if found
     Dim tbl As ListObject
@@ -94,12 +93,6 @@ Private Sub FormatAsTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal 
     Dim newTbl As ListObject
     Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
     newTbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
-
-    ' Add headers to the table
-    Dim i As Integer
-    For i = LBound(headers) To UBound(headers)
-        newTbl.HeaderRowRange.Cells(1, i + 1).Value = headers(i)
-    Next i
 
     ' Apply table style (optional)
     newTbl.TableStyle = "TableStyleMedium2" ' Change as per your preference
