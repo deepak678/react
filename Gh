@@ -56,14 +56,14 @@ Private Sub InsertTableHeading(ByVal Sh As Worksheet, ByVal selectedOption As St
     ' Insert table heading "No. of Operations: Update Type"
     Dim lastRow As Long
     If Sh.ListObjects.Count > 0 Then
-        lastRow = Sh.ListObjects(Sh.ListObjects.Count).Range.Row + Sh.ListObjects(Sh.ListObjects.Count).Range.Rows.Count - 1
+        lastRow = Sh.ListObjects(Sh.ListObjects.Count).Range.Row + Sh.ListObjects(Sh.ListObjects.Count).Range.Rows.Count
     Else
         lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
     End If
 
-    Sh.Cells(lastRow + 2, 1).Value = "No. of Operations: " & selectedOption
-    Sh.Cells(lastRow + 2, 1).Font.Bold = True
-    Sh.Cells(lastRow + 2, 1).HorizontalAlignment = xlCenter
+    Sh.Cells(lastRow + 1, 1).Value = "No. of Operations: " & selectedOption
+    Sh.Cells(lastRow + 1, 1).Font.Bold = True
+    Sh.Cells(lastRow + 1, 1).HorizontalAlignment = xlCenter
 End Sub
 
 Private Function GetNextAvailableRow(ByVal Sh As Worksheet) As Long
