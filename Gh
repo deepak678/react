@@ -23,7 +23,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 On Error GoTo 0
 
                 If tbl Is Nothing Then
-                    ' If table does not exist, create a new table
+                    ' If table does not exist, create a new table with headers
                     CreateOrUpdateTable Sh, Target.Row, selectedOption
                 Else
                     ' If table exists, find the last row and add a new row with incremented serial number
@@ -31,26 +31,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     Set newRow = tbl.ListRows.Add
                     newRow.Range.Cells(1, 1).Value = tbl.ListRows.Count ' Serial No.
 
-                    ' Fill other columns based on selected option
-                    Select Case selectedOption
-                        Case "Update Paragraph"
-                            newRow.Range.Cells(1, 2).Value = "Header Level" ' Example header
-                            newRow.Range.Cells(1, 3).Value = "Before Header" ' Example header
-                            newRow.Range.Cells(1, 4).Value = "Before Paragraph No." ' Example header
-                            newRow.Range.Cells(1, 5).Value = "Content" ' Example header
-                        Case "Update Text"
-                            newRow.Range.Cells(1, 2).Value = "Reference" ' Example header
-                            newRow.Range.Cells(1, 3).Value = "Old Text" ' Example header
-                            newRow.Range.Cells(1, 4).Value = "New Text" ' Example header
-                        Case "Update Front Page"
-                            newRow.Range.Cells(1, 2).Value = "Reference" ' Example header
-                            newRow.Range.Cells(1, 3).Value = "New Text" ' Example header
-                        Case "Placeholder Update"
-                            newRow.Range.Cells(1, 2).Value = "Placeholder Key" ' Example header
-                            newRow.Range.Cells(1, 3).Value = "Placeholder Value" ' Example header
-                        Case Else
-                            ' Handle other cases if needed
-                    End Select
+                    ' Fill other columns based on selected option (if needed)
                 End If
 
             End If
@@ -67,10 +48,6 @@ ErrorHandler:
 End Sub
 
 Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal selectedOption As String)
-    ' Find the last used row
-    Dim lastRow As Long
-    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-
     ' Define table range
     Dim tableStart As Range
     Set tableStart = Sh.Cells(headerRow, 1) ' Start from the row with headers
@@ -86,6 +63,40 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, 
     If newTbl Is Nothing Then
         Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
         newTbl.Name = "Table_" & Replace(selectedOption, " ", "_") ' Unique name for each table
+        
+        ' Add headers based on selected option
+        Select Case selectedOption
+            Case "Update Paragraph"
+                With newTbl
+                    .ListColumns.Add Position:=2
+                    .HeaderRowRange.Cells(1, 2).Value = "Header Level"
+                    .HeaderRowRange.Cells(1, 3).Value = "Before Header"
+                    .HeaderRowRange.Cells(1, 4).Value = "Before Paragraph No."
+                    .HeaderRowRange.Cells(1, 5).Value = "Content"
+                End With
+            Case "Update Text"
+                With newTbl
+                    .ListColumns.Add Position:=2
+                    .HeaderRowRange.Cells(1, 2).Value = "Reference"
+                    .HeaderRowRange.Cells(1, 3).Value = "Old Text"
+                    .HeaderRowRange.Cells(1, 4).Value = "New Text"
+                End With
+            Case "Update Front Page"
+                With newTbl
+                    .ListColumns.Add Position:=2
+                    .HeaderRowRange.Cells(1, 2).Value = "Reference"
+                    .HeaderRowRange.Cells(1, 3).Value = "New Text"
+                End With
+            Case "Placeholder Update"
+                With newTbl
+                    .ListColumns.Add Position:=2
+                    .HeaderRowRange.Cells(1, 2).Value = "Placeholder Key"
+                    .HeaderRowRange.Cells(1, 3).Value = "Placeholder Value"
+                End With
+            Case Else
+                ' Handle other cases if needed
+        End Select
+        
         newTbl.TableStyle = "TableStyleMedium2" ' Apply table style (optional)
     End If
 End Sub
