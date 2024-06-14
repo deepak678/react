@@ -16,17 +16,16 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
             ' Proceed only if a valid selection is made from the drop-down and it's not "Update Type"
             If selectedOption <> "" And selectedOption <> "Update Type" Then
 
-                ' Clear any existing tables in the sheet to avoid overlapping tables
-                ClearExistingTables Sh
-
-                ' Insert a black line before creating the first table
-                InsertBlackLine Sh
+                ' Insert a blank line before creating the first table, if this is the first table being created
+                If Sh.ListObjects.Count = 0 Then
+                    InsertBlankLine Sh
+                End If
 
                 ' Define starting row for the new table
                 Dim startRow As Long
                 startRow = GetNextAvailableRow(Sh) ' Find the next available row for new tables
 
-                ' Create or update table with headers based on selected option
+                ' Create table with headers based on selected option
                 CreateOrUpdateTable Sh, startRow, selectedOption
 
             End If
@@ -42,19 +41,12 @@ ErrorHandler:
     Resume ExitHandler
 End Sub
 
-Private Sub ClearExistingTables(ByVal Sh As Worksheet)
-    ' Clear all existing tables in the sheet
-    Dim tbl As ListObject
-    For Each tbl In Sh.ListObjects
-        tbl.Delete
-    Next tbl
-End Sub
-
-Private Sub InsertBlackLine(ByVal Sh As Worksheet)
-    ' Insert a black line (border) above the first row
-    Sh.Rows("1:1").Borders(xlEdgeBottom).LineStyle = xlContinuous
-    Sh.Rows("1:1").Borders(xlEdgeBottom).Color = RGB(0, 0, 0)
-    Sh.Rows("1:1").Borders(xlEdgeBottom).Weight = xlThin
+Private Sub InsertBlankLine(ByVal Sh As Worksheet)
+    ' Insert a blank row at the end of existing data
+    Dim lastRow As Long
+    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
+    Sh.Rows(lastRow + 1).Insert Shift:=xlDown
+    Sh.Rows(lastRow + 1).Interior.Color = RGB(255, 255, 255) ' White color for blank row
 End Sub
 
 Private Function GetNextAvailableRow(ByVal Sh As Worksheet) As Long
