@@ -19,9 +19,12 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 ' Clear any existing tables in the sheet to avoid overlapping tables
                 ClearExistingTables Sh
 
+                ' Insert a black line before creating the first table
+                InsertBlackLine Sh
+
                 ' Define starting row for the new table
                 Dim startRow As Long
-                startRow = 3 ' Adjust as per your specific starting row
+                startRow = GetNextAvailableRow(Sh) ' Find the next available row for new tables
 
                 ' Create or update table with headers based on selected option
                 CreateOrUpdateTable Sh, startRow, selectedOption
@@ -46,6 +49,20 @@ Private Sub ClearExistingTables(ByVal Sh As Worksheet)
         tbl.Delete
     Next tbl
 End Sub
+
+Private Sub InsertBlackLine(ByVal Sh As Worksheet)
+    ' Insert a black line (border) above the first row
+    Sh.Rows("1:1").Borders(xlEdgeBottom).LineStyle = xlContinuous
+    Sh.Rows("1:1").Borders(xlEdgeBottom).Color = RGB(0, 0, 0)
+    Sh.Rows("1:1").Borders(xlEdgeBottom).Weight = xlThin
+End Sub
+
+Private Function GetNextAvailableRow(ByVal Sh As Worksheet) As Long
+    ' Find the next available row for new tables
+    Dim lastRow As Long
+    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
+    GetNextAvailableRow = lastRow + 2 ' Start from the row after the last used row
+End Function
 
 Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal startRow As Long, ByVal selectedOption As String)
     ' Define table range starting from startRow
