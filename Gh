@@ -13,21 +13,23 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
             Dim selectedOption As String
             selectedOption = Target.Value
 
-            ' Proceed only if a valid selection is made from the drop-down
-            If selectedOption <> "" Then
+            ' Proceed only if a valid selection is made from the drop-down and it's not "Update Type"
+            If selectedOption <> "" And selectedOption <> "Update Type" Then
 
                 ' Determine the number of operations based on entries in "Update Type" column
                 Dim numOperations As Integer
                 numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
 
-                ' Insert a new row for the new block
+                ' Find the next available row for the new block
+                Dim lastUsedRow As Long
+                lastUsedRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
+
                 Dim newRow As Long
-                newRow = Target.Row + 1
-                Sh.Rows(newRow).Insert Shift:=xlDown
+                newRow = lastUsedRow + 2 ' Ensure space between blocks
 
                 ' Insert header for the new block
                 Dim headerRow As Long
-                headerRow = newRow + 1
+                headerRow = newRow
                 Sh.Cells(headerRow, 1).Value = numOperations & ": " & selectedOption
 
                 ' Define headers for different update types
@@ -79,15 +81,6 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, 
     Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row with headers
     Dim tableEnd As Range
     Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1) ' Assume the table has one row initially
-
-    ' Check if a table exists in the target range and delete it if found
-    Dim tbl As ListObject
-    For Each tbl In Sh.ListObjects
-        If Not Intersect(tbl.Range, Sh.Range(tableStart, tableEnd)) Is Nothing Then
-            tbl.Delete
-            Exit For
-        End If
-    Next tbl
 
     ' Add new table
     Dim newTbl As ListObject
