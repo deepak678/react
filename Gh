@@ -25,7 +25,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 newRow = Target.Row + 1
                 Sh.Rows(newRow).Insert Shift:=xlDown
 
-                ' Insert headers for the new block
+                ' Insert header for the new block
                 Dim headerRow As Long
                 headerRow = newRow + 1
                 Sh.Cells(headerRow, 1).Value = numOperations & ": " & selectedOption
@@ -42,8 +42,9 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     Case "Placeholder Update"
                         headers = Array("Serial No.", "Placeholder Key", "Placeholder Value")
                     Case Else
-                        ' Default case if none of the above options match
-                        headers = Array("Serial No.", "Default Header 1", "Default Header 2", "Default Header 3", "Default Header 4")
+                        ' Handle case where an invalid option is selected
+                        MsgBox "Invalid selection in Update Type column."
+                        GoTo ExitHandler
                 End Select
 
                 ' Populate headers in the new block
@@ -66,12 +67,13 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
         End If
     End If
 
+ExitHandler:
     Application.EnableEvents = True ' Re-enable events
     Exit Sub
 
 ErrorHandler:
-    Application.EnableEvents = True
     MsgBox "An error occurred: " & Err.Description & " in " & Err.Source
+    Resume ExitHandler
 End Sub
 
 Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, ByVal selectedOption As String)
@@ -96,8 +98,10 @@ Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, 
 
         ' Apply the new list without the selected option
         Target.Validation.Delete
-        Target.Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-            xlBetween, Formula1:=newOptions
+        If newOptions <> "" Then
+            Target.Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+                xlBetween, Formula1:=newOptions
+        End If
     End If
 End Sub
 
@@ -108,7 +112,7 @@ Private Sub CreateNewTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal
     Dim tableStart As Range
     Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below headers
     Dim tableEnd As Range
-    Set tableEnd = Sh.Cells(lastRow, UBound(headers) + 1)
+    Set tableEnd = Sh.Cells(lastRow + 1, UBound(headers) + 1)
 
     ' Check if there's enough space for the new table
     If Not Intersect(tableStart, Sh.UsedRange) Is Nothing And Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
