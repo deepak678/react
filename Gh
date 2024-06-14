@@ -8,12 +8,14 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     ' Check if the change is on a sheet other than "Mapping" and in the specified column
     If Sh.Name <> "Mapping" And Target.Column = updateTypeColumn Then
 
-        ' Insert a new block based on the selected option in the "Update Type" dropdown
+        ' Ensure the change is only processed for single-cell updates
         If Target.Cells.Count = 1 Then
             Dim selectedOption As String
             selectedOption = Target.Value
 
+            ' Proceed only if a valid selection is made from the drop-down
             If selectedOption <> "" Then
+
                 ' Determine the number of operations based on entries in "Update Type" column
                 Dim numOperations As Integer
                 numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
@@ -95,7 +97,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 
 ErrorHandler:
     Application.EnableEvents = True
-    MsgBox "An error occurred: " & Err.Description
+    MsgBox "An error occurred: " & Err.Description & " in " & Err.Source
 End Sub
 
 Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, ByVal selectedOption As String)
