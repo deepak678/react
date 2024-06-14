@@ -54,7 +54,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 
                 ' Determine the range for the table
                 Dim tableStart As Range
-                Set tableStart = Sh.Cells(headerRow + 2, 1)
+                Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below header
                 Dim tableEnd As Range
                 Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
 
@@ -62,7 +62,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 If Not Intersect(tableStart, Sh.UsedRange) Is Nothing Or Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
                     Sh.Rows(headerRow + 1).Insert Shift:=xlDown
                     headerRow = headerRow + 1
-                    Set tableStart = Sh.Cells(headerRow + 2, 1)
+                    Set tableStart = Sh.Cells(headerRow + 1, 1)
                     Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
                 End If
 
@@ -82,7 +82,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 Dim newBlockRow As Long
                 newBlockRow = headerRow + 3
                 Sh.Rows(newBlockRow).Insert Shift:=xlDown
-                
+
                 ' Disable the selected option in the drop-down
                 DisableSelectedOption Sh, Target, selectedOption
 
