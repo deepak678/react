@@ -34,7 +34,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 Dim headers As Variant
                 Select Case selectedOption
                     Case "Update Paragraph"
-                        headers = Array("Serial No.", "Paragraph Header Level", "Before Header", "Before Paragraph No.", "Content", "1234567", "10", "11", "12", "13")
+                        headers = Array("Serial No.", "Paragraph Header Level", "Before Header", "Before Paragraph No.", "Content")
                     Case "Update Text"
                         headers = Array("Serial No.", "Reference", "Old Text", "New Text")
                     Case "Update Front Page"
@@ -54,15 +54,15 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 
                 ' Determine the range for the table
                 Dim tableStart As Range
-                Set tableStart = Sh.Cells(headerRow + 1, 1)
+                Set tableStart = Sh.Cells(headerRow + 2, 1)
                 Dim tableEnd As Range
                 Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
 
                 ' Ensure there's enough space for the new table
                 If Not Intersect(tableStart, Sh.UsedRange) Is Nothing Or Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
-                    Sh.Rows(newRow).Insert Shift:=xlDown
-                    headerRow = newRow + 1
-                    Set tableStart = Sh.Cells(headerRow + 1, 1)
+                    Sh.Rows(headerRow + 1).Insert Shift:=xlDown
+                    headerRow = headerRow + 1
+                    Set tableStart = Sh.Cells(headerRow + 2, 1)
                     Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
                 End If
 
