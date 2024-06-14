@@ -61,8 +61,7 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 DisableSelectedOption Sh, Target, selectedOption
 
                 ' Add provision to add new rows to the table
-                ' Adjust this part based on your specific requirement for adding rows to tables
-
+                CreateNewTable Sh, headerRow, headers
             End If
         End If
     End If
@@ -100,4 +99,32 @@ Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, 
         Target.Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
             xlBetween, Formula1:=newOptions
     End If
+End Sub
+
+Private Sub CreateNewTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
+    Dim lastRow As Long
+    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
+
+    Dim tableStart As Range
+    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below headers
+    Dim tableEnd As Range
+    Set tableEnd = Sh.Cells(lastRow, UBound(headers) + 1)
+
+    ' Check if there's enough space for the new table
+    If Not Intersect(tableStart, Sh.UsedRange) Is Nothing And Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
+        Sh.Rows(headerRow + 1).Insert Shift:=xlDown
+        headerRow = headerRow + 1
+        Set tableStart = Sh.Cells(headerRow + 1, 1)
+        Set tableEnd = Sh.Cells(lastRow + 1, UBound(headers) + 1)
+    End If
+
+    Dim tbl As ListObject
+    Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
+    tbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
+
+    ' Add headers to the table
+    Dim i As Integer
+    For i = LBound(headers) To UBound(headers)
+        tbl.HeaderRowRange.Cells(1, i + 1).Value = headers(i)
+    Next i
 End Sub
