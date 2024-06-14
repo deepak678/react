@@ -16,46 +16,6 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
             ' Proceed only if a valid selection is made from the drop-down and it's not "Update Type"
             If selectedOption <> "" And selectedOption <> "Update Type" Then
 
-                ' Determine the number of operations based on entries in "Update Type" column
-                Dim numOperations As Integer
-                numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
-
-                ' Find the last used row
-                Dim lastUsedRow As Long
-                lastUsedRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-
-                ' Insert a new row for the new block header
-                Dim newHeaderRow As Long
-                newHeaderRow = lastUsedRow + 1
-                Sh.Rows(newHeaderRow).Insert Shift:=xlDown
-
-                ' Insert header for the new block
-                Sh.Cells(newHeaderRow, 1).Value = numOperations & ": " & selectedOption
-
-                ' Define headers for different update types
-                Dim headers As Variant
-                Select Case selectedOption
-                    Case "Update Paragraph"
-                        headers = Array("Serial No.", "Paragraph Header Level", "Before Header", "Before Paragraph No.", "Content")
-                    Case "Update Text"
-                        headers = Array("Serial No.", "Reference", "Old Text", "New Text")
-                    Case "Update Front Page"
-                        headers = Array("Serial No.", "Reference", "New Text")
-                    Case "Placeholder Update"
-                        headers = Array("Serial No.", "Placeholder Key", "Placeholder Value")
-                    Case Else
-                        ' Default case if none of the above options match
-                        headers = Array("Please select an option in Update Type")
-                End Select
-
-                ' Populate headers in the new block
-                Dim i As Integer
-                Dim headerRow As Long
-                headerRow = newHeaderRow + 1
-                For i = LBound(headers) To UBound(headers)
-                    Sh.Cells(headerRow, i + 1).Value = headers(i)
-                Next i
-
                 ' Check if a table already exists for the selected option
                 Dim tbl As ListObject
                 On Error Resume Next
@@ -64,13 +24,11 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 
                 If tbl Is Nothing Then
                     ' If table does not exist, create a new table
-                    CreateOrUpdateTable Sh, headerRow, headers, selectedOption
+                    CreateOrUpdateTable Sh, Target.Row, selectedOption
                 Else
                     ' If table exists, find the last row and add a new row with incremented serial number
-                    Dim tblLastRow As Long
-                    tblLastRow = tbl.ListRows.Count + tbl.HeaderRowRange.Rows.Count
                     Dim newRow As ListRow
-                    Set newRow = tbl.ListRows.Add(tblLastRow)
+                    Set newRow = tbl.ListRows.Add
                     newRow.Range.Cells(1, 1).Value = tbl.ListRows.Count ' Serial No.
                     ' Add additional columns as needed based on the selected option
                     Select Case selectedOption
@@ -98,7 +56,7 @@ ErrorHandler:
     Resume ExitHandler
 End Sub
 
-Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant, ByVal selectedOption As String)
+Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal selectedOption As String)
     ' Find the last used row
     Dim lastRow As Long
     lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
@@ -107,7 +65,7 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, 
     Dim tableStart As Range
     Set tableStart = Sh.Cells(headerRow, 1) ' Start from the row with headers
     Dim tableEnd As Range
-    Set tableEnd = Sh.Cells(headerRow + 1, UBound(headers) + 1) ' Assume the table has one row initially
+    Set tableEnd = Sh.Cells(headerRow + 1, 1) ' Assuming the table has one row initially
 
     ' Add new table
     Dim newTbl As ListObject
