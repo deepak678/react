@@ -21,6 +21,9 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     InsertBlankLine Sh
                 End If
 
+                ' Insert table heading "No. of Operations: Update Type"
+                InsertTableHeading Sh, selectedOption
+
                 ' Define starting row for the new table
                 Dim startRow As Long
                 startRow = GetNextAvailableRow(Sh) ' Find the next available row for new tables
@@ -49,11 +52,25 @@ Private Sub InsertBlankLine(ByVal Sh As Worksheet)
     Sh.Rows(lastRow + 1).Interior.Color = RGB(255, 255, 255) ' White color for blank row
 End Sub
 
+Private Sub InsertTableHeading(ByVal Sh As Worksheet, ByVal selectedOption As String)
+    ' Insert table heading "No. of Operations: Update Type" above the new table
+    Dim lastRow As Long
+    If Sh.ListObjects.Count > 0 Then
+        lastRow = Sh.ListObjects(Sh.ListObjects.Count).Range.Row + Sh.ListObjects(Sh.ListObjects.Count).Range.Rows.Count - 1
+    Else
+        lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
+    End If
+
+    Sh.Cells(lastRow + 2, 1).Value = "No. of Operations: " & selectedOption
+    Sh.Cells(lastRow + 2, 1).Font.Bold = True
+    Sh.Cells(lastRow + 2, 1).HorizontalAlignment = xlCenter
+End Sub
+
 Private Function GetNextAvailableRow(ByVal Sh As Worksheet) As Long
     ' Find the next available row for new tables
     Dim lastRow As Long
     lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-    GetNextAvailableRow = lastRow + 2 ' Start from the row after the last used row
+    GetNextAvailableRow = lastRow + 3 ' Start from the row after the last used row, including one blank row
 End Function
 
 Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal startRow As Long, ByVal selectedOption As String)
