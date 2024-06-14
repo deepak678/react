@@ -122,13 +122,23 @@ Private Sub CreateNewTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal
         Set tableEnd = Sh.Cells(lastRow + 1, UBound(headers) + 1)
     End If
 
+    ' Check if a table exists in the target range and delete it if found
     Dim tbl As ListObject
-    Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-    tbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
+    For Each tbl In Sh.ListObjects
+        If Not Intersect(tbl.Range, Sh.Range(tableStart, tableEnd)) Is Nothing Then
+            tbl.Delete
+            Exit For
+        End If
+    Next tbl
+
+    ' Add new table
+    Dim newTbl As ListObject
+    Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
+    newTbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
 
     ' Add headers to the table
     Dim i As Integer
     For i = LBound(headers) To UBound(headers)
-        tbl.HeaderRowRange.Cells(1, i + 1).Value = headers(i)
+        newTbl.HeaderRowRange.Cells(1, i + 1).Value = headers(i)
     Next i
 End Sub
