@@ -52,42 +52,17 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     Sh.Cells(headerRow + 1, i + 1).Value = headers(i)
                 Next i
 
-                ' Determine the range for the table
-                Dim tableStart As Range
-                Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below header
-                Dim tableEnd As Range
-                Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
-
-                ' Ensure there's enough space for the new table
-                If Not Intersect(tableStart, Sh.UsedRange) Is Nothing Or Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
-                    Sh.Rows(headerRow + 1).Insert Shift:=xlDown
-                    headerRow = headerRow + 1
-                    Set tableStart = Sh.Cells(headerRow + 1, 1)
-                    Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
-                End If
-
-                Dim tbl As ListObject
-                Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-                tbl.Name = "Table_" & numOperations & "_" & selectedOption
-                tbl.HeaderRowRange.Font.Bold = True
-
-                ' Add serial numbers to the first column of the table
-                Dim rowCount As Integer
-                rowCount = tbl.ListRows.Count
-                For i = 1 To rowCount
-                    tbl.DataBodyRange.Cells(i, 1).Value = i
-                Next i
-
                 ' Insert a blank row underneath the headers
                 Dim newBlockRow As Long
-                newBlockRow = headerRow + 3
+                newBlockRow = headerRow + 2
                 Sh.Rows(newBlockRow).Insert Shift:=xlDown
 
                 ' Disable the selected option in the drop-down
                 DisableSelectedOption Sh, Target, selectedOption
 
                 ' Add provision to add new rows to the table
-                AddRowToTable tbl
+                ' Adjust this part based on your specific requirement for adding rows to tables
+
             End If
         End If
     End If
@@ -125,18 +100,4 @@ Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, 
         Target.Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
             xlBetween, Formula1:=newOptions
     End If
-End Sub
-
-Private Sub AddRowToTable(ByVal tbl As ListObject)
-    Dim lastRow As ListRow
-    Set lastRow = tbl.ListRows.Add
-
-    ' Add serial number to the new row
-    lastRow.Range.Cells(1, 1).Value = tbl.ListRows.Count
-
-    ' Clear other cells if necessary
-    Dim i As Integer
-    For i = 2 To tbl.ListColumns.Count
-        lastRow.Range.Cells(1, i).ClearContents
-    Next i
 End Sub
