@@ -8,86 +8,85 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     ' Check if the change is on a sheet other than "Mapping" and in the specified column
     If Sh.Name <> "Mapping" And Target.Column = updateTypeColumn Then
 
-        ' Determine the number of operations based on entries in "Update Type" column
-        Dim numOperations As Integer
-        numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
-
         ' Insert a new block based on the selected option in the "Update Type" dropdown
         If Target.Cells.Count = 1 Then
             Dim selectedOption As String
             selectedOption = Target.Value
 
-            ' Insert a new row for the new block
-            Dim newRow As Long
-            newRow = Target.Row + 1
-            Sh.Rows(newRow).Insert Shift:=xlDown
+            If selectedOption <> "" Then
+                ' Determine the number of operations based on entries in "Update Type" column
+                Dim numOperations As Integer
+                numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
 
-            ' Insert headers for the new block
-            Dim headerRow As Long
-            headerRow = newRow + 1
-            Sh.Cells(headerRow, 1).Value = "No. of Operations " & numOperations & " - Update Type " & selectedOption
-
-            ' Define headers for different update types
-            Dim headers As Variant
-            Select Case selectedOption
-                Case "Update Paragraph"
-                    headers = Array("Serial No.", "Paragraph Header Level", "Before Header", "Before Paragraph No.", "Content", "1234567", "10", "11", "12", "13")
-                Case "Update Text"
-                    headers = Array("Serial No.", "Reference", "Old Text", "New Text")
-                Case "Update Front Page"
-                    headers = Array("Serial No.", "Reference", "New Text")
-                Case "Placeholder Update"
-                    headers = Array("Serial No.", "Placeholder Key", "Placeholder Value")
-                Case Else
-                    ' Default case if none of the above options match
-                    headers = Array("Serial No.", "Default Header 1", "Default Header 2", "Default Header 3", "Default Header 4")
-            End Select
-
-            ' Insert the selected option as a header for the new block
-            Sh.Cells(headerRow, 2).Value = selectedOption
-
-            ' Populate headers in the new block
-            Dim i As Integer
-            For i = LBound(headers) To UBound(headers)
-                Sh.Cells(headerRow + 1, i + 1).Value = headers(i)
-            Next i
-
-            ' Determine the range for the table
-            Dim tableStart As Range
-            Set tableStart = Sh.Cells(headerRow + 1, 1)
-            Dim tableEnd As Range
-            Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
-
-            ' Ensure there's enough space for the new table
-            If Not Intersect(tableStart, Sh.UsedRange) Is Nothing Or Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
+                ' Insert a new row for the new block
+                Dim newRow As Long
+                newRow = Target.Row + 1
                 Sh.Rows(newRow).Insert Shift:=xlDown
+
+                ' Insert headers for the new block
+                Dim headerRow As Long
                 headerRow = newRow + 1
+                Sh.Cells(headerRow, 1).Value = numOperations & ": " & selectedOption
+
+                ' Define headers for different update types
+                Dim headers As Variant
+                Select Case selectedOption
+                    Case "Update Paragraph"
+                        headers = Array("Serial No.", "Paragraph Header Level", "Before Header", "Before Paragraph No.", "Content", "1234567", "10", "11", "12", "13")
+                    Case "Update Text"
+                        headers = Array("Serial No.", "Reference", "Old Text", "New Text")
+                    Case "Update Front Page"
+                        headers = Array("Serial No.", "Reference", "New Text")
+                    Case "Placeholder Update"
+                        headers = Array("Serial No.", "Placeholder Key", "Placeholder Value")
+                    Case Else
+                        ' Default case if none of the above options match
+                        headers = Array("Serial No.", "Default Header 1", "Default Header 2", "Default Header 3", "Default Header 4")
+                End Select
+
+                ' Populate headers in the new block
+                Dim i As Integer
+                For i = LBound(headers) To UBound(headers)
+                    Sh.Cells(headerRow + 1, i + 1).Value = headers(i)
+                Next i
+
+                ' Determine the range for the table
+                Dim tableStart As Range
                 Set tableStart = Sh.Cells(headerRow + 1, 1)
+                Dim tableEnd As Range
                 Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
+
+                ' Ensure there's enough space for the new table
+                If Not Intersect(tableStart, Sh.UsedRange) Is Nothing Or Not Intersect(tableEnd, Sh.UsedRange) Is Nothing Then
+                    Sh.Rows(newRow).Insert Shift:=xlDown
+                    headerRow = newRow + 1
+                    Set tableStart = Sh.Cells(headerRow + 1, 1)
+                    Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1)
+                End If
+
+                Dim tbl As ListObject
+                Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
+                tbl.Name = "Table_" & numOperations & "_" & selectedOption
+                tbl.HeaderRowRange.Font.Bold = True
+
+                ' Add serial numbers to the first column of the table
+                Dim rowCount As Integer
+                rowCount = tbl.ListRows.Count
+                For i = 1 To rowCount
+                    tbl.DataBodyRange.Cells(i, 1).Value = i
+                Next i
+
+                ' Insert a blank row underneath the headers
+                Dim newBlockRow As Long
+                newBlockRow = headerRow + 3
+                Sh.Rows(newBlockRow).Insert Shift:=xlDown
+                
+                ' Disable the selected option in the drop-down
+                DisableSelectedOption Sh, Target, selectedOption
+
+                ' Add provision to add new rows to the table
+                AddRowToTable tbl
             End If
-
-            Dim tbl As ListObject
-            Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-            tbl.Name = "Table_" & numOperations & "_" & selectedOption
-            tbl.HeaderRowRange.Font.Bold = True
-
-            ' Add serial numbers to the first column of the table
-            Dim rowCount As Integer
-            rowCount = tbl.ListRows.Count
-            For i = 1 To rowCount
-                tbl.DataBodyRange.Cells(i, 1).Value = i
-            Next i
-
-            ' Insert a blank row underneath the headers
-            Dim newBlockRow As Long
-            newBlockRow = headerRow + 3
-            Sh.Rows(newBlockRow).Insert Shift:=xlDown
-            
-            ' Disable the selected option in the drop-down
-            DisableSelectedOption Sh, Target, selectedOption
-
-            ' Add provision to add new rows to the table
-            AddRowToTable tbl
         End If
     End If
 
