@@ -53,16 +53,11 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     Sh.Cells(headerRow + 1, i + 1).Value = headers(i)
                 Next i
 
-                ' Insert a blank row underneath the headers
-                Dim newBlockRow As Long
-                newBlockRow = headerRow + 2
-                Sh.Rows(newBlockRow).Insert Shift:=xlDown
+                ' Apply table formatting
+                FormatAsTable Sh, headerRow, headers
 
                 ' Disable the selected option in the drop-down
                 DisableSelectedOption Sh, Target, selectedOption
-
-                ' Add provision to add new rows to the table
-                CreateOrUpdateTable Sh, headerRow, headers
             End If
         End If
     End If
@@ -74,6 +69,40 @@ ExitHandler:
 ErrorHandler:
     MsgBox "An error occurred: " & Err.Description & " in " & Err.Source
     Resume ExitHandler
+End Sub
+
+Private Sub FormatAsTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
+    Dim lastRow As Long
+    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
+
+    ' Define table range
+    Dim tableStart As Range
+    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below headers
+    Dim tableEnd As Range
+    Set tableEnd = Sh.Cells(lastRow, UBound(headers))
+
+    ' Check if a table exists in the target range and delete it if found
+    Dim tbl As ListObject
+    For Each tbl In Sh.ListObjects
+        If Not Intersect(tbl.Range, Sh.Range(tableStart, tableEnd)) Is Nothing Then
+            tbl.Delete
+            Exit For
+        End If
+    Next tbl
+
+    ' Add new table
+    Dim newTbl As ListObject
+    Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
+    newTbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
+
+    ' Add headers to the table
+    Dim i As Integer
+    For i = LBound(headers) To UBound(headers)
+        newTbl.HeaderRowRange.Cells(1, i + 1).Value = headers(i)
+    Next i
+
+    ' Apply table style (optional)
+    newTbl.TableStyle = "TableStyleMedium2" ' Change as per your preference
 End Sub
 
 Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, ByVal selectedOption As String)
@@ -103,34 +132,4 @@ Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, 
                 xlBetween, Formula1:=newOptions
         End If
     End If
-End Sub
-
-Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
-    Dim lastRow As Long
-    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-
-    Dim tableStart As Range
-    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below headers
-    Dim tableEnd As Range
-    Set tableEnd = Sh.Cells(lastRow + 1, UBound(headers) + 1)
-
-    ' Check if there's an existing table in the target range
-    Dim tbl As ListObject
-    For Each tbl In Sh.ListObjects
-        If Not Intersect(tbl.Range, Sh.Range(tableStart, tableEnd)) Is Nothing Then
-            ' If existing table overlaps, do not delete it and exit the subroutine
-            Exit Sub
-        End If
-    Next tbl
-
-    ' Add new table if no overlapping table is found
-    Dim newTbl As ListObject
-    Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-    newTbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
-
-    ' Add headers to the table
-    Dim i As Integer
-    For i = LBound(headers) To UBound(headers)
-        newTbl.HeaderRowRange.Cells(1, i + 1).Value = headers(i)
-    Next i
 End Sub
