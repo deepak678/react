@@ -16,23 +16,15 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
             ' Proceed only if a valid selection is made from the drop-down and it's not "Update Type"
             If selectedOption <> "" And selectedOption <> "Update Type" Then
 
-                ' Check if a table already exists for the selected option
-                Dim tbl As ListObject
-                On Error Resume Next
-                Set tbl = Sh.ListObjects("Table_" & Replace(selectedOption, " ", "_"))
-                On Error GoTo 0
+                ' Clear any existing tables in the sheet to avoid overlapping tables
+                ClearExistingTables Sh
 
-                If tbl Is Nothing Then
-                    ' If table does not exist, create a new table with headers
-                    CreateOrUpdateTable Sh, Target.Row, selectedOption
-                Else
-                    ' If table exists, find the last row and add a new row with incremented serial number
-                    Dim newRow As ListRow
-                    Set newRow = tbl.ListRows.Add
-                    newRow.Range.Cells(1, 1).Value = tbl.ListRows.Count ' Serial No.
+                ' Define starting row for the new table
+                Dim startRow As Long
+                startRow = 3 ' Adjust as per your specific starting row
 
-                    ' Fill other columns based on selected option (if needed)
-                End If
+                ' Create or update table with headers based on selected option
+                CreateOrUpdateTable Sh, startRow, selectedOption
 
             End If
         End If
@@ -47,8 +39,18 @@ ErrorHandler:
     Resume ExitHandler
 End Sub
 
-Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal selectedOption As String)
-    ' Define table range
+Private Sub ClearExistingTables(ByVal Sh As Worksheet)
+    ' Clear all existing tables in the sheet
+    Dim tbl As ListObject
+    For Each tbl In Sh.ListObjects
+        tbl.Delete
+    Next tbl
+End Sub
+
+Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal startRow As Long, ByVal selectedOption As String)
+    ' Define table range starting from startRow
+    Dim headerRow As Long
+    headerRow = startRow ' Start from the specified startRow
     Dim tableStart As Range
     Set tableStart = Sh.Cells(headerRow, 1) ' Start from the row with headers
     Dim tableEnd As Range
@@ -64,6 +66,10 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, 
         Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
         newTbl.Name = "Table_" & Replace(selectedOption, " ", "_") ' Unique name for each table
         
+        ' Add serial number column as the first column
+        newTbl.ListColumns.Add Position:=1
+        newTbl.HeaderRowRange.Cells(1, 1).Value = "Serial No."
+
         ' Add headers based on selected option
         Select Case selectedOption
             Case "Update Paragraph"
