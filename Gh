@@ -30,16 +30,26 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                     Dim newRow As ListRow
                     Set newRow = tbl.ListRows.Add
                     newRow.Range.Cells(1, 1).Value = tbl.ListRows.Count ' Serial No.
-                    ' Add additional columns as needed based on the selected option
+
+                    ' Fill other columns based on selected option
                     Select Case selectedOption
                         Case "Update Paragraph"
-                            ' Add your specific column updates here
+                            newRow.Range.Cells(1, 2).Value = "Header Level" ' Example header
+                            newRow.Range.Cells(1, 3).Value = "Before Header" ' Example header
+                            newRow.Range.Cells(1, 4).Value = "Before Paragraph No." ' Example header
+                            newRow.Range.Cells(1, 5).Value = "Content" ' Example header
                         Case "Update Text"
-                            ' Add your specific column updates here
+                            newRow.Range.Cells(1, 2).Value = "Reference" ' Example header
+                            newRow.Range.Cells(1, 3).Value = "Old Text" ' Example header
+                            newRow.Range.Cells(1, 4).Value = "New Text" ' Example header
                         Case "Update Front Page"
-                            ' Add your specific column updates here
+                            newRow.Range.Cells(1, 2).Value = "Reference" ' Example header
+                            newRow.Range.Cells(1, 3).Value = "New Text" ' Example header
                         Case "Placeholder Update"
-                            ' Add your specific column updates here
+                            newRow.Range.Cells(1, 2).Value = "Placeholder Key" ' Example header
+                            newRow.Range.Cells(1, 3).Value = "Placeholder Value" ' Example header
+                        Case Else
+                            ' Handle other cases if needed
                     End Select
                 End If
 
@@ -67,11 +77,15 @@ Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, 
     Dim tableEnd As Range
     Set tableEnd = Sh.Cells(headerRow + 1, 1) ' Assuming the table has one row initially
 
-    ' Add new table
+    ' Add new table if it doesn't exist
     Dim newTbl As ListObject
-    Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-    newTbl.Name = "Table_" & Replace(selectedOption, " ", "_") ' Unique name for each table
+    On Error Resume Next
+    Set newTbl = Sh.ListObjects("Table_" & Replace(selectedOption, " ", "_"))
+    On Error GoTo 0
 
-    ' Apply table style (optional)
-    newTbl.TableStyle = "TableStyleMedium2" ' Change as per your preference
+    If newTbl Is Nothing Then
+        Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
+        newTbl.Name = "Table_" & Replace(selectedOption, " ", "_") ' Unique name for each table
+        newTbl.TableStyle = "TableStyleMedium2" ' Apply table style (optional)
+    End If
 End Sub
