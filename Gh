@@ -20,17 +20,17 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
                 Dim numOperations As Integer
                 numOperations = Application.WorksheetFunction.CountA(Sh.Columns(updateTypeColumn)) - 1 ' Subtract header row
 
-                ' Find the next available row for the new block
+                ' Find the last used row
                 Dim lastUsedRow As Long
                 lastUsedRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
 
-                Dim newRow As Long
-                newRow = lastUsedRow + 2 ' Ensure space between blocks
+                ' Insert a new row for the new block header
+                Dim newHeaderRow As Long
+                newHeaderRow = lastUsedRow + 1
+                Sh.Rows(newHeaderRow).Insert Shift:=xlDown
 
                 ' Insert header for the new block
-                Dim headerRow As Long
-                headerRow = newRow
-                Sh.Cells(headerRow, 1).Value = numOperations & ": " & selectedOption
+                Sh.Cells(newHeaderRow, 1).Value = numOperations & ": " & selectedOption
 
                 ' Define headers for different update types
                 Dim headers As Variant
@@ -50,15 +50,41 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
 
                 ' Populate headers in the new block
                 Dim i As Integer
+                Dim headerRow As Long
+                headerRow = newHeaderRow + 1
                 For i = LBound(headers) To UBound(headers)
-                    Sh.Cells(headerRow + 1, i + 1).Value = headers(i)
+                    Sh.Cells(headerRow, i + 1).Value = headers(i)
                 Next i
 
-                ' Apply table formatting
-                CreateOrUpdateTable Sh, headerRow, headers
+                ' Check if a table already exists for the selected option
+                Dim tbl As ListObject
+                On Error Resume Next
+                Set tbl = Sh.ListObjects("Table_" & Replace(selectedOption, " ", "_"))
+                On Error GoTo 0
 
-                ' Disable the selected option in the drop-down
-                DisableSelectedOption Sh, Target, selectedOption
+                If tbl Is Nothing Then
+                    ' If table does not exist, create a new table
+                    CreateOrUpdateTable Sh, headerRow, headers, selectedOption
+                Else
+                    ' If table exists, find the last row and add a new row with incremented serial number
+                    Dim tblLastRow As Long
+                    tblLastRow = tbl.ListRows.Count + tbl.HeaderRowRange.Rows.Count
+                    Dim newRow As ListRow
+                    Set newRow = tbl.ListRows.Add(tblLastRow)
+                    newRow.Range.Cells(1, 1).Value = tbl.ListRows.Count ' Serial No.
+                    ' Add additional columns as needed based on the selected option
+                    Select Case selectedOption
+                        Case "Update Paragraph"
+                            ' Add your specific column updates here
+                        Case "Update Text"
+                            ' Add your specific column updates here
+                        Case "Update Front Page"
+                            ' Add your specific column updates here
+                        Case "Placeholder Update"
+                            ' Add your specific column updates here
+                    End Select
+                End If
+
             End If
         End If
     End If
@@ -72,50 +98,22 @@ ErrorHandler:
     Resume ExitHandler
 End Sub
 
-Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant)
+Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal headerRow As Long, ByVal headers As Variant, ByVal selectedOption As String)
+    ' Find the last used row
     Dim lastRow As Long
     lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
 
     ' Define table range
     Dim tableStart As Range
-    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row with headers
+    Set tableStart = Sh.Cells(headerRow, 1) ' Start from the row with headers
     Dim tableEnd As Range
-    Set tableEnd = Sh.Cells(headerRow + 2, UBound(headers) + 1) ' Assume the table has one row initially
+    Set tableEnd = Sh.Cells(headerRow + 1, UBound(headers) + 1) ' Assume the table has one row initially
 
     ' Add new table
     Dim newTbl As ListObject
     Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-    newTbl.Name = "Table_" & Format(Date, "yyyymmdd_hhmmss") ' Unique name for each table
+    newTbl.Name = "Table_" & Replace(selectedOption, " ", "_") ' Unique name for each table
 
     ' Apply table style (optional)
     newTbl.TableStyle = "TableStyleMedium2" ' Change as per your preference
-End Sub
-
-Private Sub DisableSelectedOption(ByVal Sh As Worksheet, ByVal Target As Range, ByVal selectedOption As String)
-    Dim dv As Validation
-    Set dv = Target.Validation
-
-    If Not dv Is Nothing Then
-        Dim options As Variant
-        options = Split(dv.Formula1, ",")
-
-        Dim newOptions As String
-        Dim i As Integer
-        For i = LBound(options) To UBound(options)
-            If Trim(options(i)) <> selectedOption Then
-                If newOptions = "" Then
-                    newOptions = Trim(options(i))
-                Else
-                    newOptions = newOptions & "," & Trim(options(i))
-                End If
-            End If
-        Next i
-
-        ' Apply the new list without the selected option
-        Target.Validation.Delete
-        If newOptions <> "" Then
-            Target.Validation.Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-                xlBetween, Formula1:=newOptions
-        End If
-    End If
 End Sub
