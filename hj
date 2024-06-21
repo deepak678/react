@@ -40,7 +40,4 @@ def extract_tables(df):
 tables = extract_tables(df)
 
 # Print the result
-for table_name, table_data in tables.items():
-    print(f"{table_name}:")
-    for row in table_data:
-        print(row)
+print("Sheet_name :", tables)
