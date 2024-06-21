@@ -1,4 +1,5 @@
 import pandas as pd
+from collections import OrderedDict
 
 # Load the Excel file
 file_path = '/mnt/data/your_excel_file.xlsx'  # Update this with the correct path to your Excel file
@@ -8,29 +9,36 @@ df = pd.read_excel(file_path, sheet_name=0, header=None)
 
 # Function to identify headers and extract tables
 def extract_tables(df):
-    tables = []
-    current_table = []
+    tables = OrderedDict()
     current_table_name = None
+    current_table_data = OrderedDict()
+    skip_next_row = False  # Flag to skip header row
+
     for i, row in df.iterrows():
         if pd.isnull(row[0]):
             # If the first cell is NaN, it's part of the current table
-            if current_table:
-                current_table.append(row.tolist())
+            if current_table_name and not skip_next_row:
+                if not pd.isnull(row[1]):  # Only add rows with non-null second column
+                    current_table_data[row[1]] = row[2]  # Skip the serial number and take the next two columns
+            skip_next_row = False
         else:
             # If we encounter a non-null first cell, it might be a new table
             if current_table_name:
                 # Save the previous table
-                tables.append((current_table_name, [r[:2] for r in current_table if not pd.isnull(r[1])]))
+                tables[current_table_name] = current_table_data
             # Start a new table
             current_table_name = row[0]
-            current_table = [row.tolist()]
+            current_table_data = OrderedDict()
+            skip_next_row = True  # Set flag to skip the header row in the next iteration
+
     # Append the last table
     if current_table_name:
-        tables.append((current_table_name, [r[:2] for r in current_table if not pd.isnull(r[1])]))
+        tables[current_table_name] = current_table_data
+
     return tables
 
 # Extract tables
 tables = extract_tables(df)
 
 # Print the result
-print(tables)
+print("Sheet_name :", tables)
