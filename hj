@@ -1,0 +1,36 @@
+import pandas as pd
+
+# Load the Excel file
+file_path = '/mnt/data/your_excel_file.xlsx'  # Update this with the correct path to your Excel file
+
+# Read the entire sheet
+df = pd.read_excel(file_path, sheet_name=0, header=None)
+
+# Function to identify headers and extract tables
+def extract_tables(df):
+    tables = []
+    current_table = []
+    current_table_name = None
+    for i, row in df.iterrows():
+        if pd.isnull(row[0]):
+            # If the first cell is NaN, it's part of the current table
+            if current_table:
+                current_table.append(row.tolist())
+        else:
+            # If we encounter a non-null first cell, it might be a new table
+            if current_table_name:
+                # Save the previous table
+                tables.append((current_table_name, [r[:2] for r in current_table if not pd.isnull(r[1])]))
+            # Start a new table
+            current_table_name = row[0]
+            current_table = [row.tolist()]
+    # Append the last table
+    if current_table_name:
+        tables.append((current_table_name, [r[:2] for r in current_table if not pd.isnull(r[1])]))
+    return tables
+
+# Extract tables
+tables = extract_tables(df)
+
+# Print the result
+print(tables)
