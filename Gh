@@ -1,164 +1,87 @@
-Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
-    On Error GoTo ErrorHandler
-    Application.EnableEvents = False ' Disable events temporarily
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Data</title>
+    <style>
+        .collapsible {
+            background-color: #777;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+        }
 
-    Dim updateTypeColumn As Integer
-    updateTypeColumn = 2 ' Assuming "Update Type" column is column 2
+        .active, .collapsible:hover {
+            background-color: #555;
+        }
 
-    ' Check if the change is on a sheet other than "Mapping" and in the specified column
-    If Sh.Name <> "Mapping" And Target.Column = updateTypeColumn Then
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f1f1f1;
+        }
 
-        ' Ensure the change is only processed for single-cell updates
-        If Target.Cells.Count = 1 Then
-            Dim selectedOption As String
-            selectedOption = Target.Value
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-            ' Proceed only if a valid selection is made from the drop-down and it's not "Update Type"
-            If selectedOption <> "" And selectedOption <> "Update Type" Then
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
 
-                ' Insert a blank line before creating the first table, if this is the first table being created
-                If Sh.ListObjects.Count = 0 Then
-                    InsertBlankLine Sh
-                End If
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
 
-                ' Calculate the number of operations
-                Dim numOperations As Long
-                numOperations = CalculateNumberOfOperations(Sh)
+<h1>Data</h1>
 
-                ' Insert table heading "No. of Operations: Update Type"
-                InsertTableHeading Sh, selectedOption, numOperations
+<script>
+    const data = {{ data|safe|json_script:"data" }};
 
-                ' Define starting row for the new table
-                Dim startRow As Long
-                startRow = GetNextAvailableRow(Sh) ' Find the next available row for new tables
+    function createTable(obj) {
+        let table = '<table border="1"><tr><th>Key</th><th>Value</th></tr>';
+        for (const [key, value] of Object.entries(obj)) {
+            table += `<tr><td>${key}</td><td>${typeof value === 'object' ? createTable(value) : value}</td></tr>`;
+        }
+        table += '</table>';
+        return table;
+    }
 
-                ' Create or update table with headers based on selected option
-                CreateOrUpdateTable Sh, startRow, selectedOption, numOperations
+    document.addEventListener('DOMContentLoaded', () => {
+        for (const [key, value] of Object.entries(data)) {
+            const button = document.createElement('button');
+            button.className = 'collapsible';
+            button.innerHTML = key;
+            document.body.appendChild(button);
 
-            End If
-        End If
-    End If
+            const content = document.createElement('div');
+            content.className = 'content';
+            content.innerHTML = createTable(value);
+            document.body.appendChild(content);
 
-ExitHandler:
-    Application.EnableEvents = True ' Re-enable events
-    Exit Sub
+            button.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                }
+            });
+        }
+    });
+</script>
 
-ErrorHandler:
-    MsgBox "An error occurred: " & Err.Description & " in " & Err.Source
-    Resume ExitHandler
-End Sub
-
-Private Sub InsertBlankLine(ByVal Sh As Worksheet)
-    ' Insert a blank row at the end of existing data
-    Dim lastRow As Long
-    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-    Sh.Rows(lastRow + 1).Insert Shift:=xlDown
-    Sh.Rows(lastRow + 1).Interior.Color = RGB(255, 255, 255) ' White color for blank row
-End Sub
-
-Private Sub InsertTableHeading(ByVal Sh As Worksheet, ByVal selectedOption As String, ByVal numOperations As Long)
-    ' Insert table heading "No. of Operations: Update Type"
-    Dim lastRow As Long
-    If Sh.ListObjects.Count > 0 Then
-        lastRow = Sh.ListObjects(Sh.ListObjects.Count).Range.Row + Sh.ListObjects(Sh.ListObjects.Count).Range.Rows.Count
-    Else
-        lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-    End If
-
-    Sh.Cells(lastRow + 1, 1).Value = numOperations & ": " & selectedOption
-    Sh.Cells(lastRow + 1, 1).Font.Bold = True
-    Sh.Cells(lastRow + 1, 1).HorizontalAlignment = xlCenter
-End Sub
-
-Private Function GetNextAvailableRow(ByVal Sh As Worksheet) As Long
-    ' Find the next available row for new tables
-    Dim lastRow As Long
-    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-    GetNextAvailableRow = lastRow + 2 ' Start from the row after the last used row, including one blank row
-End Function
-
-Private Function CalculateNumberOfOperations(ByVal Sh As Worksheet) As Long
-    ' Calculate the number of operations based on existing headings
-    Dim lastRow As Long
-    lastRow = Sh.Cells(Sh.Rows.Count, 1).End(xlUp).Row
-    Dim count As Long
-    count = 0
-
-    Dim i As Long
-    For i = 1 To lastRow
-        If InStr(Sh.Cells(i, 1).Value, "Operations") > 0 Then
-            count = count + 1
-        End If
-    Next i
-
-    CalculateNumberOfOperations = count + 1 ' Increment by 1 for the new operation
-End Function
-
-Private Sub CreateOrUpdateTable(ByVal Sh As Worksheet, ByVal startRow As Long, ByVal selectedOption As String, ByVal numOperations As Long)
-    ' Define table range starting from startRow
-    Dim headerRow As Long
-    headerRow = startRow ' Start from the specified startRow
-    Dim tableStart As Range
-    Set tableStart = Sh.Cells(headerRow + 1, 1) ' Start from the row below the header row
-    Dim tableEnd As Range
-    Set tableEnd = Sh.Cells(headerRow + 1, 1) ' Assuming the table has one row initially
-
-    ' Add new table if it doesn't exist
-    Dim newTbl As ListObject
-    On Error Resume Next
-    Set newTbl = Sh.ListObjects("Table_" & Replace(selectedOption, " ", "_"))
-    On Error GoTo 0
-
-    If newTbl Is Nothing Then
-        Set newTbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range(tableStart, tableEnd), , xlYes)
-        newTbl.Name = "Table_" & Replace(selectedOption, " ", "_") ' Unique name for each table
-        
-        ' Add serial number column as the first column
-        newTbl.ListColumns.Add Position:=1
-        newTbl.HeaderRowRange.Cells(1, 1).Value = "Serial No."
-        
-        ' Add headers based on selected option
-        Select Case selectedOption
-            Case "Update Paragraph"
-                With newTbl
-                    .ListColumns.Add Position:=2
-                    .HeaderRowRange.Cells(1, 2).Value = "Paragraph Header Level"
-                    .HeaderRowRange.Cells(1, 3).Value = "Before Header"
-                    .HeaderRowRange.Cells(1, 4).Value = "Before Paragraph No."
-                    .HeaderRowRange.Cells(1, 5).Value = "Content"
-                End With
-            Case "Update Text"
-                With newTbl
-                    .ListColumns.Add Position:=2
-                    .HeaderRowRange.Cells(1, 2).Value = "Reference"
-                    .HeaderRowRange.Cells(1, 3).Value = "Old Text"
-                    .HeaderRowRange.Cells(1, 4).Value = "New Text"
-                End With
-            Case "Update Front Page"
-                With newTbl
-                    .ListColumns.Add Position:=2
-                    .HeaderRowRange.Cells(1, 2).Value = "Reference"
-                    .HeaderRowRange.Cells(1, 3).Value = "New Text"
-                End With
-            Case "Placeholder Update"
-                With newTbl
-                    .ListColumns.Add Position:=2
-                    .HeaderRowRange.Cells(1, 2).Value = "Placeholder Key"
-                    .HeaderRowRange.Cells(1, 3).Value = "Placeholder Value"
-                End With
-            Case Else
-                ' Handle other cases if needed
-        End Select
-        
-        newTbl.TableStyle = "TableStyleMedium2" ' Apply table style (optional)
-        
-        ' Insert the first row with the serial number
-        newTbl.ListRows.Add
-        newTbl.ListRows(1).Range.Cells(1, 1).Value = 1 ' Start with serial number 1
-    Else
-        ' If the table already exists, add a new row to it
-        Dim newRow As ListRow
-        Set newRow = newTbl.ListRows.Add
-        newRow.Range.Cells(1, 1).Value = newTbl.ListRows.Count ' Set the serial number to the current row count
-    End If
-End Sub
+</body>
+</html>
