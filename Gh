@@ -47,12 +47,17 @@
 <h1>Data</h1>
 
 <script>
-    const data = {{ data|safe|json_script:"data" }};
+    const data = JSON.parse('{{ data|escapejs }}');
 
     function createTable(obj) {
         let table = '<table border="1"><tr><th>Key</th><th>Value</th></tr>';
         for (const [key, value] of Object.entries(obj)) {
-            table += `<tr><td>${key}</td><td>${typeof value === 'object' ? createTable(value) : value}</td></tr>`;
+            if (typeof value === 'object' && !Array.isArray(value)) {
+                table += `<tr><td colspan="2">${key}</td></tr>`;
+                table += `<tr><td colspan="2">${createTable(value)}</td></tr>`;
+            } else {
+                table += `<tr><td>${key}</td><td>${value}</td></tr>`;
+            }
         }
         table += '</table>';
         return table;
