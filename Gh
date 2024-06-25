@@ -1,79 +1,60 @@
-{% load static %}
+import pandas as pd
 
-<style>
-    /* Styles for collapsible sections */
-    .collapsible {
-        background-color: #777;
-        color: white;
-        cursor: pointer;
-        padding: 10px;
-        width: 100%;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 15px;
-    }
+# Sample DataFrame from the extracted data
+data = {
+    "Update Type": [
+        "Placeholder type", "NA", "Placeholder Feed", "Serial No.", "1", "2", "3", "4", "5", "6", 
+        "7", "8", "9", "10", "NA", "Placeholder List", "Serial No.", "1", "2", "3", "4"
+    ],
+    "Unnamed: 1": [
+        "NA", "NA", "NA", "c1", "release_number", "start", "end", "month", "year", "authors", 
+        "support_material_authors", "total_alerts", "btl_wot_alerts", "excluded_countries", "NA", 
+        "NA", "country", "Hong Kong", "India", "Bangladesh", "Great Britain"
+    ],
+    "Unnamed: 2": [
+        "NA", "NA", "NA", "c2", "29", "21/02/2024", "22/02/2024", "August", "2024", "Kumar, Mahendra", 
+        "Nishant Vemulakonda", "580", "53", "Poland, India, Spain, Armenia", "NA", "NA", "value", 
+        "265 (45%)", "Excluded from UAT", "92 (15%)", "65 (11%)"
+    ],
+    "Unnamed: 3": [
+        "NA", "NA", "NA", "c3", "kj", "lk", "NA", "NA", "NA", "NA", 
+        "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA"
+    ]
+}
 
-    .active, .collapsible:hover {
-        background-color: #555;
-    }
+# Create the DataFrame
+df = pd.DataFrame(data)
 
-    .content {
-        padding: 0 18px;
-        display: none;
-        overflow: hidden;
-        background-color: #f1f1f1;
-    }
+# Function to identify table ranges based on header keywords
+def find_table_ranges(df, headers):
+    indices = [df[df['Update Type'] == header].index[0] for header in headers]
+    table_ranges = [(indices[i], indices[i + 1]) for i in range(len(indices) - 1)]
+    return table_ranges
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+# Headers that mark the start of tables
+headers = ["Placeholder Feed", "Placeholder List"]
 
-    th, td {
-        text-align: left;
-        padding: 8px;
-    }
+# Get the table ranges
+table_ranges = find_table_ranges(df, headers)
 
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-</style>
+# Extract tables based on the ranges
+tables = [df.iloc[start:end].reset_index(drop=True) for start, end in table_ranges]
 
-<table border="1">
-    <tr>
-        <th>Key</th>
-        <th>Value</th>
-    </tr>
-    {% for key, value in data.items %}
-        <tr>
-            <td colspan="2" class="collapsible">{{ key }}</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="content">
-                {% if value is mapping %}
-                    {% include 'yourapp/partial_table.html' with data=value %}
-                {% else %}
-                    {{ value }}
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-</table>
+# Add the last table manually (from the last header to the end of the DataFrame)
+tables.append(df.iloc[table_ranges[-1][1]:].reset_index(drop=True))
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const collapsibles = document.querySelectorAll('.collapsible');
-        collapsibles.forEach(button => {
-            button.addEventListener('click', function() {
-                this.classList.toggle('active');
-                const content = this.nextElementSibling;
-                if (content.style.display === 'block') {
-                    content.style.display = 'none';
-                } else {
-                    content.style.display = 'block';
-                }
-            });
-        });
-    });
-</script>
+# Perform operations on each table based on the first row
+for table in tables:
+    header = table.iloc[0]['Update Type']
+    print(f"Processing table with header: {header}")
+    if header == "Placeholder Feed":
+        # Perform operations for Placeholder Feed table
+        print("Placeholder Feed Table:")
+        print(table)
+    elif header == "Placeholder List":
+        # Perform operations for Placeholder List table
+        print("Placeholder List Table:")
+        print(table)
+    else:
+        print("Unknown Table:")
+        print(table)
