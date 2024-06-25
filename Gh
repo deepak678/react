@@ -1,80 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>JSON Data</title>
-    <style>
-        .collapsible {
-            background-color: #777;
-            color: white;
-            cursor: pointer;
-            padding: 10px;
-            width: 100%;
-            border: none;
-            text-align: left;
-            outline: none;
-            font-size: 15px;
-        }
+{% load static %}
 
-        .active, .collapsible:hover {
-            background-color: #555;
-        }
-
-        .content {
-            padding: 0 18px;
-            display: none;
-            overflow: hidden;
-            background-color: #f1f1f1;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 8px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
-<body>
-
-<h1>Data</h1>
+<table border="1">
+    <tr>
+        <th>Key</th>
+        <th>Value</th>
+    </tr>
+    {% for key, value in data.items %}
+        <tr>
+            <td colspan="2" class="collapsible">{{ key }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="content">
+                {% if value is mapping %}
+                    {% include 'yourapp/partial_table.html' with data=value %}
+                {% else %}
+                    {{ value }}
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
 
 <script>
-    const data = JSON.parse('{{ data|escapejs }}');
-
-    function createTable(obj) {
-        let table = '<table border="1"><tr><th>Key</th><th>Value</th></tr>';
-        for (const [key, value] of Object.entries(obj)) {
-            if (typeof value === 'object' && !Array.isArray(value)) {
-                table += `<tr><td colspan="2">${key}</td></tr>`;
-                table += `<tr><td colspan="2">${createTable(value)}</td></tr>`;
-            } else {
-                table += `<tr><td>${key}</td><td>${value}</td></tr>`;
-            }
-        }
-        table += '</table>';
-        return table;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        for (const [key, value] of Object.entries(data)) {
-            const button = document.createElement('button');
-            button.className = 'collapsible';
-            button.innerHTML = key;
-            document.body.appendChild(button);
-
-            const content = document.createElement('div');
-            content.className = 'content';
-            content.innerHTML = createTable(value);
-            document.body.appendChild(content);
-
+    document.addEventListener('DOMContentLoaded', function() {
+        const collapsibles = document.querySelectorAll('.collapsible');
+        collapsibles.forEach(button => {
             button.addEventListener('click', function() {
                 this.classList.toggle('active');
                 const content = this.nextElementSibling;
@@ -84,9 +34,6 @@
                     content.style.display = 'block';
                 }
             });
-        }
+        });
     });
 </script>
-
-</body>
-</html>
