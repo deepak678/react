@@ -1,36 +1,73 @@
 Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     If Sh.Name <> "ExcludedSheet" Then
+        ' Monitor changes in the first drop-down (A2)
         If Not Intersect(Target, Sh.Range("A2")) Is Nothing Then
-            Dim selectedOption As String
-            Dim tbl As ListObject
-            selectedOption = Sh.Range("A2").Value
+            Dim baseName As String
+            Dim newTableName As String
+            baseName = Sh.Range("A2").Value
 
-            ' Check if a table with the selected name already exists
-            On Error Resume Next
-            Set tbl = Sh.ListObjects(selectedOption)
-            On Error GoTo 0
+            ' Get the next available table name with index
+            newTableName = GetNextTableName(Sh, baseName)
 
-            If tbl Is Nothing Then
-                ' Create a new table if it doesn't exist
-                Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range("B5:C5"), , xlYes)
-                tbl.Name = selectedOption
-                tbl.HeaderRowRange(1).Value = "Column1"
-                tbl.HeaderRowRange(2).Value = "Column2"
+            ' Create a new table
+            CreateTable Sh, newTableName
 
-                ' Add new drop-down for the new table
-                AddSecondDropDown Sh, selectedOption
-            Else
-                ' Add a new row to the existing table
-                tbl.ListRows.Add
-            End If
+            ' Update the second drop-down with the new table name
+            UpdateSecondDropDown Sh
+
+        ' Monitor changes in the second drop-down (C2)
+        ElseIf Not Intersect(Target, Sh.Range("C2")) Is Nothing Then
+            Dim selectedTableName As String
+            selectedTableName = Sh.Range("C2").Value
+
+            ' Add a new row to the selected table
+            AddRowToTable Sh, selectedTableName
         End If
     End If
 End Sub
 
 
 
+Private Function GetNextTableName(ws As Worksheet, baseName As String) As String
+    Dim index As Integer
+    Dim tableName As String
+    Dim lo As ListObject
 
-Private Sub AddSecondDropDown(ws As Worksheet, tableName As String)
+    index = 1
+    Do
+        tableName = baseName & "_" & index
+        Set lo = Nothing
+        On Error Resume Next
+        Set lo = ws.ListObjects(tableName)
+        On Error GoTo 0
+        If lo Is Nothing Then Exit Do
+        index = index + 1
+    Loop
+
+    GetNextTableName = tableName
+End Function
+
+Private Sub CreateTable(ws As Worksheet, tableName As String)
+    Dim tbl As ListObject
+    Set tbl = ws.ListObjects.Add(xlSrcRange, ws.Range("B5:C5"), , xlYes)
+    tbl.Name = tableName
+    tbl.HeaderRowRange(1).Value = "Column1"
+    tbl.HeaderRowRange(2).Value = "Column2"
+End Sub
+
+Private Sub AddRowToTable(ws As Worksheet, tableName As String)
+    Dim tbl As ListObject
+    On Error Resume Next
+    Set tbl = ws.ListObjects(tableName)
+    On Error GoTo 0
+    If Not tbl Is Nothing Then
+        tbl.ListRows.Add
+    Else
+        MsgBox "Table " & tableName & " does not exist."
+    End If
+End Sub
+
+Private Sub UpdateSecondDropDown(ws As Worksheet)
     Dim ddCell As Range
     Set ddCell = ws.Cells(2, 3) ' Place the second drop-down in cell C2
 
@@ -61,3 +98,4 @@ Private Function GetAllTableNames(ws As Worksheet) As String
 
     GetAllTableNames = tableNames
 End Function
+
