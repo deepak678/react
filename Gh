@@ -1,60 +1,63 @@
-import pandas as pd
+Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
+    If Sh.Name <> "ExcludedSheet" Then
+        If Not Intersect(Target, Sh.Range("A2")) Is Nothing Then
+            Dim selectedOption As String
+            Dim tbl As ListObject
+            selectedOption = Sh.Range("A2").Value
 
-# Sample DataFrame from the extracted data
-data = {
-    "Update Type": [
-        "Placeholder type", "NA", "Placeholder Feed", "Serial No.", "1", "2", "3", "4", "5", "6", 
-        "7", "8", "9", "10", "NA", "Placeholder List", "Serial No.", "1", "2", "3", "4"
-    ],
-    "Unnamed: 1": [
-        "NA", "NA", "NA", "c1", "release_number", "start", "end", "month", "year", "authors", 
-        "support_material_authors", "total_alerts", "btl_wot_alerts", "excluded_countries", "NA", 
-        "NA", "country", "Hong Kong", "India", "Bangladesh", "Great Britain"
-    ],
-    "Unnamed: 2": [
-        "NA", "NA", "NA", "c2", "29", "21/02/2024", "22/02/2024", "August", "2024", "Kumar, Mahendra", 
-        "Nishant Vemulakonda", "580", "53", "Poland, India, Spain, Armenia", "NA", "NA", "value", 
-        "265 (45%)", "Excluded from UAT", "92 (15%)", "65 (11%)"
-    ],
-    "Unnamed: 3": [
-        "NA", "NA", "NA", "c3", "kj", "lk", "NA", "NA", "NA", "NA", 
-        "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA"
-    ]
-}
+            ' Check if a table with the selected name already exists
+            On Error Resume Next
+            Set tbl = Sh.ListObjects(selectedOption)
+            On Error GoTo 0
 
-# Create the DataFrame
-df = pd.DataFrame(data)
+            If tbl Is Nothing Then
+                ' Create a new table if it doesn't exist
+                Set tbl = Sh.ListObjects.Add(xlSrcRange, Sh.Range("B5:C5"), , xlYes)
+                tbl.Name = selectedOption
+                tbl.HeaderRowRange(1).Value = "Column1"
+                tbl.HeaderRowRange(2).Value = "Column2"
 
-# Function to identify table ranges based on header keywords
-def find_table_ranges(df, headers):
-    indices = [df[df['Update Type'] == header].index[0] for header in headers]
-    table_ranges = [(indices[i], indices[i + 1]) for i in range(len(indices) - 1)]
-    return table_ranges
+                ' Add new drop-down for the new table
+                AddSecondDropDown Sh, selectedOption
+            Else
+                ' Add a new row to the existing table
+                tbl.ListRows.Add
+            End If
+        End If
+    End If
+End Sub
 
-# Headers that mark the start of tables
-headers = ["Placeholder Feed", "Placeholder List"]
 
-# Get the table ranges
-table_ranges = find_table_ranges(df, headers)
 
-# Extract tables based on the ranges
-tables = [df.iloc[start:end].reset_index(drop=True) for start, end in table_ranges]
 
-# Add the last table manually (from the last header to the end of the DataFrame)
-tables.append(df.iloc[table_ranges[-1][1]:].reset_index(drop=True))
+Private Sub AddSecondDropDown(ws As Worksheet, tableName As String)
+    Dim ddCell As Range
+    Set ddCell = ws.Cells(2, 3) ' Place the second drop-down in cell C2
 
-# Perform operations on each table based on the first row
-for table in tables:
-    header = table.iloc[0]['Update Type']
-    print(f"Processing table with header: {header}")
-    if header == "Placeholder Feed":
-        # Perform operations for Placeholder Feed table
-        print("Placeholder Feed Table:")
-        print(table)
-    elif header == "Placeholder List":
-        # Perform operations for Placeholder List table
-        print("Placeholder List Table:")
-        print(table)
-    else:
-        print("Unknown Table:")
-        print(table)
+    ' Add data validation to cell C2 for selecting table names
+    With ddCell.Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=GetAllTableNames(ws)
+        .IgnoreBlank = True
+        .InCellDropdown = True
+        .ShowInput = True
+        .ShowError = True
+    End With
+End Sub
+
+Private Function GetAllTableNames(ws As Worksheet) As String
+    Dim lo As ListObject
+    Dim tableNames As String
+
+    ' Iterate through all tables and get their names
+    For Each lo In ws.ListObjects
+        If tableNames = "" Then
+            tableNames = lo.Name
+        Else
+            tableNames = tableNames & "," & lo.Name
+        End If
+    Next lo
+
+    GetAllTableNames = tableNames
+End Function
