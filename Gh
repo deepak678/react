@@ -26,8 +26,6 @@ Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
     End If
 End Sub
 
-
-
 Private Function GetNextTableName(ws As Worksheet, baseName As String) As String
     Dim index As Integer
     Dim tableName As String
@@ -57,10 +55,22 @@ End Sub
 
 Private Sub AddRowToTable(ws As Worksheet, tableName As String)
     Dim tbl As ListObject
+    Dim lastCell As Range
+    Dim rowBelowLast As Range
+
     On Error Resume Next
     Set tbl = ws.ListObjects(tableName)
     On Error GoTo 0
+
     If Not tbl Is Nothing Then
+        ' Find the last cell of the table
+        Set lastCell = tbl.ListRows(tbl.ListRows.Count).Range.Cells(1, 1)
+        Set rowBelowLast = lastCell.Offset(1, 0).EntireRow
+
+        ' Shift all rows below the last cell down by one
+        rowBelowLast.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+
+        ' Add a new row to the table
         tbl.ListRows.Add
     Else
         MsgBox "Table " & tableName & " does not exist."
@@ -98,4 +108,3 @@ Private Function GetAllTableNames(ws As Worksheet) As String
 
     GetAllTableNames = tableNames
 End Function
-
