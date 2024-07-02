@@ -1,110 +1,21 @@
-Private Sub Workbook_SheetChange(ByVal Sh As Object, ByVal Target As Range)
-    If Sh.Name <> "ExcludedSheet" Then
-        ' Monitor changes in the first drop-down (A2)
-        If Not Intersect(Target, Sh.Range("A2")) Is Nothing Then
-            Dim baseName As String
-            Dim newTableName As String
-            baseName = Sh.Range("A2").Value
-
-            ' Get the next available table name with index
-            newTableName = GetNextTableName(Sh, baseName)
-
-            ' Create a new table
-            CreateTable Sh, newTableName
-
-            ' Update the second drop-down with the new table name
-            UpdateSecondDropDown Sh
-
-        ' Monitor changes in the second drop-down (C2)
-        ElseIf Not Intersect(Target, Sh.Range("C2")) Is Nothing Then
-            Dim selectedTableName As String
-            selectedTableName = Sh.Range("C2").Value
-
-            ' Add a new row to the selected table
-            AddRowToTable Sh, selectedTableName
-        End If
-    End If
-End Sub
-
-Private Function GetNextTableName(ws As Worksheet, baseName As String) As String
-    Dim index As Integer
-    Dim tableName As String
-    Dim lo As ListObject
-
-    index = 1
-    Do
-        tableName = baseName & "_" & index
-        Set lo = Nothing
-        On Error Resume Next
-        Set lo = ws.ListObjects(tableName)
-        On Error GoTo 0
-        If lo Is Nothing Then Exit Do
-        index = index + 1
-    Loop
-
-    GetNextTableName = tableName
-End Function
-
-Private Sub CreateTable(ws As Worksheet, tableName As String)
-    Dim tbl As ListObject
-    Set tbl = ws.ListObjects.Add(xlSrcRange, ws.Range("B5:C5"), , xlYes)
-    tbl.Name = tableName
-    tbl.HeaderRowRange(1).Value = "Column1"
-    tbl.HeaderRowRange(2).Value = "Column2"
-End Sub
-
-Private Sub AddRowToTable(ws As Worksheet, tableName As String)
-    Dim tbl As ListObject
-    Dim lastCell As Range
-    Dim rowBelowLast As Range
-
-    On Error Resume Next
-    Set tbl = ws.ListObjects(tableName)
-    On Error GoTo 0
-
-    If Not tbl Is Nothing Then
-        ' Find the last cell of the table
-        Set lastCell = tbl.ListRows(tbl.ListRows.Count).Range.Cells(1, 1)
-        Set rowBelowLast = lastCell.Offset(1, 0).EntireRow
-
-        ' Shift all rows below the last cell down by one
-        rowBelowLast.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
-
-        ' Add a new row to the table
-        tbl.ListRows.Add
-    Else
-        MsgBox "Table " & tableName & " does not exist."
-    End If
-End Sub
-
-Private Sub UpdateSecondDropDown(ws As Worksheet)
-    Dim ddCell As Range
-    Set ddCell = ws.Cells(2, 3) ' Place the second drop-down in cell C2
-
-    ' Add data validation to cell C2 for selecting table names
-    With ddCell.Validation
-        .Delete
-        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
-        xlBetween, Formula1:=GetAllTableNames(ws)
-        .IgnoreBlank = True
-        .InCellDropdown = True
-        .ShowInput = True
-        .ShowError = True
-    End With
-End Sub
-
-Private Function GetAllTableNames(ws As Worksheet) As String
-    Dim lo As ListObject
-    Dim tableNames As String
-
-    ' Iterate through all tables and get their names
-    For Each lo In ws.ListObjects
-        If tableNames = "" Then
-            tableNames = lo.Name
-        Else
-            tableNames = tableNames & "," & lo.Name
-        End If
-    Next lo
-
-    GetAllTableNames = tableNames
-End Function
+<body>
+    <table>
+        {% if value and value|length > 0 %}
+        <!-- Render the header row -->
+        <tr>
+            {% for column_data in value[0] %}
+            <th>{{ column_data }}</th>
+            {% endfor %}
+        </tr>
+        
+        <!-- Render the data rows -->
+        {% for row_data in value[1:] %}
+        <tr>
+            {% for column_data in row_data %}
+            <td>{{ column_data }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </table>
+</body>
