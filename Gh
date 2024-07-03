@@ -1,21 +1,19 @@
-<body>
-    <table>
-        {% if value and value|length > 0 %}
-        <!-- Render the header row -->
-        <tr>
-            {% for column_data in value[0] %}
-            <th>{{ column_data }}</th>
-            {% endfor %}
-        </tr>
-        
-        <!-- Render the data rows -->
-        {% for row_data in value[1:] %}
-        <tr>
-            {% for column_data in row_data %}
-            <td>{{ column_data }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </table>
-</body>
+Function TableExists(sheet As Worksheet, tableName As String) As Boolean
+    Dim tbl As ListObject
+    On Error GoTo NoTables
+    
+    ' Loop through each table in the sheet
+    For Each tbl In sheet.ListObjects
+        If tbl.Name = tableName Then
+            TableExists = True
+            Exit Function
+        End If
+    Next tbl
+    
+    TableExists = False
+    Exit Function
+
+NoTables:
+    ' No tables on the sheet
+    TableExists = False
+End Function
