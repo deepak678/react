@@ -1,49 +1,4 @@
 import pandas as pd
-from openpyxl import load_workbook
-import re
-
-# Function to extract hyperlinks and text from a cell
-def get_hyperlink_text(cell):
-    if cell.hyperlink:
-        return cell.hyperlink.target, cell.value
-    else:
-        return None, cell.value
-
-# Load the workbook and select the sheet
-file_path = 'your_excel_file.xlsx'
-wb = load_workbook(file_path, data_only=True)
-sheet = wb.active
-
-# Read the Excel file into a DataFrame
-df = pd.read_excel(file_path)
-
-# Create lists to store hyperlinks and text
-hyperlinks = []
-text_values = []
-
-# Iterate over the DataFrame to extract hyperlinks and text
-for row_index, row in df.iterrows():
-    row_hyperlinks = []
-    row_texts = []
-    for col_index in range(len(row)):
-        cell = sheet.cell(row=row_index + 2, column=col_index + 1)  # Adjusting for header row
-        hyperlink, text = get_hyperlink_text(cell)
-        row_hyperlinks.append(hyperlink)
-        row_texts.append(text)
-    hyperlinks.append(row_hyperlinks)
-    text_values.append(row_texts)
-
-# Create DataFrames for hyperlinks and text
-hyperlinks_df = pd.DataFrame(hyperlinks, columns=[f'{col}_link' for col in df.columns])
-text_df = pd.DataFrame(text_values, columns=df.columns)
-
-# Combine the original DataFrame, text DataFrame, and hyperlinks DataFrame
-combined_df = pd.concat([text_df, hyperlinks_df], axis=1)
-
-print(combined_df)
-
-
-
 import openpyxl
 
 # Function to find tables by headers
@@ -55,7 +10,7 @@ def find_tables_by_headers(sheet, headers):
     for row in range(1, max_row + 1):
         for col in range(1, max_col + 1):
             cell_value = sheet.cell(row=row, column=col).value
-            if cell_value in headers:
+            if cell_value and (str(cell_value) in headers or any(str(cell_value).startswith(header) for header in headers)):
                 start_row = row
                 start_col = col
 
@@ -69,8 +24,37 @@ def find_tables_by_headers(sheet, headers):
                     end_col += 1
 
                 table_range = f"{openpyxl.utils.get_column_letter(start_col)}{start_row}:{openpyxl.utils.get_column_letter(end_col)}{end_row}"
-                tables.append((cell_value, table_range))
+                tables.append((str(cell_value), table_range))
     return tables
+
+# Function to read tables into DataFrames while skipping overlapping rows
+def read_tables(sheet, tables):
+    read_rows = set()
+    dataframes = []
+
+    for table_name, table_range in tables:
+        start_cell, end_cell = table_range.split(':')
+        start_row = sheet[start_cell].row
+        end_row = sheet[end_cell].row
+        start_col = openpyxl.utils.column_index_from_string(start_cell[:len(start_cell) - len(str(start_row))])
+        end_col = openpyxl.utils.column_index_from_string(end_cell[:len(end_cell) - len(str(end_row))])
+
+        # Check if any row in the range has already been read
+        if any(row in read_rows for row in range(start_row, end_row + 1)):
+            continue
+
+        # Read the table into a DataFrame
+        table_data = []
+        for row in sheet.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
+            table_data.append([cell.value for cell in row])
+
+        df = pd.DataFrame(table_data)
+        dataframes.append(df)
+
+        # Mark these rows as read
+        read_rows.update(range(start_row, end_row + 1))
+
+    return dataframes
 
 # Load the workbook and select the sheet
 file_path = 'your_excel_file.xlsx'
@@ -80,8 +64,12 @@ sheet = wb['Doc1']  # Specify the sheet name
 # Define the list of headers to search for
 headers_to_search = ['Header1', 'Header2', 'Header3']  # Replace with your headers
 
-# Find tables with the specified headers and print their ranges
+# Find tables with the specified headers
 tables_with_headers = find_tables_by_headers(sheet, headers_to_search)
-for table_name, table_range in tables_with_headers:
-    print(f'Table Name: {table_name}, Table Range: {table_range}')
 
+# Read tables into DataFrames while skipping overlapping rows
+dataframes = read_tables(sheet, tables_with_headers)
+
+# Print the DataFrames
+for df in dataframes:
+    print(df)
