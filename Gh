@@ -36,8 +36,8 @@ def read_tables(sheet, tables):
         start_cell, end_cell = table_range.split(':')
         start_row = sheet[start_cell].row
         end_row = sheet[end_cell].row
-        start_col = openpyxl.utils.column_index_from_string(start_cell[:len(start_cell) - len(str(start_row))])
-        end_col = openpyxl.utils.column_index_from_string(end_cell[:len(end_cell) - len(str(end_row))])
+        start_col = openpyxl.utils.column_index_from_string(start_cell.rstrip('0123456789'))
+        end_col = openpyxl.utils.column_index_from_string(end_cell.rstrip('0123456789'))
 
         # Check if any row in the range has already been read
         if any(row in read_rows for row in range(start_row, end_row + 1)):
