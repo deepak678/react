@@ -75,3 +75,45 @@ header_to_search = 'Your Header Name'
 tables_with_header = find_tables_by_header(sheet, header_to_search)
 for table_name, table_range in tables_with_header:
     print(f'Table Name: {table_name}, Table Range: {table_range}')
+
+
+import openpyxl
+
+# Function to find tables by headers
+def find_tables_by_headers(sheet, headers):
+    tables = []
+    max_row = sheet.max_row
+    max_col = sheet.max_column
+
+    for row in range(1, max_row + 1):
+        for col in range(1, max_col + 1):
+            if sheet.cell(row=row, column=col).value in headers:
+                start_row = row
+                start_col = col
+
+                # Determine the table range by finding the end row and column
+                end_row = start_row
+                while end_row <= max_row and sheet.cell(row=end_row + 1, column=start_col).value is not None:
+                    end_row += 1
+
+                end_col = start_col
+                while end_col <= max_col and sheet.cell(row=start_row, column=end_col + 1).value is not None:
+                    end_col += 1
+
+                table_range = f"{openpyxl.utils.get_column_letter(start_col)}{start_row}:{openpyxl.utils.get_column_letter(end_col)}{end_row}"
+                tables.append((f"Table at {start_col}:{start_row}", table_range))
+    return tables
+
+# Load the workbook and select the sheet
+file_path = 'your_excel_file.xlsx'
+wb = openpyxl.load_workbook(file_path)
+sheet = wb['Doc1']  # Specify the sheet name
+
+# Define the list of headers to search for
+headers_to_search = ['Header1', 'Header2', 'Header3']  # Replace with your headers
+
+# Find tables with the specified headers and print their ranges
+tables_with_headers = find_tables_by_headers(sheet, headers_to_search)
+for table_name, table_range in tables_with_headers:
+    print(f'Table Name: {table_name}, Table Range: {table_range}')
+
