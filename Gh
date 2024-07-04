@@ -41,3 +41,37 @@ text_df = pd.DataFrame(text_values, columns=df.columns)
 combined_df = pd.concat([text_df, hyperlinks_df], axis=1)
 
 print(combined_df)
+
+
+
+
+import openpyxl
+
+# Function to find tables by header
+def find_tables_by_header(sheet, header):
+    tables = []
+    for table in sheet.tables.values():
+        table_range = table.ref
+        start_cell, end_cell = table_range.split(':')
+        start_row = sheet[start_cell].row
+        end_row = sheet[end_cell].row
+        start_col = openpyxl.utils.column_index_from_string(start_cell[:len(start_cell) - len(str(start_row))])
+        end_col = openpyxl.utils.column_index_from_string(end_cell[:len(end_cell) - len(str(end_row))])
+        
+        # Check if header matches the first row in the table
+        if sheet.cell(row=start_row, column=start_col).value == header:
+            tables.append((table.name, table_range))
+    return tables
+
+# Load the workbook and select the sheet
+file_path = 'your_excel_file.xlsx'
+wb = openpyxl.load_workbook(file_path)
+sheet = wb.active
+
+# Define the header to search for
+header_to_search = 'Your Header Name'
+
+# Find tables with the specified header and print their ranges
+tables_with_header = find_tables_by_header(sheet, header_to_search)
+for table_name, table_range in tables_with_header:
+    print(f'Table Name: {table_name}, Table Range: {table_range}')
