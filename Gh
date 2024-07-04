@@ -44,39 +44,6 @@ print(combined_df)
 
 
 
-
-import openpyxl
-
-# Function to find tables by header
-def find_tables_by_header(sheet, header):
-    tables = []
-    for table in sheet.tables.values():
-        table_range = table.ref
-        start_cell, end_cell = table_range.split(':')
-        start_row = sheet[start_cell].row
-        end_row = sheet[end_cell].row
-        start_col = openpyxl.utils.column_index_from_string(start_cell[:len(start_cell) - len(str(start_row))])
-        end_col = openpyxl.utils.column_index_from_string(end_cell[:len(end_cell) - len(str(end_row))])
-        
-        # Check if header matches the first row in the table
-        if sheet.cell(row=start_row, column=start_col).value == header:
-            tables.append((table.name, table_range))
-    return tables
-
-# Load the workbook and select the sheet
-file_path = 'your_excel_file.xlsx'
-wb = openpyxl.load_workbook(file_path)
-sheet = wb.active
-
-# Define the header to search for
-header_to_search = 'Your Header Name'
-
-# Find tables with the specified header and print their ranges
-tables_with_header = find_tables_by_header(sheet, header_to_search)
-for table_name, table_range in tables_with_header:
-    print(f'Table Name: {table_name}, Table Range: {table_range}')
-
-
 import openpyxl
 
 # Function to find tables by headers
@@ -87,7 +54,8 @@ def find_tables_by_headers(sheet, headers):
 
     for row in range(1, max_row + 1):
         for col in range(1, max_col + 1):
-            if sheet.cell(row=row, column=col).value in headers:
+            cell_value = sheet.cell(row=row, column=col).value
+            if cell_value in headers:
                 start_row = row
                 start_col = col
 
@@ -101,7 +69,7 @@ def find_tables_by_headers(sheet, headers):
                     end_col += 1
 
                 table_range = f"{openpyxl.utils.get_column_letter(start_col)}{start_row}:{openpyxl.utils.get_column_letter(end_col)}{end_row}"
-                tables.append((f"Table at {start_col}:{start_row}", table_range))
+                tables.append((cell_value, table_range))
     return tables
 
 # Load the workbook and select the sheet
