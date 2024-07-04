@@ -1,19 +1,43 @@
-Function TableExists(sheet As Worksheet, tableName As String) As Boolean
-    Dim tbl As ListObject
-    On Error GoTo NoTables
-    
-    ' Loop through each table in the sheet
-    For Each tbl In sheet.ListObjects
-        If tbl.Name = tableName Then
-            TableExists = True
-            Exit Function
-        End If
-    Next tbl
-    
-    TableExists = False
-    Exit Function
+import pandas as pd
+from openpyxl import load_workbook
+import re
 
-NoTables:
-    ' No tables on the sheet
-    TableExists = False
-End Function
+# Function to extract hyperlinks and text from a cell
+def get_hyperlink_text(cell):
+    if cell.hyperlink:
+        return cell.hyperlink.target, cell.value
+    else:
+        return None, cell.value
+
+# Load the workbook and select the sheet
+file_path = 'your_excel_file.xlsx'
+wb = load_workbook(file_path, data_only=True)
+sheet = wb.active
+
+# Read the Excel file into a DataFrame
+df = pd.read_excel(file_path)
+
+# Create lists to store hyperlinks and text
+hyperlinks = []
+text_values = []
+
+# Iterate over the DataFrame to extract hyperlinks and text
+for row_index, row in df.iterrows():
+    row_hyperlinks = []
+    row_texts = []
+    for col_index in range(len(row)):
+        cell = sheet.cell(row=row_index + 2, column=col_index + 1)  # Adjusting for header row
+        hyperlink, text = get_hyperlink_text(cell)
+        row_hyperlinks.append(hyperlink)
+        row_texts.append(text)
+    hyperlinks.append(row_hyperlinks)
+    text_values.append(row_texts)
+
+# Create DataFrames for hyperlinks and text
+hyperlinks_df = pd.DataFrame(hyperlinks, columns=[f'{col}_link' for col in df.columns])
+text_df = pd.DataFrame(text_values, columns=df.columns)
+
+# Combine the original DataFrame, text DataFrame, and hyperlinks DataFrame
+combined_df = pd.concat([text_df, hyperlinks_df], axis=1)
+
+print(combined_df)
