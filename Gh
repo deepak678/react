@@ -1,75 +1,27 @@
-import pandas as pd
-import openpyxl
-
-# Function to find tables by headers
-def find_tables_by_headers(sheet, headers):
-    tables = []
-    max_row = sheet.max_row
-    max_col = sheet.max_column
-
-    for row in range(1, max_row + 1):
-        for col in range(1, max_col + 1):
-            cell_value = sheet.cell(row=row, column=col).value
-            if cell_value and (str(cell_value) in headers or any(str(cell_value).startswith(header) for header in headers)):
-                start_row = row
-                start_col = col
-
-                # Determine the table range by finding the end row and column
-                end_row = start_row
-                while end_row <= max_row and sheet.cell(row=end_row + 1, column=start_col).value is not None:
-                    end_row += 1
-
-                end_col = start_col
-                while end_col <= max_col and sheet.cell(row=start_row, column=end_col + 1).value is not None:
-                    end_col += 1
-
-                table_range = f"{openpyxl.utils.get_column_letter(start_col)}{start_row}:{openpyxl.utils.get_column_letter(end_col)}{end_row}"
-                tables.append((str(cell_value), table_range))
-    return tables
-
-# Function to read tables into DataFrames while skipping overlapping rows
-def read_tables(sheet, tables):
-    read_rows = set()
-    dataframes = []
-
-    for table_name, table_range in tables:
-        start_cell, end_cell = table_range.split(':')
-        start_row = sheet[start_cell].row
-        end_row = sheet[end_cell].row
-        start_col = openpyxl.utils.column_index_from_string(start_cell.rstrip('0123456789'))
-        end_col = openpyxl.utils.column_index_from_string(end_cell.rstrip('0123456789'))
-
-        # Check if any row in the range has already been read
-        if any(row in read_rows for row in range(start_row, end_row + 1)):
-            continue
-
-        # Read the table into a DataFrame
-        table_data = []
-        for row in sheet.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col):
-            table_data.append([cell.value for cell in row])
-
-        df = pd.DataFrame(table_data)
-        dataframes.append(df)
-
-        # Mark these rows as read
-        read_rows.update(range(start_row, end_row + 1))
-
-    return dataframes
-
-# Load the workbook and select the sheet
-file_path = 'your_excel_file.xlsx'
-wb = openpyxl.load_workbook(file_path)
-sheet = wb['Doc1']  # Specify the sheet name
-
-# Define the list of headers to search for
-headers_to_search = ['Header1', 'Header2', 'Header3']  # Replace with your headers
-
-# Find tables with the specified headers
-tables_with_headers = find_tables_by_headers(sheet, headers_to_search)
-
-# Read tables into DataFrames while skipping overlapping rows
-dataframes = read_tables(sheet, tables_with_headers)
-
-# Print the DataFrames
-for df in dataframes:
-    print(df)
+def _render_text_frame(self, text_frame, slide_context=None):
+    for paragraph in text_frame.paragraphs:
+        # Create a tokenized version of the full text
+        full_text_with_tokens = ''
+        tokens = []
+        for idx, run in enumerate(paragraph.runs):
+            full_text_with_tokens += f"<token{idx}>{run.text}</token{idx}>"
+            tokens.append(f"<token{idx}>")
+        
+        # Render the tokenized text
+        rendered_full_text_with_tokens = self._render_run(full_text_with_tokens, slide_context)
+        print(rendered_full_text_with_tokens)
+        
+        # Split the rendered text using tokens
+        for idx, run in enumerate(paragraph.runs):
+            token = f"<token{idx}>"
+            if token in rendered_full_text_with_tokens:
+                parts = rendered_full_text_with_tokens.split(token)
+                # The text before the token is what we need to assign to the run
+                if len(parts) > 1:
+                    run.text = parts[1].split(f"</token{idx}>")[0]
+                else:
+                    run.text = ''
+                # Update the rendered text to exclude the processed part
+                rendered_full_text_with_tokens = ''.join(parts[1:])
+            else:
+                run.text = ''
