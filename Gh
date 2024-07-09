@@ -1,27 +1,30 @@
 def _render_text_frame(self, text_frame, slide_context=None):
     for paragraph in text_frame.paragraphs:
-        full_text_with_tokens = ''
-        tokens = []
-        for idx, run in enumerate(paragraph.runs):
-            token = f"__TOKEN{idx}__"
-            full_text_with_tokens += f"{token}{run.text}{token}"
-            tokens.append(token)
+        # Get the original full text
+        full_text = ''.join(run.text for run in paragraph.runs)
         
-        # Render the tokenized text
-        rendered_full_text_with_tokens = self._render_run(full_text_with_tokens, slide_context)
-        print(rendered_full_text_with_tokens)
+        # Render the full text with placeholders replaced
+        rendered_full_text = self._render_run(full_text, slide_context)
+        print(rendered_full_text)
         
-        # Split the rendered text using tokens and assign back to runs
-        for idx, run in enumerate(paragraph.runs):
-            token = tokens[idx]
-            if token in rendered_full_text_with_tokens:
-                parts = rendered_full_text_with_tokens.split(token, 1)
-                # The text between tokens is what we need to assign to the run
-                if len(parts) > 1:
-                    run.text = parts[1].split(token)[0]
-                else:
-                    run.text = ''
-                # Update the rendered text to exclude the processed part
-                rendered_full_text_with_tokens = rendered_full_text_with_tokens.replace(f"{token}{run.text}{token}", '', 1)
+        # To handle changes in length, we will maintain the runs' structure
+        current_pos = 0
+        for run in paragraph.runs:
+            run_length = len(run.text)
+            # Extract the corresponding portion of the rendered text
+            new_run_text = rendered_full_text[current_pos:current_pos + run_length]
+            
+            # If the new_run_text length is different, adjust accordingly
+            actual_new_length = len(new_run_text)
+            if actual_new_length != run_length:
+                new_run_text = rendered_full_text[current_pos:current_pos + actual_new_length]
+                current_pos += actual_new_length
             else:
-                run.text = ''
+                current_pos += run_length
+            
+            run.text = new_run_text
+
+        # Handle any remaining text if necessary
+        if current_pos < len(rendered_full_text):
+            remaining_text = rendered_full_text[current_pos:]
+            print("Warning: Some text remains unassigned to runs:", remaining_text)
