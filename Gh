@@ -1,27 +1,27 @@
 def _render_text_frame(self, text_frame, slide_context=None):
     for paragraph in text_frame.paragraphs:
-        # Create a tokenized version of the full text
         full_text_with_tokens = ''
         tokens = []
         for idx, run in enumerate(paragraph.runs):
-            full_text_with_tokens += f"<token{idx}>{run.text}</token{idx}>"
-            tokens.append(f"<token{idx}>")
+            token = f"__TOKEN{idx}__"
+            full_text_with_tokens += f"{token}{run.text}{token}"
+            tokens.append(token)
         
         # Render the tokenized text
         rendered_full_text_with_tokens = self._render_run(full_text_with_tokens, slide_context)
         print(rendered_full_text_with_tokens)
         
-        # Split the rendered text using tokens
+        # Split the rendered text using tokens and assign back to runs
         for idx, run in enumerate(paragraph.runs):
-            token = f"<token{idx}>"
+            token = tokens[idx]
             if token in rendered_full_text_with_tokens:
-                parts = rendered_full_text_with_tokens.split(token)
-                # The text before the token is what we need to assign to the run
+                parts = rendered_full_text_with_tokens.split(token, 1)
+                # The text between tokens is what we need to assign to the run
                 if len(parts) > 1:
-                    run.text = parts[1].split(f"</token{idx}>")[0]
+                    run.text = parts[1].split(token)[0]
                 else:
                     run.text = ''
                 # Update the rendered text to exclude the processed part
-                rendered_full_text_with_tokens = ''.join(parts[1:])
+                rendered_full_text_with_tokens = rendered_full_text_with_tokens.replace(f"{token}{run.text}{token}", '', 1)
             else:
                 run.text = ''
