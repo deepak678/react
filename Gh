@@ -1,27 +1,81 @@
-def _render_text_frame(self, text_frame, slide_context=None):
-    for paragraph in text_frame.paragraphs:
-        full_text_with_tokens = ''
-        tokens = []
-        for idx, run in enumerate(paragraph.runs):
-            token = f"__TOKEN{idx}__"
-            full_text_with_tokens += f"{token}{run.text}{token}"
-            tokens.append(token)
-        
-        # Render the tokenized text
-        rendered_full_text_with_tokens = self._render_run(full_text_with_tokens, slide_context)
-        print(rendered_full_text_with_tokens)
-        
-        # Split the rendered text using tokens and assign back to runs
-        for idx, run in enumerate(paragraph.runs):
-            token = tokens[idx]
-            if token in rendered_full_text_with_tokens:
-                parts = rendered_full_text_with_tokens.split(token, 1)
-                # The text between tokens is what we need to assign to the run
-                if len(parts) > 1:
-                    run.text = parts[1].split(token)[0]
-                else:
-                    run.text = ''
-                # Update the rendered text to exclude the processed part
-                rendered_full_text_with_tokens = rendered_full_text_with_tokens.replace(f"{token}{run.text}{token}", '', 1)
-            else:
-                run.text = ''
+Problem Statement
+Company Context:
+You are a data engineer for a financial services firm that provides real-time trading analytics and risk assessment. The firm needs to integrate data from various sources to create a comprehensive view of market conditions, client portfolios, and transaction histories.
+
+Objective:
+Design and implement a robust data pipeline that:
+
+Orchestrates the extraction of data from multiple real-time and batch sources.
+Transforms and cleans the data to ensure consistency, integrity, and accuracy.
+Performs real-time analytics to provide immediate insights on market conditions and risk exposure.
+Ensures data quality through rigorous validation and auditing processes.
+Loads the processed data into a data warehouse for further analysis and reporting.
+Requirements:
+
+Data Extraction:
+
+Market Data: Extract real-time market data (e.g., stock prices, exchange rates) from a financial market data provider using WebSocket APIs.
+Client Portfolios: Extract daily snapshots of client portfolios from an SFTP server containing CSV files.
+Transaction Histories: Extract historical transaction data from a PostgreSQL database.
+Data Transformation:
+
+Normalize the data to ensure a consistent format (e.g., timestamps, currency conversion).
+Clean and validate the data (e.g., handle missing values, detect anomalies).
+Aggregate transaction data to calculate key metrics (e.g., portfolio value, risk metrics).
+Enrich market data with additional contextual information (e.g., financial news sentiment analysis).
+Real-Time Analytics:
+
+Use a stream processing framework (e.g., Apache Kafka Streams, Apache Flink) to process and analyze market data in real-time.
+Calculate real-time risk exposure for each client portfolio based on market conditions.
+Data Loading:
+
+Load the transformed data into a PostgreSQL data warehouse.
+Ensure that real-time insights are stored in a separate high-performance database (e.g., Redis) for immediate access by trading systems.
+Data Orchestration:
+
+Use an orchestration tool (e.g., Apache Airflow, Prefect) to schedule and manage the pipeline.
+Implement error handling and notifications to alert the data engineering team of any issues.
+Data Quality Assurance:
+
+Implement rigorous data validation and auditing processes to ensure data integrity.
+Track data lineage to maintain an audit trail of data transformations and ensure regulatory compliance.
+Tasks:
+Design the Data Pipeline:
+
+Create a high-level design of the data pipeline, including a flowchart or diagram that shows the flow of data from extraction to loading and real-time processing.
+Implement the Data Pipeline:
+
+Write scripts to extract data from the WebSocket API, SFTP server, and PostgreSQL database.
+Perform necessary data transformations and validation checks.
+Implement real-time analytics using a stream processing framework.
+Load the processed data into the PostgreSQL data warehouse and Redis database.
+Orchestration:
+
+Use Apache Airflow (or a similar tool) to schedule and manage the pipeline.
+Implement error handling and notifications.
+Testing and Validation:
+
+Test the pipeline with sample data to ensure it works as expected.
+Validate the integrity and accuracy of the loaded data.
+Ensure the real-time processing provides accurate and timely insights.
+Expected Deliverables:
+Pipeline Design: A document or diagram outlining the pipeline architecture.
+Source Code: Scripts for data extraction, transformation, loading, and real-time processing.
+Orchestration Workflow: Configuration and scripts for the orchestration tool.
+Data Quality Assurance: Documentation of data validation and auditing processes.
+Documentation: Instructions on how to set up and run the pipeline, including any dependencies and configurations.
+This problem is more complex and requires the candidate to handle real-time data processing, stringent data quality requirements, and the integration of multiple data sources.
+
+
+
+
+
+
+
+Data validation steps
+
+Kafka stream example
+
+
+
+ChatGPT can make mistakes. Check important
