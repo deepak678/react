@@ -1,7 +1,13 @@
-Dropdown Menu: For selecting one of the two options.
-File Upload: For uploading the input document.
-File Upload: For uploading the input data.
-Data Display Area: To render the uploaded input document data.
-Refactor Button: To process the input document based on the input data.
-Download Button: To download the refactored document.
-Restart Button: To restart the process.
+from lxml import etree
+
+def validate_xml(xml_file):
+    try:
+        with open(xml_file, 'r') as file:
+            xml_content = file.read()
+        etree.fromstring(xml_content)
+        print(f"{xml_file} is valid XML.")
+    except etree.XMLSyntaxError as e:
+        print(f"XMLSyntaxError in {xml_file}: {e}")
+
+# Validate a specific XML file
+validate_xml('path/to/your/xml/file.xml')
