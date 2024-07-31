@@ -1,13 +1,27 @@
-from lxml import etree
-
-def validate_xml(xml_file):
-    try:
-        with open(xml_file, 'r') as file:
-            xml_content = file.read()
-        etree.fromstring(xml_content)
-        print(f"{xml_file} is valid XML.")
-    except etree.XMLSyntaxError as e:
-        print(f"XMLSyntaxError in {xml_file}: {e}")
-
-# Validate a specific XML file
-validate_xml('path/to/your/xml/file.xml')
+.row-equal {
+    display: flex;
+    flex-wrap: wrap;
+}
+.col-equal {
+    display: flex;
+    flex-direction: column;
+}
+.card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
+.content {
+    flex-grow: 1;
+}
+.form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
