@@ -1,21 +1,14 @@
-.row-equal {
-    display: flex;
-    flex-wrap: wrap;
-}
-.col-equal {
+.card-container {
     display: flex;
     flex-direction: column;
-}
-.card {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    justify-content: space-between;
+    height: 100%;
 }
 .card-body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex: 1;
+    flex-grow: 1;
 }
 .content {
     flex-grow: 1;
