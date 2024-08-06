@@ -1,20 +1,21 @@
-.card-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-}
-.card-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex-grow: 1;
-}
-.content {
-    flex-grow: 1;
-}
-.form-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
+DAG: financial_news_pipeline
+  |
+  |-- Task: start
+  |
+  |-- Task: extract_financial_data (SimpleHttpOperator)
+  |
+  |-- Task: extract_news_data (SimpleHttpOperator)
+  |
+  |-- Task: push_to_kafka (PythonOperator or BashOperator)
+  |
+  |-- Task: process_data_flink (TriggerFlinkJobOperator or similar)
+  |
+  |-- Task: store_in_redis (PythonOperator or BashOperator)
+  |
+  |-- Task: store_in_redshift (PythonOperator or RedshiftOperator)
+  |
+  |-- Task: update_dashboards (PythonOperator or BashOperator)
+  |
+  |-- Task: notify_success (EmailOperator)
+  |
+  |-- Task: end
