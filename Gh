@@ -1,21 +1,18 @@
-DAG: financial_news_pipeline
+Job: Financial and News Data Processing
   |
-  |-- Task: start
+  |-- Source: Kafka (financial_data_topic)
   |
-  |-- Task: extract_financial_data (SimpleHttpOperator)
+  |-- Transformation: 
+  |      - Cleaning
+  |      - Normalization
+  |      - Enrichment
+  |      - Aggregation
   |
-  |-- Task: extract_news_data (SimpleHttpOperator)
+  |-- Real-Time Analytics: 
+  |      - Risk Metrics Calculation
+  |      - Sentiment Analysis
   |
-  |-- Task: push_to_kafka (PythonOperator or BashOperator)
-  |
-  |-- Task: process_data_flink (TriggerFlinkJobOperator or similar)
-  |
-  |-- Task: store_in_redis (PythonOperator or BashOperator)
-  |
-  |-- Task: store_in_redshift (PythonOperator or RedshiftOperator)
-  |
-  |-- Task: update_dashboards (PythonOperator or BashOperator)
-  |
-  |-- Task: notify_success (EmailOperator)
-  |
-  |-- Task: end
+  |-- Sink: 
+         - Redis
+         - Redshift
+         - Real-Time Dashboards
