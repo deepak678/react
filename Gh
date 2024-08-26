@@ -1,18 +1,45 @@
-Job: Financial and News Data Processing
-  |
-  |-- Source: Kafka (financial_data_topic)
-  |
-  |-- Transformation: 
-  |      - Cleaning
-  |      - Normalization
-  |      - Enrichment
-  |      - Aggregation
-  |
-  |-- Real-Time Analytics: 
-  |      - Risk Metrics Calculation
-  |      - Sentiment Analysis
-  |
-  |-- Sink: 
-         - Redis
-         - Redshift
-         - Real-Time Dashboards
+import nltk
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Function to preprocess text
+def preprocess_text(text):
+    stop_words = set(stopwords.words('english'))
+    words = nltk.word_tokenize(text.lower())  # Tokenize and convert to lowercase
+    words = [word for word in words if word.isalpha()]  # Remove punctuation and non-alphabetic words
+    words = [word for word in words if word not in stop_words]  # Remove stopwords
+    return ' '.join(words)
+
+# Function to compute cosine similarity between two texts
+def compute_similarity(text1, text2):
+    # Preprocess the texts
+    text1_processed = preprocess_text(text1)
+    text2_processed = preprocess_text(text2)
+
+    # Initialize TF-IDF Vectorizer
+    vectorizer = TfidfVectorizer()
+
+    # Combine texts into a single list
+    combined_texts = [text1_processed, text2_processed]
+
+    # Compute TF-IDF matrix
+    tfidf_matrix = vectorizer.fit_transform(combined_texts)
+
+    # Compute cosine similarity
+    cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
+
+    return cosine_sim[0][0]
+
+# Example texts
+text1 = "Artificial intelligence is transforming the world in many ways."
+text2 = "The world is being transformed by the advancements in artificial intelligence."
+
+# Compute similarity
+similarity_score = compute_similarity(text1, text2)
+print(f"Cosine Similarity: {similarity_score:.4f}")
