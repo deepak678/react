@@ -1,138 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Help Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        header {
-            background-color: #004080;
-            color: white;
-            padding: 15px;
-            text-align: center;
-        }
-        .container {
-            display: flex;
-            flex: 1;
-        }
-        nav {
-            width: 250px;
-            background-color: #f4f4f4;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        }
-        nav a {
-            display: block;
-            color: #333;
-            padding: 10px 0;
-            text-decoration: none;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        nav a:hover {
-            color: #004080;
-        }
-        .content {
-            flex: 1;
-            padding: 20px;
-        }
-        .content h2 {
-            color: #004080;
-        }
-        .content p {
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        footer {
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 15px;
-            border-top: 1px solid #ddd;
-        }
-        @media (max-width: 768px) {
-            nav {
-                width: 100%;
-                box-shadow: none;
-            }
-            .container {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-<body>
+import pandas as pd
 
-<header>
-    <h1>Help & Support</h1>
-    <input type="text" placeholder="Search..." style="padding: 8px; width: 50%;">
-</header>
+# Sample DataFrame
+data = [
+    ['Dict1', 'a', 'b'],
+    ['Dict1', 'c', 'd'],
+    ['Dict2', 'e', 'f'],
+    ['Dict2', 'g', 'h'],
+    ['Dict1', 'i', 'j']
+]
+df = pd.DataFrame(data)
 
-<div class="container">
-    <nav>
-        <a href="#getting-started">Getting Started</a>
-        <a href="#faqs">FAQs</a>
-        <a href="#user-guides">User Guides</a>
-        <a href="#troubleshooting">Troubleshooting</a>
-        <a href="#access-permissions">Access & Permissions</a>
-        <a href="#account-management">Account Management</a>
-    </nav>
+# Group by the first column and create a list of dictionaries from the second and third columns
+result_dict = df.groupby(df.iloc[:, 0]).apply(lambda x: x.apply(lambda y: {"key": y[1], "value": y[2]}, axis=1).tolist()).to_dict()
 
-    <div class="content">
-        <section id="getting-started">
-            <h2>Getting Started</h2>
-            <p>Welcome to our application! Here's how to get started...</p>
-            <!-- Add more content as needed -->
-        </section>
-
-        <section id="faqs">
-            <h2>Frequently Asked Questions (FAQs)</h2>
-            <p>Find answers to the most commonly asked questions.</p>
-            <!-- Add FAQ items here -->
-        </section>
-
-        <section id="user-guides">
-            <h2>User Guides & Tutorials</h2>
-            <p>Step-by-step instructions on how to use various features.</p>
-            <!-- Add user guide content here -->
-        </section>
-
-        <section id="troubleshooting">
-            <h2>Troubleshooting</h2>
-            <p>If you're experiencing issues, here are some solutions.</p>
-            <!-- Add troubleshooting tips here -->
-        </section>
-
-        <section id="access-permissions">
-            <h2>Access & Permissions</h2>
-            <p>Need access? Please raise a Jira ticket.</p>
-            <p>Steps to apply:</p>
-            <ol>
-                <li>Go to the Jira dashboard.</li>
-                <li>Create a new ticket under the "Access Requests" project.</li>
-                <li>Fill in the required fields and submit your request.</li>
-            </ol>
-        </section>
-
-        <section id="account-management">
-            <h2>Account Management</h2>
-            <p>Manage your account settings, update your profile, and more.</p>
-            <!-- Add account management content here -->
-        </section>
-    </div>
-</div>
-
-<footer>
-    <p>&copy; 2024 Your Company Name. All rights reserved.</p>
-    <p>Contact support: <a href="mailto:support@example.com">support@example.com</a></p>
-</footer>
-
-</body>
-</html>
+print(result_dict)
