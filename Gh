@@ -1,16 +1,59 @@
-import pandas as pd
+from docx import Document
 
-# Sample DataFrame
-data = [
-    ['Dict1', 'a', 'b'],
-    ['Dict1', 'c', 'd'],
-    ['Dict2', 'e', 'f'],
-    ['Dict2', 'g', 'h'],
-    ['Dict1', 'i', 'j']
-]
-df = pd.DataFrame(data)
+# Load the Word document
+doc = Document('template_with_placeholder.docx')
 
-# Group by the first column and create a list of dictionaries from the second and third columns
-result_dict = df.groupby(df.iloc[:, 0]).apply(lambda x: x.apply(lambda y: {"key": y[1], "value": y[2]}, axis=1).tolist()).to_dict()
+# Placeholder text to look for
+placeholder = "{{add_more}}"
 
-print(result_dict)
+# Function to find the table containing the placeholder
+def find_table_with_placeholder(doc, placeholder):
+    for table_idx, table in enumerate(doc.tables):
+        for row in table.rows:
+            for cell in row.cells:
+                if placeholder in cell.text:
+                    # Return the table and its index when the placeholder is found
+                    return table, table_idx
+    return None, None
+
+# Function to process the placeholder in the identified table
+def process_placeholder_in_table(table, placeholder, new_rows_data, insert_after=True):
+    for row_idx, row in enumerate(table.rows):
+        for cell in row.cells:
+            if placeholder in cell.text:
+                # Clear placeholder and insert rows if data is provided
+                cell.text = ""
+                if new_rows_data:
+                    for new_row_data in new_rows_data:
+                        if insert_after:
+                            new_row = table.add_row()
+                            table._tbl.insert(row_idx + 1, new_row._tr)
+                        else:
+                            new_row = table.add_row()
+                            table._tbl.insert(row_idx, new_row._tr)
+                            row_idx += 1
+                        for idx, data in enumerate(new_row_data):
+                            new_row.cells[idx].text = data
+                return True
+    return False
+
+# Find the table that contains the placeholder
+target_table, table_index = find_table_with_placeholder(doc, placeholder)
+
+if target_table:
+    # If the table is found, process the placeholder
+    new_rows_data = [
+        ["Emily Jones", "35", "Chicago"],
+        ["Michael Brown", "40", "Los Angeles"]
+    ]
+    placeholder_found = process_placeholder_in_table(target_table, placeholder, new_rows_data, insert_after=True)
+    
+    if placeholder_found:
+        print(f"Placeholder processed in table {table_index} and rows inserted.")
+    else:
+        print("Placeholder found but no rows were added.")
+else:
+    print("Placeholder not found in any table.")
+
+# Save the updated document
+doc.save('updated_document_using_placeholder.docx')
