@@ -6,50 +6,49 @@ doc = Document("input_document.docx")
 # Placeholder to look for
 placeholder = "{{add_more}}"
 
-def find_table_with_placeholder(doc, placeholder):
-    # Iterate through all tables in the document
-    for table in doc.tables:
-        # Loop through rows and cells in the table
-        for row_idx, row in enumerate(table.rows):
-            for cell in row.cells:
-                if placeholder in cell.text:
-                    return table, row_idx  # Return the table and the row index of the placeholder
+def find_placeholder_in_table(table, placeholder):
+    # Iterate through rows and cells to find the placeholder
+    for row_idx, row in enumerate(table.rows):
+        for cell_idx, cell in enumerate(row.cells):
+            if placeholder in cell.text:
+                return row_idx, cell_idx
     return None, None
 
-def process_table(table, placeholder_row_idx, new_rows_data=None):
-    if new_rows_data:
-        # Replace the placeholder row with the first row of new data
-        placeholder_row = table.rows[placeholder_row_idx]
-        
-        for idx, cell in enumerate(placeholder_row.cells):
-            if idx < len(new_rows_data[0]):
-                cell.text = new_rows_data[0][idx]  # Replace the placeholder row with first row of data
-        
-        # Add any remaining rows (if there's more data after the first row)
-        if len(new_rows_data) > 1:
-            for row_data in new_rows_data[1:]:
-                new_row = table.add_row()  # Add a new row at the end
-                table._tbl.insert(placeholder_row_idx + 1, new_row._tr)  # Insert the new row after the placeholder row
+def insert_data_in_row_or_column(table, row_idx, col_idx, row_data, col_data):
+    # If the placeholder is in the first cell of an empty row
+    if col_idx == 0 and all(not cell.text.strip() for cell in table.rows[row_idx].cells):
+        print(f"Placeholder found in an empty row at row index {row_idx}. Inserting data in the entire row.")
+        # Insert the row_data into the found row
+        for idx, data in enumerate(row_data):
+            table.rows[row_idx].cells[idx].text = data
+    
+    # If the placeholder is in a column with empty cells below it
+    elif all(not table.rows[i].cells[col_idx].text.strip() for i in range(row_idx + 1, len(table.rows))):
+        print(f"Placeholder found in column at index {col_idx}. Inserting data below.")
+        # Insert the col_data into the cells below the placeholder
+        for idx, data in enumerate(col_data):
+            if row_idx + 1 + idx < len(table.rows):
+                table.rows[row_idx + 1 + idx].cells[col_idx].text = data
+            else:
+                # If no more rows are available, add a new row
+                new_row = table.add_row()
+                new_row.cells[col_idx].text = data
 
-                # Populate the newly inserted row with data
-                for idx, data in enumerate(row_data):
-                    new_row.cells[idx].text = data
+# Example data to insert
+row_data = ["Alice Smith", "25", "New York"]
+col_data = ["25", "30", "35"]
 
-                # Update the placeholder_row_idx so new rows are inserted sequentially
-                placeholder_row_idx += 1
+# Select the first table (modify as needed)
+target_table = doc.tables[0]
 
-# Call the function to find the table with the placeholder
-target_table, placeholder_row_idx = find_table_with_placeholder(doc, placeholder)
+# Find the placeholder's position in the table
+row_idx, col_idx = find_placeholder_in_table(target_table, placeholder)
 
-if target_table and placeholder_row_idx is not None:
-    # If placeholder is found, replace it with new rows
-    new_rows_data = [
-        ["Alice Smith", "25", "New York"],
-        ["Bob Johnson", "30", "San Francisco"]
-    ]
-    process_table(target_table, placeholder_row_idx, new_rows_data=new_rows_data)
+if row_idx is not None and col_idx is not None:
+    # Insert data based on the position of the placeholder
+    insert_data_in_row_or_column(target_table, row_idx, col_idx, row_data, col_data)
 
-    # Save the modified document
+    # Save the updated document
     doc.save("updated_document.docx")
     print("Table updated successfully!")
 else:
