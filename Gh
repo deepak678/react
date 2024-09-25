@@ -24,19 +24,25 @@ def process_table(table, placeholder_row_idx, new_rows_data=None):
             if placeholder in cell.text:
                 cell.text = cell.text.replace(placeholder, "")
 
-        # Add new rows starting after the placeholder row
-        for row_data in new_rows_data:
-            # Insert a row after the placeholder row
-            new_row = table.add_row()  # Add a new row at the end first
-            # Move the new row to the desired position
-            table._tbl.insert(placeholder_row_idx + 1, new_row._tr)
+        # Check if the placeholder is in the last row
+        if placeholder_row_idx == len(table.rows) - 1:
+            # If the placeholder is in the last row, simply append new rows
+            for row_data in new_rows_data:
+                new_row = table.add_row()  # Add a new row at the end
+                for idx, data in enumerate(row_data):
+                    new_row.cells[idx].text = data
+        else:
+            # If the placeholder is in the middle, insert rows after the placeholder row
+            for row_data in new_rows_data:
+                new_row = table.add_row()  # Add a new row at the end
+                table._tbl.insert(placeholder_row_idx + 1, new_row._tr)  # Move the new row to the desired position
 
-            # Populate the newly inserted row with data
-            for idx, data in enumerate(row_data):
-                new_row.cells[idx].text = data
+                # Populate the newly inserted row with data
+                for idx, data in enumerate(row_data):
+                    new_row.cells[idx].text = data
 
-            # Update the placeholder_row_idx so that new rows are inserted sequentially
-            placeholder_row_idx += 1
+                # Update the placeholder_row_idx so that new rows are inserted sequentially
+                placeholder_row_idx += 1
 
 # Call the function to find the table with the placeholder
 target_table, placeholder_row_idx = find_table_with_placeholder(doc, placeholder)
