@@ -1,59 +1,56 @@
 from docx import Document
 
-# Load the Word document
-doc = Document('template_with_placeholder.docx')
+# Load your Word document
+doc = Document("input_document.docx")
 
-# Placeholder text to look for
+# Placeholder to look for
 placeholder = "{{add_more}}"
 
-# Function to find the table containing the placeholder
 def find_table_with_placeholder(doc, placeholder):
-    for table_idx, table in enumerate(doc.tables):
-        for row in table.rows:
+    # Iterate through all tables in the document
+    for table in doc.tables:
+        # Loop through rows and cells in the table
+        for row_idx, row in enumerate(table.rows):
             for cell in row.cells:
                 if placeholder in cell.text:
-                    # Return the table and its index when the placeholder is found
-                    return table, table_idx
+                    return table, row_idx  # Return the table and the row index of the placeholder
     return None, None
 
-# Function to process the placeholder in the identified table
-def process_placeholder_in_table(table, placeholder, new_rows_data, insert_after=True):
-    for row_idx, row in enumerate(table.rows):
-        for cell in row.cells:
+def process_table(table, placeholder_row_idx, new_rows_data=None):
+    if new_rows_data:
+        # Remove the placeholder from the placeholder row
+        placeholder_row = table.rows[placeholder_row_idx]
+        for cell in placeholder_row.cells:
             if placeholder in cell.text:
-                # Clear placeholder and insert rows if data is provided
-                cell.text = ""
-                if new_rows_data:
-                    for new_row_data in new_rows_data:
-                        if insert_after:
-                            new_row = table.add_row()
-                            table._tbl.insert(row_idx + 1, new_row._tr)
-                        else:
-                            new_row = table.add_row()
-                            table._tbl.insert(row_idx, new_row._tr)
-                            row_idx += 1
-                        for idx, data in enumerate(new_row_data):
-                            new_row.cells[idx].text = data
-                return True
-    return False
+                cell.text = cell.text.replace(placeholder, "")
 
-# Find the table that contains the placeholder
-target_table, table_index = find_table_with_placeholder(doc, placeholder)
+        # Add new rows starting after the placeholder row
+        for row_data in new_rows_data:
+            # Insert a row after the placeholder row
+            new_row = table.add_row()  # Add a new row at the end first
+            # Move the new row to the desired position
+            table._tbl.insert(placeholder_row_idx + 1, new_row._tr)
 
-if target_table:
-    # If the table is found, process the placeholder
+            # Populate the newly inserted row with data
+            for idx, data in enumerate(row_data):
+                new_row.cells[idx].text = data
+
+            # Update the placeholder_row_idx so that new rows are inserted sequentially
+            placeholder_row_idx += 1
+
+# Call the function to find the table with the placeholder
+target_table, placeholder_row_idx = find_table_with_placeholder(doc, placeholder)
+
+if target_table and placeholder_row_idx is not None:
+    # If placeholder is found, add new rows after it
     new_rows_data = [
-        ["Emily Jones", "35", "Chicago"],
-        ["Michael Brown", "40", "Los Angeles"]
+        ["Alice Smith", "25", "New York"],
+        ["Bob Johnson", "30", "San Francisco"]
     ]
-    placeholder_found = process_placeholder_in_table(target_table, placeholder, new_rows_data, insert_after=True)
-    
-    if placeholder_found:
-        print(f"Placeholder processed in table {table_index} and rows inserted.")
-    else:
-        print("Placeholder found but no rows were added.")
+    process_table(target_table, placeholder_row_idx, new_rows_data=new_rows_data)
+
+    # Save the modified document
+    doc.save("updated_document.docx")
+    print("Table updated successfully!")
 else:
     print("Placeholder not found in any table.")
-
-# Save the updated document
-doc.save('updated_document_using_placeholder.docx')
