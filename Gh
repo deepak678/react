@@ -1,29 +1,15 @@
-def add_column_to_table(self, table):
-        """Adds an empty column to the table."""
-        for row in table.rows:
-            new_cell = OxmlElement('w:tc')  # Create a new cell
-            new_cell_content = OxmlElement('w:p')  # Create a paragraph for the new cell
-            new_cell.append(new_cell_content)  # Append the paragraph to the cell
-            row._tr.append(new_cell)  # Append the cell to the row
-
-    def ensure_column_count(self, table, min_columns):
-        """Ensure that each row in the table has at least 'min_columns' cells."""
-        for row in table.rows:
-            while len(row.cells) < min_columns:
-                self.add_column_to_table(table)
-
-    def insert_data_in_columns(self, table, start_col_idx, col_data):
-        """Inserts data starting from the placeholder's column."""
+# First ensure the table has enough rows
+        required_rows = len(col_data)
+        while required_rows > len(table.rows):
+            table.add_row()  # Add new rows until we have enough
+        
+        # Now insert data
         for i, data in enumerate(col_data):
-            # Ensure there are enough rows
-            if i >= len(table.rows):
-                table.add_row()  # Add a new row if necessary
             row = table.rows[i]
-            
             # Ensure enough cells in the row
             self.ensure_column_count(table, start_col_idx + len(data))
 
-            # Now populate the columns with data
+            # Populate the columns with data
             for j, value in enumerate(data):
                 if start_col_idx + j < len(row.cells):  # Check bounds
                     row.cells[start_col_idx + j].text = value
