@@ -1,15 +1,27 @@
-# First ensure the table has enough rows
-        required_rows = len(col_data)
-        while required_rows > len(table.rows):
-            table.add_row()  # Add new rows until we have enough
-        
-        # Now insert data
-        for i, data in enumerate(col_data):
-            row = table.rows[i]
-            # Ensure enough cells in the row
-            self.ensure_column_count(table, start_col_idx + len(data))
+from docx import Document
 
-            # Populate the columns with data
-            for j, value in enumerate(data):
-                if start_col_idx + j < len(row.cells):  # Check bounds
-                    row.cells[start_col_idx + j].text = value
+def shift_columns_right(table, start_col_idx):
+    # Ensure the table has more than one column
+    if len(table.columns) <= start_col_idx:
+        print(f"Table doesn't have enough columns to shift from index {start_col_idx}")
+        return
+
+    # Iterate through all rows
+    for row in table.rows:
+        # Start from the last column and move backwards
+        for col_idx in range(len(row.cells) - 1, start_col_idx, -1):
+            row.cells[col_idx].text = row.cells[col_idx - 1].text  # Shift data from left to right
+
+        # Clear the starting column data
+        row.cells[start_col_idx].text = ""
+
+# Example usage
+doc = Document("input_document.docx")
+table = doc.tables[0]  # Assuming we are working with the first table in the document
+
+# Shift data starting from the 2nd column (index 1)
+shift_columns_right(table, start_col_idx=1)
+
+# Save the updated document
+doc.save("updated_document.docx")
+print("Columns shifted successfully!")
