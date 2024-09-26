@@ -1,6 +1,5 @@
 from docx import Document
 from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
 
 # Load the Word document
 doc = Document("input_document.docx")
@@ -22,15 +21,20 @@ def insert_data_in_rows(table, start_row_idx, row_data):
     If more data is present, new rows will be added to accommodate it.
     """
     for i, data in enumerate(row_data):
+        # Ensure that the row exists
         if start_row_idx + i < len(table.rows):
             row = table.rows[start_row_idx + i]
             for j, value in enumerate(data):
-                row.cells[j].text = value
+                # Ensure we don't go out of bounds for existing rows
+                if j < len(row.cells):
+                    row.cells[j].text = value
         else:
             # Add new rows if needed
             new_row = table.add_row()
             for j, value in enumerate(data):
-                new_row.cells[j].text = value
+                # Ensure we don't go out of bounds
+                if j < len(new_row.cells):
+                    new_row.cells[j].text = value
 
 def add_column_to_table(table):
     """
@@ -54,6 +58,7 @@ def insert_data_in_columns(table, start_col_idx, col_data):
     Inserts data starting from the placeholder's column.
     If more data is present, new columns will be added to the right.
     """
+    # Determine the number of existing columns
     num_existing_columns = len(table.rows[0].cells)  # Number of existing columns in the table
     max_cols_needed = start_col_idx + len(col_data[0])  # Total columns needed
 
@@ -62,9 +67,14 @@ def insert_data_in_columns(table, start_col_idx, col_data):
 
     # Now populate the columns with data
     for row_idx, row_data in enumerate(col_data):
-        row = table.rows[row_idx]
-        for col_idx, value in enumerate(row_data):
-            row.cells[start_col_idx + col_idx].text = value
+        # Ensure we don't exceed the number of existing rows
+        if row_idx < len(table.rows):
+            row = table.rows[row_idx]
+            for col_idx, value in enumerate(row_data):
+                if start_col_idx + col_idx < len(row.cells):  # Check bounds
+                    row.cells[start_col_idx + col_idx].text = value
+                else:
+                    print(f"Warning: Trying to access out-of-bounds column index {start_col_idx + col_idx}.")
 
 def process_table(table, data):
     """Processes the table by finding the placeholder and dynamically inserting rows or columns."""
