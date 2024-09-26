@@ -1,107 +1,29 @@
-from docx import Document
-from docx.oxml import OxmlElement
+def add_column_to_table(self, table):
+        """Adds an empty column to the table."""
+        for row in table.rows:
+            new_cell = OxmlElement('w:tc')  # Create a new cell
+            new_cell_content = OxmlElement('w:p')  # Create a paragraph for the new cell
+            new_cell.append(new_cell_content)  # Append the paragraph to the cell
+            row._tr.append(new_cell)  # Append the cell to the row
 
-# Load the Word document
-doc = Document("input_document.docx")
+    def ensure_column_count(self, table, min_columns):
+        """Ensure that each row in the table has at least 'min_columns' cells."""
+        for row in table.rows:
+            while len(row.cells) < min_columns:
+                self.add_column_to_table(table)
 
-# Placeholder to look for
-placeholder = "{{add_more}}"
+    def insert_data_in_columns(self, table, start_col_idx, col_data):
+        """Inserts data starting from the placeholder's column."""
+        for i, data in enumerate(col_data):
+            # Ensure there are enough rows
+            if i >= len(table.rows):
+                table.add_row()  # Add a new row if necessary
+            row = table.rows[i]
+            
+            # Ensure enough cells in the row
+            self.ensure_column_count(table, start_col_idx + len(data))
 
-def find_placeholder_in_table(table, placeholder):
-    """Finds the row and column index of the placeholder in a table."""
-    for row_idx, row in enumerate(table.rows):
-        for cell_idx, cell in enumerate(row.cells):
-            if placeholder in cell.text:
-                return row_idx, cell_idx
-    return None, None
-
-def insert_data_in_rows(table, start_row_idx, row_data):
-    """
-    Inserts data starting from the placeholder's row.
-    If more data is present, new rows will be added to accommodate it.
-    """
-    for i, data in enumerate(row_data):
-        # Ensure that the row exists
-        if start_row_idx + i < len(table.rows):
-            row = table.rows[start_row_idx + i]
+            # Now populate the columns with data
             for j, value in enumerate(data):
-                # Ensure we don't go out of bounds for existing rows
-                if j < len(row.cells):
-                    row.cells[j].text = value
-        else:
-            # Add new rows if needed
-            new_row = table.add_row()
-            for j, value in enumerate(data):
-                # Ensure we don't go out of bounds
-                if j < len(new_row.cells):
-                    new_row.cells[j].text = value
-
-def add_column_to_table(table):
-    """
-    Adds an empty column to the table.
-    """
-    for row in table.rows:
-        # Create a new cell for each row
-        new_cell = OxmlElement('w:tc')
-        new_cell_content = OxmlElement('w:p')  # Add a paragraph to the new cell
-        new_cell.append(new_cell_content)
-        row._tr.append(new_cell)
-
-def ensure_column_count(table, min_columns):
-    """Ensure that each row in the table has at least 'min_columns' cells."""
-    for row in table.rows:
-        while len(row.cells) < min_columns:
-            add_column_to_table(table)
-
-def insert_data_in_columns(table, start_col_idx, col_data):
-    """
-    Inserts data starting from the placeholder's column.
-    If more data is present, new columns will be added to the right.
-    """
-    # Determine the number of existing columns
-    num_existing_columns = len(table.rows[0].cells)  # Number of existing columns in the table
-    max_cols_needed = start_col_idx + len(col_data[0])  # Total columns needed
-
-    # Ensure enough columns exist in the table
-    ensure_column_count(table, max_cols_needed)
-
-    # Now populate the columns with data
-    for row_idx, row_data in enumerate(col_data):
-        # Ensure we don't exceed the number of existing rows
-        if row_idx < len(table.rows):
-            row = table.rows[row_idx]
-            for col_idx, value in enumerate(row_data):
-                if start_col_idx + col_idx < len(row.cells):  # Check bounds
-                    row.cells[start_col_idx + col_idx].text = value
-                else:
-                    print(f"Warning: Trying to access out-of-bounds column index {start_col_idx + col_idx}.")
-
-def process_table(table, data):
-    """Processes the table by finding the placeholder and dynamically inserting rows or columns."""
-    row_idx, col_idx = find_placeholder_in_table(table, placeholder)
-    
-    if row_idx is not None and col_idx is not None:
-        # If the placeholder is in the first column, we insert rows
-        if col_idx == 0:
-            insert_data_in_rows(table, row_idx, data)
-        # If the placeholder is in the first row, we insert columns
-        elif row_idx == 0:
-            insert_data_in_columns(table, col_idx, data)
-    else:
-        print("Placeholder not found in the table.")
-
-# Example Data: This data will be inserted either as rows or columns depending on placeholder position
-data = [
-    ["dept", "city"],  # New headers
-    ["R&C", "NY"]      # Data for the corresponding rows
-]
-
-# Select the first table (modify as needed)
-target_table = doc.tables[0]
-
-# Process the table and insert data dynamically based on the placeholder position
-process_table(target_table, data)
-
-# Save the updated document
-doc.save("updated_document.docx")
-print("Table updated successfully!")
+                if start_col_idx + j < len(row.cells):  # Check bounds
+                    row.cells[start_col_idx + j].text = value
