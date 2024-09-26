@@ -1,168 +1,19 @@
-from docx import Document
-
-# Load the Word document
-doc = Document("input_document.docx")
-
-# Placeholder to look for
-placeholder = "{{add_more}}"
-
-def find_placeholder_in_table(table, placeholder):
-    """Finds the row and column index of the placeholder in a table."""
-    for row_idx, row in enumerate(table.rows):
-        for cell_idx, cell in enumerate(row.cells):
-            if placeholder in cell.text:
-                return row_idx, cell_idx
-    return None, None
-
-def insert_data_in_rows(table, start_row_idx, row_data):
-    """
-    Inserts data starting from the placeholder's row.
-    If more data is present, new rows will be added to accommodate it.
-    """
-    for i, data in enumerate(row_data):
-        # If row exists, insert data into it
-        if start_row_idx + i < len(table.rows):
-            row = table.rows[start_row_idx + i]
-            for j, value in enumerate(data):
-                row.cells[j].text = value
-        else:
-            # Add new rows if needed
-            new_row = table.add_row()
-            for j, value in enumerate(data):
-                new_row.cells[j].text = value
-
 def insert_data_in_columns(table, start_col_idx, col_data):
     """
     Inserts data starting from the placeholder's column.
     If more data is present, new columns will be added to the right.
     """
-    for i, row_data in enumerate(col_data):
-        if i < len(table.rows):
-            row = table.rows[i]
-            for j, value in enumerate(row_data):
-                if start_col_idx + j < len(row.cells):
-                    row.cells[start_col_idx + j].text = value
-                else:
-                    # Add new cells/columns if necessary
-                    new_cell = row.add_cell()
-                    new_cell.text = value
+    for row_idx, row_data in enumerate(col_data):
+        if row_idx < len(table.rows):
+            row = table.rows[row_idx]
+            # Ensure that the row has enough cells for the insertion
+            while len(row.cells) < start_col_idx + len(row_data):
+                row.add_cell()  # Dynamically add new cells (columns) if needed
+            # Insert the data into the corresponding cells
+            for col_idx, value in enumerate(row_data):
+                row.cells[start_col_idx + col_idx].text = value
         else:
-            # Add new row if it doesn't exist
+            # Add a new row if the row doesn't exist
             new_row = table.add_row()
-            for j, value in enumerate(row_data):
-                new_row.cells[start_col_idx + j].text = value
-
-def process_table(table, data):
-    """Processes the table by finding the placeholder and dynamically inserting rows or columns."""
-    row_idx, col_idx = find_placeholder_in_table(table, placeholder)
-    
-    if row_idx is not None and col_idx is not None:
-        # If the placeholder is in the first column, we insert rows
-        if col_idx == 0:
-            insert_data_in_rows(table, row_idx, data)
-        # If the placeholder is in the first row, we insert columns
-        elif row_idx == 0:
-            insert_data_in_columns(table, col_idx, data)
-    else:
-        print("Placeholder not found in the table.")
-
-# Example Data: This data will be inserted either as rows or columns depending on placeholder position
-data = [
-    ["Alice Smith", "25", "New York"],
-    ["Bob Johnson", "30", "San Francisco"],
-    ["Charlie Brown", "35", "Los Angeles"]
-]
-
-# Select the first table (modify as needed)
-target_table = doc.tables[0]
-
-# Process the table and insert data dynamically based on the placeholder position
-process_table(target_table, data)
-
-# Save the updated document
-doc.save("updated_document.docx")
-print("Table updated successfully!")
-
-
-
-from docx import Document
-
-# Load the Word document
-doc = Document("input_document.docx")
-
-# Placeholder to look for
-placeholder = "{{add_more}}"
-
-def find_placeholder_in_table(table, placeholder):
-    """Finds the row and column index of the placeholder in a table."""
-    for row_idx, row in enumerate(table.rows):
-        for cell_idx, cell in enumerate(row.cells):
-            if placeholder in cell.text:
-                return row_idx, cell_idx
-    return None, None
-
-def insert_data_in_rows(table, start_row_idx, row_data):
-    """
-    Inserts data starting from the placeholder's row.
-    If more data is present, new rows will be added to accommodate it.
-    """
-    for i, data in enumerate(row_data):
-        # If row exists, insert data into it
-        if start_row_idx + i < len(table.rows):
-            row = table.rows[start_row_idx + i]
-            for j, value in enumerate(data):
-                row.cells[j].text = value
-        else:
-            # Add new rows if needed
-            new_row = table.add_row()
-            for j, value in enumerate(data):
-                new_row.cells[j].text = value
-
-def insert_data_in_columns(table, start_col_idx, col_data):
-    """
-    Inserts data starting from the placeholder's column.
-    If more data is present, new columns will be added to the right.
-    """
-    num_columns_to_add = len(col_data[0])  # Number of new columns to insert
-    num_existing_columns = len(table.rows[0].cells)  # Existing columns in the table
-    
-    for i, row_data in enumerate(col_data):
-        if i < len(table.rows):
-            row = table.rows[i]
-            for j, value in enumerate(row_data):
-                if start_col_idx + j < num_existing_columns:
-                    row.cells[start_col_idx + j].text = value
-                else:
-                    # Add a new cell to the row manually
-                    row._tr.add_tc()  # _tr refers to the underlying XML element for the row
-                    row.cells[start_col_idx + j].text = value
-
-def process_table(table, data):
-    """Processes the table by finding the placeholder and dynamically inserting rows or columns."""
-    row_idx, col_idx = find_placeholder_in_table(table, placeholder)
-    
-    if row_idx is not None and col_idx is not None:
-        # If the placeholder is in the first column, we insert rows
-        if col_idx == 0:
-            insert_data_in_rows(table, row_idx, data)
-        # If the placeholder is in the first row, we insert columns
-        elif row_idx == 0:
-            insert_data_in_columns(table, col_idx, data)
-    else:
-        print("Placeholder not found in the table.")
-
-# Example Data: This data will be inserted either as rows or columns depending on placeholder position
-data = [
-    ["dept", "city"],  # New headers
-    ["R&C", "NY"]      # Data for the corresponding rows
-]
-
-# Select the first table (modify as needed)
-target_table = doc.tables[0]
-
-# Process the table and insert data dynamically based on the placeholder position
-process_table(target_table, data)
-
-# Save the updated document
-doc.save("updated_document.docx")
-print("Table updated successfully!")
+            for col_idx, value in enumerate(row_data):
+                new_row.cells[start_col_idx + col_idx].text = value
