@@ -1,55 +1,84 @@
 from docx import Document
 
-# Load your Word document
+# Load the Word document
 doc = Document("input_document.docx")
 
 # Placeholder to look for
 placeholder = "{{add_more}}"
 
 def find_placeholder_in_table(table, placeholder):
-    # Iterate through rows and cells to find the placeholder
+    """Finds the row and column index of the placeholder in a table."""
     for row_idx, row in enumerate(table.rows):
         for cell_idx, cell in enumerate(row.cells):
             if placeholder in cell.text:
                 return row_idx, cell_idx
     return None, None
 
-def insert_data_in_row_or_column(table, row_idx, col_idx, row_data, col_data):
-    # If the placeholder is in the first cell of an empty row
-    if col_idx == 0 and all(not cell.text.strip() for cell in table.rows[row_idx].cells):
-        print(f"Placeholder found in an empty row at row index {row_idx}. Inserting data in the entire row.")
-        # Insert the row_data into the found row
-        for idx, data in enumerate(row_data):
-            table.rows[row_idx].cells[idx].text = data
-    
-    # If the placeholder is in a column with empty cells below it
-    elif all(not table.rows[i].cells[col_idx].text.strip() for i in range(row_idx + 1, len(table.rows))):
-        print(f"Placeholder found in column at index {col_idx}. Inserting data below.")
-        # Insert the col_data into the cells below the placeholder
-        for idx, data in enumerate(col_data):
-            if row_idx + 1 + idx < len(table.rows):
-                table.rows[row_idx + 1 + idx].cells[col_idx].text = data
-            else:
-                # If no more rows are available, add a new row
-                new_row = table.add_row()
-                new_row.cells[col_idx].text = data
+def insert_data_in_rows(table, start_row_idx, row_data):
+    """
+    Inserts data starting from the placeholder's row.
+    If more data is present, new rows will be added to accommodate it.
+    """
+    for i, data in enumerate(row_data):
+        # If row exists, insert data into it
+        if start_row_idx + i < len(table.rows):
+            row = table.rows[start_row_idx + i]
+            for j, value in enumerate(data):
+                row.cells[j].text = value
+        else:
+            # Add new rows if needed
+            new_row = table.add_row()
+            for j, value in enumerate(data):
+                new_row.cells[j].text = value
 
-# Example data to insert
-row_data = ["Alice Smith", "25", "New York"]
-col_data = ["25", "30", "35"]
+def insert_data_in_columns(table, start_col_idx, col_data):
+    """
+    Inserts data starting from the placeholder's column.
+    If more data is present, new columns will be added to the right.
+    """
+    for i, row_data in enumerate(col_data):
+        if i < len(table.rows):
+            row = table.rows[i]
+            for j, value in enumerate(row_data):
+                if start_col_idx + j < len(row.cells):
+                    row.cells[start_col_idx + j].text = value
+                else:
+                    # Add new cells/columns if necessary
+                    new_cell = row.add_cell()
+                    new_cell.text = value
+        else:
+            # Add new row if it doesn't exist
+            new_row = table.add_row()
+            for j, value in enumerate(row_data):
+                new_row.cells[start_col_idx + j].text = value
+
+def process_table(table, data):
+    """Processes the table by finding the placeholder and dynamically inserting rows or columns."""
+    row_idx, col_idx = find_placeholder_in_table(table, placeholder)
+    
+    if row_idx is not None and col_idx is not None:
+        # If the placeholder is in the first column, we insert rows
+        if col_idx == 0:
+            insert_data_in_rows(table, row_idx, data)
+        # If the placeholder is in the first row, we insert columns
+        elif row_idx == 0:
+            insert_data_in_columns(table, col_idx, data)
+    else:
+        print("Placeholder not found in the table.")
+
+# Example Data: This data will be inserted either as rows or columns depending on placeholder position
+data = [
+    ["Alice Smith", "25", "New York"],
+    ["Bob Johnson", "30", "San Francisco"],
+    ["Charlie Brown", "35", "Los Angeles"]
+]
 
 # Select the first table (modify as needed)
 target_table = doc.tables[0]
 
-# Find the placeholder's position in the table
-row_idx, col_idx = find_placeholder_in_table(target_table, placeholder)
+# Process the table and insert data dynamically based on the placeholder position
+process_table(target_table, data)
 
-if row_idx is not None and col_idx is not None:
-    # Insert data based on the position of the placeholder
-    insert_data_in_row_or_column(target_table, row_idx, col_idx, row_data, col_data)
-
-    # Save the updated document
-    doc.save("updated_document.docx")
-    print("Table updated successfully!")
-else:
-    print("Placeholder not found in any table.")
+# Save the updated document
+doc.save("updated_document.docx")
+print("Table updated successfully!")
