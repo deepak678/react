@@ -1,19 +1,27 @@
+def add_column_to_table(table):
+    """
+    Adds an empty column to the table.
+    """
+    for row in table.rows:
+        # Create a new cell for each row
+        new_cell = OxmlElement('w:tc')
+        new_cell_content = OxmlElement('w:p')  # Add a paragraph to the new cell
+        new_cell.append(new_cell_content)
+        row._tr.append(new_cell)
+
 def insert_data_in_columns(table, start_col_idx, col_data):
     """
     Inserts data starting from the placeholder's column.
     If more data is present, new columns will be added to the right.
     """
+    num_existing_columns = len(table.rows[0].cells)  # Number of existing columns in the table
+
+    # Add new columns if necessary
+    for _ in range(len(col_data[0]) - (num_existing_columns - start_col_idx)):
+        add_column_to_table(table)
+
+    # Now populate the columns with data
     for row_idx, row_data in enumerate(col_data):
-        if row_idx < len(table.rows):
-            row = table.rows[row_idx]
-            # Ensure that the row has enough cells for the insertion
-            while len(row.cells) < start_col_idx + len(row_data):
-                row.add_cell()  # Dynamically add new cells (columns) if needed
-            # Insert the data into the corresponding cells
-            for col_idx, value in enumerate(row_data):
-                row.cells[start_col_idx + col_idx].text = value
-        else:
-            # Add a new row if the row doesn't exist
-            new_row = table.add_row()
-            for col_idx, value in enumerate(row_data):
-                new_row.cells[start_col_idx + col_idx].text = value
+        row = table.rows[row_idx]
+        for col_idx, value in enumerate(row_data):
+            row.cells[start_col_idx + col_idx].text = value
