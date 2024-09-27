@@ -1,52 +1,16 @@
 from docx import Document
 
+def print_table_contents(doc):
+    # Iterate through all tables in the document
+    for table_index, table in enumerate(doc.tables):
+        print(f"Table {table_index + 1}:")
+        for row in table.rows:
+            row_data = [cell.text.strip() for cell in row.cells]  # Get cell texts and strip whitespace
+            print("\t".join(row_data))  # Print row data separated by tabs
+        print()  # Add a newline for better readability between tables
+
 # Load your Word document
 doc = Document("input_document.docx")
 
-# Placeholder to look for
-placeholder = "{{add_more}}"
-
-def find_table_with_placeholder(doc, placeholder):
-    # Iterate through all tables in the document
-    for table in doc.tables:
-        # Loop through rows and cells in the table
-        for row in table.rows:
-            for cell in row.cells:
-                if placeholder in cell.text:
-                    return table, table.rows.index(row)  # Return the table and the row index
-    return None, None
-
-def insert_row_at_index(table, row_idx):
-    # Insert an empty row at the specified index (row_idx)
-    new_row = table.add_row()  # This creates a new row at the end
-    # Now we move this new row to the correct position
-    table._tbl.insert(row_idx, new_row._tr)
-    return table.rows[row_idx]
-
-def process_table(table, row_idx, new_rows_data):
-    # Insert rows starting from the placeholder's row index
-    for i, row_data in enumerate(new_rows_data):
-        # Insert the row at the desired index (shifting the others)
-        new_row = insert_row_at_index(table, row_idx + 1 + i)  # Insert at correct position
-        
-        # Fill the new row with data
-        for idx, data in enumerate(row_data):
-            if idx < len(new_row.cells):
-                new_row.cells[idx].text = data
-
-# Call the function to find the table with the placeholder
-target_table, placeholder_idx = find_table_with_placeholder(doc, placeholder)
-
-if target_table:
-    # If placeholder is found, add new rows
-    new_rows_data = [
-        ["Alice Smith", "25", "New York"],
-        ["Bob Johnson", "30", "San Francisco"]
-    ]
-    process_table(target_table, placeholder_idx, new_rows_data=new_rows_data)
-
-    # Save the modified document
-    doc.save("updated_document.docx")
-    print("Table updated successfully!")
-else:
-    print("Placeholder not found in any table.")
+# Call the function to print the contents of all tables
+print_table_contents(doc)
