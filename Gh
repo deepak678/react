@@ -1,5 +1,11 @@
 from docx import Document
 
+# Load your Word document
+doc = Document("input_document.docx")
+
+# Placeholder to look for
+placeholder = "{{add_more}}"
+
 def find_table_with_placeholder(doc, placeholder):
     # Iterate through all tables in the document
     for table in doc.tables:
@@ -7,52 +13,40 @@ def find_table_with_placeholder(doc, placeholder):
         for row in table.rows:
             for cell in row.cells:
                 if placeholder in cell.text:
-                    return table, row  # Return the table and row with the placeholder
+                    return table, table.rows.index(row)  # Return the table and the row index
     return None, None
 
-def insert_rows_at_placeholder(table, placeholder_row, new_rows_data):
-    # Get the index of the placeholder row
-    row_idx = table.rows.index(placeholder_row)
+def insert_row_at_index(table, row_idx):
+    # Insert an empty row at the specified index (row_idx)
+    new_row = table.add_row()  # This creates a new row at the end
+    # Now we move this new row to the correct position
+    table._tbl.insert(row_idx, new_row._tr)
+    return table.rows[row_idx]
 
-    # Replace the placeholder with the first set of data
-    for i, data in enumerate(new_rows_data[0]):
-        placeholder_row.cells[i].text = data
+def process_table(table, row_idx, new_rows_data):
+    # Insert rows starting from the placeholder's row index
+    for i, row_data in enumerate(new_rows_data):
+        # Insert the row at the desired index (shifting the others)
+        new_row = insert_row_at_index(table, row_idx + 1 + i)  # Insert at correct position
+        
+        # Fill the new row with data
+        for idx, data in enumerate(row_data):
+            if idx < len(new_row.cells):
+                new_row.cells[idx].text = data
 
-    # Insert new rows starting after the placeholder row
-    for row_data in new_rows_data[1:]:
-        new_row = table.add_row()  # Add a new row
-        new_row_element = new_row._element
-        # Move the new row to the correct index (below the placeholder row)
-        table._tbl.remove(new_row_element)
-        table._tbl.insert(row_idx + 1, new_row_element)
-        row_idx += 1
+# Call the function to find the table with the placeholder
+target_table, placeholder_idx = find_table_with_placeholder(doc, placeholder)
 
-        # Fill the new row with the provided data
-        for i, data in enumerate(row_data):
-            new_row.cells[i].text = data
-
-# Load the document
-doc = Document("input_document.docx")
-
-# Placeholder to look for
-placeholder = "{{add_more}}"
-
-# Data to insert (replace placeholder and subsequent rows)
-new_rows_data = [
-    ["Alice Smith", "25", "New York"],
-    ["Bob Johnson", "30", "San Francisco"],
-    ["Charlie Brown", "35", "Los Angeles"]
-]
-
-# Find the table and row with the placeholder
-target_table, placeholder_row = find_table_with_placeholder(doc, placeholder)
-
-if target_table and placeholder_row:
-    # Insert rows starting from the placeholder
-    insert_rows_at_placeholder(target_table, placeholder_row, new_rows_data)
+if target_table:
+    # If placeholder is found, add new rows
+    new_rows_data = [
+        ["Alice Smith", "25", "New York"],
+        ["Bob Johnson", "30", "San Francisco"]
+    ]
+    process_table(target_table, placeholder_idx, new_rows_data=new_rows_data)
 
     # Save the modified document
     doc.save("updated_document.docx")
-    print("Table updated with new rows!")
+    print("Table updated successfully!")
 else:
     print("Placeholder not found in any table.")
