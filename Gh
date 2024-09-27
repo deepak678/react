@@ -1,27 +1,58 @@
 from docx import Document
 
-def shift_columns_right(table, start_col_idx):
-    # Ensure the table has more than one column
-    if len(table.columns) <= start_col_idx:
-        print(f"Table doesn't have enough columns to shift from index {start_col_idx}")
-        return
+def find_table_with_placeholder(doc, placeholder):
+    # Iterate through all tables in the document
+    for table in doc.tables:
+        # Loop through rows and cells in the table
+        for row in table.rows:
+            for cell in row.cells:
+                if placeholder in cell.text:
+                    return table, row  # Return the table and row with the placeholder
+    return None, None
 
-    # Iterate through all rows
-    for row in table.rows:
-        # Start from the last column and move backwards
-        for col_idx in range(len(row.cells) - 1, start_col_idx, -1):
-            row.cells[col_idx].text = row.cells[col_idx - 1].text  # Shift data from left to right
+def insert_rows_at_placeholder(table, placeholder_row, new_rows_data):
+    # Get the index of the placeholder row
+    row_idx = table.rows.index(placeholder_row)
 
-        # Clear the starting column data
-        row.cells[start_col_idx].text = ""
+    # Replace the placeholder with the first set of data
+    for i, data in enumerate(new_rows_data[0]):
+        placeholder_row.cells[i].text = data
 
-# Example usage
+    # Insert new rows starting after the placeholder row
+    for row_data in new_rows_data[1:]:
+        new_row = table.add_row()  # Add a new row
+        new_row_element = new_row._element
+        # Move the new row to the correct index (below the placeholder row)
+        table._tbl.remove(new_row_element)
+        table._tbl.insert(row_idx + 1, new_row_element)
+        row_idx += 1
+
+        # Fill the new row with the provided data
+        for i, data in enumerate(row_data):
+            new_row.cells[i].text = data
+
+# Load the document
 doc = Document("input_document.docx")
-table = doc.tables[0]  # Assuming we are working with the first table in the document
 
-# Shift data starting from the 2nd column (index 1)
-shift_columns_right(table, start_col_idx=1)
+# Placeholder to look for
+placeholder = "{{add_more}}"
 
-# Save the updated document
-doc.save("updated_document.docx")
-print("Columns shifted successfully!")
+# Data to insert (replace placeholder and subsequent rows)
+new_rows_data = [
+    ["Alice Smith", "25", "New York"],
+    ["Bob Johnson", "30", "San Francisco"],
+    ["Charlie Brown", "35", "Los Angeles"]
+]
+
+# Find the table and row with the placeholder
+target_table, placeholder_row = find_table_with_placeholder(doc, placeholder)
+
+if target_table and placeholder_row:
+    # Insert rows starting from the placeholder
+    insert_rows_at_placeholder(target_table, placeholder_row, new_rows_data)
+
+    # Save the modified document
+    doc.save("updated_document.docx")
+    print("Table updated with new rows!")
+else:
+    print("Placeholder not found in any table.")
