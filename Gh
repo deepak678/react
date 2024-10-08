@@ -1,1 +1,66 @@
-for rel in self.docx.element.body.xpath('.//w:drawing')
+from docx import Document
+
+def find_placeholder_and_replace_data(doc, table, placeholder, data):
+    """
+    Finds the placeholder in the table and replaces the row data starting from the row where the placeholder is found.
+    If necessary, new rows and columns are added dynamically.
+    """
+
+    # Iterate through the table to find the placeholder
+    for row_idx, row in enumerate(table.rows):
+        for col_idx, cell in enumerate(row.cells):
+            if placeholder in cell.text:
+                # Placeholder found, start replacing data from this row
+                start_row_idx = row_idx
+                start_col_idx = col_idx
+
+                # Insert data into the table
+                for i, row_data in enumerate(data):
+                    current_row_idx = start_row_idx + i
+
+                    # Check if the current row exists, otherwise add a new row
+                    if current_row_idx < len(table.rows):
+                        current_row = table.rows[current_row_idx]
+                    else:
+                        current_row = table.add_row()  # Add new row if necessary
+
+                    # Insert data starting from the placeholder column
+                    for j, value in enumerate(row_data):
+                        current_col_idx = start_col_idx + j
+                        
+                        # Add new columns dynamically if necessary
+                        if current_col_idx >= len(current_row.cells):
+                            for _ in range(current_col_idx - len(current_row.cells) + 1):
+                                current_row.add_cell()
+                        
+                        # Insert the value into the cell
+                        current_row.cells[current_col_idx].text = value
+
+                # Remove the placeholder text after insertion
+                cell.text = ""
+
+                return
+    
+    print(f"Placeholder '{placeholder}' not found in the table.")
+
+# Load your Word document
+doc = Document("input_document.docx")
+
+# Find the first table in the document (assuming there's only one table)
+table = doc.tables[0]
+
+# Placeholder to look for
+placeholder = "{{add_data}}"
+
+# Data to insert (list of lists)
+data = [
+    ["Smith", "25", "San Francisco"],
+    ["Johnson", "30", "Seattle"]
+]
+
+# Call the function to insert the data starting from the placeholder
+find_placeholder_and_replace_data(doc, table, placeholder, data)
+
+# Save the modified document
+doc.save("updated_document.docx")
+print("Table updated successfully!")
