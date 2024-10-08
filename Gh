@@ -1,3 +1,28 @@
+from docx import Document
+from docx.oxml import OxmlElement
+
+def find_table_with_placeholder(doc, placeholder):
+    """
+    Scans the document and finds the table containing the placeholder.
+    Returns the table and the row/column index of the placeholder.
+    """
+    for table in doc.tables:
+        for row_idx, row in enumerate(table.rows):
+            for col_idx, cell in enumerate(row.cells):
+                if placeholder in cell.text:
+                    return table, row_idx, col_idx
+    return None, None, None
+
+def add_new_column(table, column_idx):
+    """
+    Adds a new column to the table by appending a cell to each row.
+    """
+    for row in table.rows:
+        # Add a new cell to the row at the column index by appending a cell
+        new_cell = row.cells[-1]._element  # Get the last cell as template
+        new_cell_copy = OxmlElement(new_cell.tag)  # Create a new empty cell with the same tag
+        row._element.append(new_cell_copy)  # Append the new empty cell
+
 def replace_data_in_table(table, start_row_idx, start_col_idx, data):
     """
     Replaces data in the table starting from the specified row and column index.
@@ -15,9 +40,35 @@ def replace_data_in_table(table, start_row_idx, start_col_idx, data):
         for j, value in enumerate(row_data):
             current_col_idx = start_col_idx + j
 
-            # If the current column index exceeds the number of cells, expand the row with additional columns
+            # If the current column index exceeds the number of cells, add new columns
             while current_col_idx >= len(current_row.cells):
-                current_row._element.append(current_row._element[-1].clone())  # Clone the last cell to add a new one
+                add_new_column(table, current_col_idx)
 
             # Insert the value into the cell
             current_row.cells[current_col_idx].text = value
+
+# Example Usage:
+# Load your Word document
+doc = Document("input_document.docx")
+
+# Placeholder to look for
+placeholder = "{{add_data}}"
+
+# Data to insert (list of lists)
+data = [
+    ["Smith", "25", "San Francisco"],
+    ["Johnson", "30", "Seattle"]
+]
+
+# Step 1: Scan the document to find the table and placeholder location
+table, row_idx, col_idx = find_table_with_placeholder(doc, placeholder)
+
+# Step 2: If the table is found, replace the data starting from the placeholder
+if table is not None:
+    replace_data_in_table(table, row_idx, col_idx, data)
+
+    # Save the modified document
+    doc.save("updated_document.docx")
+    print("Table updated successfully!")
+else:
+    print(f"Placeholder '{placeholder}' not found in any table.")
