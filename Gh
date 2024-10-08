@@ -19,4 +19,7 @@ def replace_data_in_table(table, start_row_idx, start_col_idx, data):
             # Add new columns dynamically if necessary
             if current_col_idx >= len(current_row.cells):
                 for _ in range(current_col_idx - len(current_row.cells) + 1):
-                    current
+                    current_row.add_cell()
+
+            # Insert the value into the cell
+            current_row.cells[current_col_idx].text = value
