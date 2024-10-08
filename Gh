@@ -1,25 +1,23 @@
 def replace_data_in_table(table, start_row_idx, start_col_idx, data):
     """
     Replaces data in the table starting from the specified row and column index.
-    Adds new rows or columns if necessary.
+    Adds new rows or columns dynamically as necessary.
     """
     for i, row_data in enumerate(data):
         current_row_idx = start_row_idx + i
 
-        # Check if the current row exists, otherwise add a new row
-        if current_row_idx < len(table.rows):
-            current_row = table.rows[current_row_idx]
-        else:
-            current_row = table.add_row()  # Add new row if necessary
+        # If current row does not exist, add new rows
+        if current_row_idx >= len(table.rows):
+            table.add_row()  # Add a new row if needed
+        current_row = table.rows[current_row_idx]
 
         # Insert data starting from the placeholder column
         for j, value in enumerate(row_data):
             current_col_idx = start_col_idx + j
 
-            # Add new columns dynamically if necessary
-            if current_col_idx >= len(current_row.cells):
-                for _ in range(current_col_idx - len(current_row.cells) + 1):
-                    current_row.add_cell()
+            # If the current column index exceeds the number of cells, expand the row with additional columns
+            while current_col_idx >= len(current_row.cells):
+                current_row._element.append(current_row._element[-1].clone())  # Clone the last cell to add a new one
 
             # Insert the value into the cell
             current_row.cells[current_col_idx].text = value
