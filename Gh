@@ -1,52 +1,37 @@
 from docx import Document
+from docx.shared import RGBColor
 
 def extract_cell_format(cell):
+    # Store cell formatting as a dictionary
     formatting = {
         'style': cell.paragraphs[0].style,
         'alignment': cell.paragraphs[0].alignment,
-        'runs': []
+        'color': cell.paragraphs[0].runs[0].font.color.rgb if cell.paragraphs[0].runs else None,
+        'highlight': cell.paragraphs[0].runs[0].font.highlight_color if cell.paragraphs[0].runs else None,
+        'borders': cell._element.xpath('.//w:tcBorders'),
+        'shading': cell._element.xpath('.//w:shd')
     }
-
-    for paragraph in cell.paragraphs:
-        for run in paragraph.runs:
-            run_format = {
-                'text': run.text,
-                'bold': run.bold,
-                'italic': run.italic,
-                'underline': run.underline,
-                'color': run.font.color.rgb,
-                'size': run.font.size,
-                'name': run.font.name
-            }
-            formatting['runs'].append(run_format)
-    
-    # Store borders and shading if necessary
-    formatting['borders'] = cell._element.xpath('.//w:tcBorders')
-    formatting['shading'] = cell._element.xpath('.//w:shd')
-    
     return formatting
 
 def apply_cell_format(target_cell, formatting, new_text):
-    # Clear existing content
+    # Clear existing content effectively
     target_cell._element.clear_content()
-    
+
     # Add new text to the target cell
     target_paragraph = target_cell.add_paragraph(new_text)
-    
+
     # Apply stored formatting
     target_paragraph.style = formatting['style']
     target_paragraph.alignment = formatting['alignment']
     
-    # Create runs with stored formatting
-    for run_format in formatting['runs']:
-        new_run = target_paragraph.add_run(run_format['text'])
-        new_run.bold = run_format['bold']
-        new_run.italic = run_format['italic']
-        new_run.underline = run_format['underline']
-        new_run.font.color.rgb = run_format['color']
-        new_run.font.size = run_format['size']
-        new_run.font.name = run_format['name']
-    
+    # Apply color and highlight if present
+    if formatting['color']:
+        for run in target_paragraph.runs:
+            run.font.color.rgb = formatting['color']
+    if formatting['highlight']:
+        for run in target_paragraph.runs:
+            run.font.highlight_color = formatting['highlight']
+
     # Apply borders and shading
     for border in formatting['borders']:
         target_cell._element.append(border)
