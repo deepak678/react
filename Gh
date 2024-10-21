@@ -1,59 +1,10 @@
-from docx import Document
-from docx.shared import RGBColor
+Dear Team,
 
-def extract_cell_format(cell):
-    # Store cell formatting as a dictionary
-    formatting = {
-        'style': cell.paragraphs[0].style,
-        'alignment': cell.paragraphs[0].alignment,
-        'color': cell.paragraphs[0].runs[0].font.color.rgb if cell.paragraphs[0].runs else None,
-        'highlight': cell.paragraphs[0].runs[0].font.highlight_color if cell.paragraphs[0].runs else None,
-        'borders': cell._element.xpath('.//w:tcBorders'),
-        'shading': cell._element.xpath('.//w:shd')
-    }
-    return formatting
+We are excited to announce GSC Got Talent and encourage everyone to participate! You can showcase your talent in singing, dancing, stand-up comedy, beatboxing, hosting, or any other performance art. This is your chance to shine, whether solo or as a team!
 
-def apply_cell_format(target_cell, formatting, new_text):
-    # Clear existing content effectively
-    target_cell._element.clear_content()
+Please send your nominations to Deepti by 25th October. The prelims will take place between 4th to 25th November (dates to be communicated soon).
 
-    # Add new text to the target cell
-    target_paragraph = target_cell.add_paragraph(new_text)
+Feel free to reach out to me for any queries. Let’s make this event memorable—don’t miss out!
 
-    # Apply stored formatting
-    target_paragraph.style = formatting['style']
-    target_paragraph.alignment = formatting['alignment']
-    
-    # Apply color and highlight if present
-    if formatting['color']:
-        for run in target_paragraph.runs:
-            run.font.color.rgb = formatting['color']
-    if formatting['highlight']:
-        for run in target_paragraph.runs:
-            run.font.highlight_color = formatting['highlight']
-
-    # Apply borders and shading
-    for border in formatting['borders']:
-        target_cell._element.append(border)
-
-    if formatting['shading']:
-        target_cell._element.append(formatting['shading'][0])
-
-# Load the document
-doc = Document('your_document.docx')
-
-# Access the table
-table = doc.tables[0]  # Assuming you want the first table
-
-# Extract formatting from a source cell
-source_cell = table.cell(0, 0)
-formatting = extract_cell_format(source_cell)
-
-# Apply the extracted formatting to multiple cells
-new_text = "New text for cell."
-for row in range(1, 5):  # Apply to cells in rows 1 to 4, for example
-    target_cell = table.cell(row, 0)  # Change column index as needed
-    apply_cell_format(target_cell, formatting, new_text)
-
-# Save the document
-doc.save('updated_document.docx')
+Best regards,
+[Your Name]
