@@ -1,3 +1,25 @@
-Risk Management & Compliance: Diligently managed risk and ensured compliance by strictly following organizational policies and regulatory standards, proactively identifying and mitigating potential risks.
+The ISTQB (International Software Testing Qualifications Board) offers specific definitions for accuracy and completeness within the context of software testing. These definitions can be adapted to AI and model monitoring to align with standard testing principles.
 
-Policy Adherence & Alerts: Maintained a vigilant approach toward policy compliance, raising alerts and communicating effectively whenever potential issues arose, thereby minimizing impact on project timelines.
+1. Accuracy
+ISTQB Definition: In ISTQB, accuracy is defined as the "capability of the software product to provide the right or agreed results or effects with the needed degree of precision" (ISO/IEC 25010).
+Adaptation for AI Models: In model monitoring, accuracy would refer to the degree to which model outputs match the correct or expected results, based on factual correctness or alignment with ground truth data.
+2. Completeness
+ISTQB Definition: Completeness is the extent to which all necessary parts of an entity are present. This means the software must include all functions and deliver all expected results for a specified input.
+Adaptation for AI Models: Completeness for AI models can be interpreted as whether the model's response contains all the information necessary to answer the input query fully, without leaving out critical details.
+These definitions from ISTQB provide a strong basis for understanding accuracy and completeness in a structured way.
+
+
+
+
+
+
+You said:
+for ahllucination also
+ChatGPT said:
+ChatGPT
+The term hallucination isn't traditionally defined by ISTQB, as it’s specific to AI and natural language generation rather than standard software testing. However, we can create an adapted definition based on its usage in the context of generative AI models.
+
+Hallucination (Adapted Definition for AI)
+Definition (AI Context): Hallucination refers to the AI model’s tendency to generate information that appears factual or plausible but is actually incorrect, misleading, or entirely fabricated. This includes statements or details that aren't based on any underlying data or truth but are presented as if they are.
+Adaptation for Monitoring: In model monitoring, hallucination is tracked to measure how often and to what extent the model outputs incorrect or invented information. The goal is to minimize hallucinated responses to maintain trustworthiness and factual accuracy in outputs.
+Although not a traditional software quality metric, hallucination can be managed similarly to "defect rate" in ISTQB terms, where a defect represents an undesired characteristic in model output accuracy.
