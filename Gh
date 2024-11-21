@@ -1,25 +1,11 @@
-The ISTQB (International Software Testing Qualifications Board) offers specific definitions for accuracy and completeness within the context of software testing. These definitions can be adapted to AI and model monitoring to align with standard testing principles.
-
-1. Accuracy
-ISTQB Definition: In ISTQB, accuracy is defined as the "capability of the software product to provide the right or agreed results or effects with the needed degree of precision" (ISO/IEC 25010).
-Adaptation for AI Models: In model monitoring, accuracy would refer to the degree to which model outputs match the correct or expected results, based on factual correctness or alignment with ground truth data.
-2. Completeness
-ISTQB Definition: Completeness is the extent to which all necessary parts of an entity are present. This means the software must include all functions and deliver all expected results for a specified input.
-Adaptation for AI Models: Completeness for AI models can be interpreted as whether the model's response contains all the information necessary to answer the input query fully, without leaving out critical details.
-These definitions from ISTQB provide a strong basis for understanding accuracy and completeness in a structured way.
-
-
-
-
-
-
-You said:
-for ahllucination also
-ChatGPT said:
-ChatGPT
-The term hallucination isn't traditionally defined by ISTQB, as it’s specific to AI and natural language generation rather than standard software testing. However, we can create an adapted definition based on its usage in the context of generative AI models.
-
-Hallucination (Adapted Definition for AI)
-Definition (AI Context): Hallucination refers to the AI model’s tendency to generate information that appears factual or plausible but is actually incorrect, misleading, or entirely fabricated. This includes statements or details that aren't based on any underlying data or truth but are presented as if they are.
-Adaptation for Monitoring: In model monitoring, hallucination is tracked to measure how often and to what extent the model outputs incorrect or invented information. The goal is to minimize hallucinated responses to maintain trustworthiness and factual accuracy in outputs.
-Although not a traditional software quality metric, hallucination can be managed similarly to "defect rate" in ISTQB terms, where a defect represents an undesired characteristic in model output accuracy.
+Use Case Name	Metric Name	Evaluation Method	Timestamp	Threshold Value	Metric Value	Actionable Insight
+Chatbot QA	Accuracy	Automatic	2024-10-22 10:00:00	90%	85%	Improve training dataset with more diverse user queries.
+Document Summarizer	Hallucination	Manual	2024-10-21 14:00:00	5%	8%	Add fact-checking module to the summarization process.
+Sentiment Analysis	Completeness	Automatic	2024-10-22 09:00:00	95%	92%	Extend training data to include more nuanced sentiments.
+Email Generator	Accuracy	Manual	2024-10-21 16:30:00	85%	87%	Incorporate user feedback for better personalization.
+Chatbot QA	Hallucination	Manual	2024-10-22 11:00:00	3%	6%	Update knowledge base to improve factual responses.
+Document Summarizer	Completeness	Automatic	2024-10-22 08:30:00	90%	88%	Refine text extraction models for better summarization.
+Sentiment Analysis	Accuracy	Automatic	2024-10-21 13:45:00	92%	90%	Enhance sentiment classification algorithms.
+Email Generator	Hallucination	Automatic	2024-10-22 12:15:00	4%	2%	Periodically review training data to reduce errors.
+Chatbot QA	Completeness	Manual	2024-10-22 10:30:00	90%	93%	Maintain consistency in training data annotation.
+Document Summarizer	Accuracy	Automatic	2024-10-22 14:30:00	88%	86%	Focus on improving summary generation for longer texts.
