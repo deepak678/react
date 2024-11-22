@@ -1,11 +1,6 @@
-Use Case Name	Metric Name	Evaluation Method	Timestamp	Threshold Value	Metric Value	Actionable Insight
-Chatbot QA	Accuracy	Automatic	2024-10-22 10:00:00	90%	85%	Improve training dataset with more diverse user queries.
-Document Summarizer	Hallucination	Manual	2024-10-21 14:00:00	5%	8%	Add fact-checking module to the summarization process.
-Sentiment Analysis	Completeness	Automatic	2024-10-22 09:00:00	95%	92%	Extend training data to include more nuanced sentiments.
-Email Generator	Accuracy	Manual	2024-10-21 16:30:00	85%	87%	Incorporate user feedback for better personalization.
-Chatbot QA	Hallucination	Manual	2024-10-22 11:00:00	3%	6%	Update knowledge base to improve factual responses.
-Document Summarizer	Completeness	Automatic	2024-10-22 08:30:00	90%	88%	Refine text extraction models for better summarization.
-Sentiment Analysis	Accuracy	Automatic	2024-10-21 13:45:00	92%	90%	Enhance sentiment classification algorithms.
-Email Generator	Hallucination	Automatic	2024-10-22 12:15:00	4%	2%	Periodically review training data to reduce errors.
-Chatbot QA	Completeness	Manual	2024-10-22 10:30:00	90%	93%	Maintain consistency in training data annotation.
-Document Summarizer	Accuracy	Automatic	2024-10-22 14:30:00	88%	86%	Focus on improving summary generation for longer texts.
+Error ID	Timestamp	Use Case Name	Metric Affected	Severity	Threshold Breach	Affected Output	Root Cause
+001	2024-10-01 10:15	Text Summarization	Accuracy	Critical	Yes	"Summary lacks key points."	Insufficient training data
+002	2024-10-02 14:40	Chatbot QA	Hallucination	Major	Yes	"Chatbot fabricated information."	Context mismanagement
+003	2024-10-03 09:10	Translation	Completeness	Minor	No	"Missing translation for phrases."	Edge case scenario
+004	2024-10-03 11:50	Content Generation	Accuracy	Major	Yes	"Generated content contradicts input."	Misaligned model weights
+005	2024-10-04 13:25	Document Parsing	Completeness	Critical	Yes	"Extracted data missing tables."	OCR misconfiguration
