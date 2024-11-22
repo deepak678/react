@@ -1,6 +1,7 @@
-Error ID	Timestamp	Use Case Name	Metric Affected	Severity	Threshold Breach	Affected Output	Root Cause
-001	2024-10-01 10:15	Text Summarization	Accuracy	Critical	Yes	"Summary lacks key points."	Insufficient training data
-002	2024-10-02 14:40	Chatbot QA	Hallucination	Major	Yes	"Chatbot fabricated information."	Context mismanagement
-003	2024-10-03 09:10	Translation	Completeness	Minor	No	"Missing translation for phrases."	Edge case scenario
-004	2024-10-03 11:50	Content Generation	Accuracy	Major	Yes	"Generated content contradicts input."	Misaligned model weights
-005	2024-10-04 13:25	Document Parsing	Completeness	Critical	Yes	"Extracted data missing tables."	OCR misconfiguration
+Getting Started
+FAQs
+Troubleshooting
+Glossary
+Tutorials
+API Documentation
+Contact Support
