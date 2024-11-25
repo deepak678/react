@@ -1,33 +1,72 @@
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.evaluation import EmbeddingEvaluationChain
-from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
+import numpy as np
 
-# Example setup
+# 1. Define Prompt Alignment
+# Use a secondary LLM to rate the alignment of the response to the prompt
 prompt = PromptTemplate(
-    input_variables=["task"],
-    template="You are a judge. Evaluate the following response for {task}.",
+    input_variables=["task", "response"],
+    template="You are a judge. Evaluate how well the following response satisfies the task: {task}\nResponse: {response}\nRate from 1 to 10."
 )
 
-# Response evaluation using a secondary model
 llm_chain = LLMChain(llm=my_llm, prompt=prompt)
 
-# Embedding similarity for semantic evaluation
-embedding_eval = EmbeddingEvaluationChain(
-    embedding=OpenAIEmbeddings(),
-    vectorstore=FAISS,
-)
+# 2. Define Semantic Similarity Using Embeddings
+# Function to compute cosine similarity
+def cosine_similarity(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
-# Implement rules for custom checks
-def heuristic_check(output):
-    if "specific_keyword" in output:
-        return True
-    return False
+def compute_semantic_similarity(output_text, reference_texts, embedding_model):
+    # Generate embedding for the output text
+    output_embedding = embedding_model.embed_query(output_text)
+    
+    # Generate embeddings for reference texts
+    reference_embeddings = [embedding_model.embed_query(ref) for ref in reference_texts]
+    
+    # Compute similarities and return the highest score
+    similarities = [cosine_similarity(output_embedding, ref_emb) for ref_emb in reference_embeddings]
+    return max(similarities)
 
-# Combine into a comprehensive evaluation pipeline
-evaluation_pipeline = {
-    "prompt_alignment": llm_chain.run(input_text),
-    "semantic_similarity": embedding_eval.run(output),
-    "heuristic_check": heuristic_check(output),
-}
+# 3. Define Heuristic Rules
+# Example rule: Check for the presence of key terms
+def heuristic_check(output_text, key_terms):
+    return all(term in output_text for term in key_terms)
+
+# 4. Combine All Components
+def evaluate_accuracy(task, response, reference_texts, key_terms):
+    # Prompt alignment score
+    prompt_alignment_score = int(llm_chain.run(task=task, response=response))
+    
+    # Semantic similarity score
+    embedding_model = OpenAIEmbeddings()
+    semantic_similarity_score = compute_semantic_similarity(response, reference_texts, embedding_model)
+    
+    # Heuristic check
+    heuristic_score = 1.0 if heuristic_check(response, key_terms) else 0.0
+    
+    # Weighted score calculation
+    overall_score = (
+        0.4 * prompt_alignment_score +  # 40% weight
+        0.5 * semantic_similarity_score +  # 50% weight
+        0.1 * heuristic_score  # 10% weight
+    )
+    
+    return {
+        "prompt_alignment_score": prompt_alignment_score,
+        "semantic_similarity_score": semantic_similarity_score,
+        "heuristic_score": heuristic_score,
+        "overall_score": overall_score
+    }
+
+# Example Usage
+task_description = "Summarize the key points of a news article."
+model_response = "The article discusses climate change, its effects, and mitigation strategies."
+reference_texts = [
+    "The article talks about the impact of climate change and ways to reduce it.",
+    "Climate change and its mitigation strategies are highlighted in the article."
+]
+key_terms = ["climate change", "mitigation"]
+
+evaluation_result = evaluate_accuracy(task_description, model_response, reference_texts, key_terms)
+print(evaluation_result)
