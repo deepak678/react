@@ -85,4 +85,24 @@ def extract_scores_and_feedback(feedback_text):
     # This could involve splitting the text or using another LLM prompt to parse the output
     scores = {
         "Condition": {"presence": "Yes", "clarity": 8, "completeness": 7},
-        "Con
+        "Consequence": {"presence": "Yes", "clarity": 9, "completeness": 8},
+        "Context": {"presence": "No", "clarity": 0, "completeness": 0},
+        "Criteria": {"presence": "Yes", "clarity": 7, "completeness": 6},
+        "Cause": {"presence": "Yes", "clarity": 8, "completeness": 8},
+    }
+    return scores
+
+# Example Usage
+title = "Payment system error"
+description = "Recurring payments fail due to a bug in the payment module."
+initial_response = """Condition: Recurring payments fail.
+Consequence: This exposes a financial risk as transactions are delayed.
+Context: Affects 10% of users.
+Criteria: Based on payment success rate.
+Cause: A bug in the payment module."""
+
+results = evaluate_issue_description(title, description, initial_response)
+for result in results:
+    print(f"Revision {result['revision']}:")
+    print("Response:", result["response"])
+    print("Evaluation:", result["evaluation"])
