@@ -1,72 +1,88 @@
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.embeddings.openai import OpenAIEmbeddings
-import numpy as np
 
-# 1. Define Prompt Alignment
-# Use a secondary LLM to rate the alignment of the response to the prompt
-prompt = PromptTemplate(
-    input_variables=["task", "response"],
-    template="You are a judge. Evaluate how well the following response satisfies the task: {task}\nResponse: {response}\nRate from 1 to 10."
+# Define the evaluator prompt
+evaluation_prompt = PromptTemplate(
+    input_variables=["title", "description", "response"],
+    template="""
+    You are an evaluator for an issue description based on the 5 C's framework. 
+    The framework includes:
+    - Condition: What is or was the problem?
+    - Consequence: What risk does this expose?
+    - Context: How big is or was the problem?
+    - Criteria: By what standard is or was it judged?
+    - Cause: Why did it happen?
+
+    Task:
+    Issue Title: {title}
+    Issue Description: {description}
+    LLM Response: {response}
+
+    For each "C", evaluate the response for:
+    - Presence: Is the element present? (Yes/No)
+    - Clarity: Is it clearly and effectively described? (Score: 1-10)
+    - Completeness: Is it comprehensive and relevant? (Score: 1-10)
+
+    Highlight any missing or incomplete elements for each "C". Suggest improvements to address gaps.
+    """
 )
 
-llm_chain = LLMChain(llm=my_llm, prompt=prompt)
+# Define a chain to generate feedback
+evaluation_chain = LLMChain(llm=my_llm, prompt=evaluation_prompt)
 
-# 2. Define Semantic Similarity Using Embeddings
-# Function to compute cosine similarity
-def cosine_similarity(vec1, vec2):
-    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+# Define a revision prompt
+revision_prompt = PromptTemplate(
+    input_variables=["title", "description", "response", "feedback"],
+    template="""
+    Using the feedback below, revise the LLM-generated issue description to better align with the 5 C's framework.
 
-def compute_semantic_similarity(output_text, reference_texts, embedding_model):
-    # Generate embedding for the output text
-    output_embedding = embedding_model.embed_query(output_text)
-    
-    # Generate embeddings for reference texts
-    reference_embeddings = [embedding_model.embed_query(ref) for ref in reference_texts]
-    
-    # Compute similarities and return the highest score
-    similarities = [cosine_similarity(output_embedding, ref_emb) for ref_emb in reference_embeddings]
-    return max(similarities)
+    Issue Title: {title}
+    Issue Description: {description}
+    Current Response: {response}
+    Feedback: {feedback}
 
-# 3. Define Heuristic Rules
-# Example rule: Check for the presence of key terms
-def heuristic_check(output_text, key_terms):
-    return all(term in output_text for term in key_terms)
+    Revise the response to address missing or incomplete elements while improving clarity and relevance.
+    """
+)
 
-# 4. Combine All Components
-def evaluate_accuracy(task, response, reference_texts, key_terms):
-    # Prompt alignment score
-    prompt_alignment_score = int(llm_chain.run(task=task, response=response))
-    
-    # Semantic similarity score
-    embedding_model = OpenAIEmbeddings()
-    semantic_similarity_score = compute_semantic_similarity(response, reference_texts, embedding_model)
-    
-    # Heuristic check
-    heuristic_score = 1.0 if heuristic_check(response, key_terms) else 0.0
-    
-    # Weighted score calculation
-    overall_score = (
-        0.4 * prompt_alignment_score +  # 40% weight
-        0.5 * semantic_similarity_score +  # 50% weight
-        0.1 * heuristic_score  # 10% weight
-    )
-    
-    return {
-        "prompt_alignment_score": prompt_alignment_score,
-        "semantic_similarity_score": semantic_similarity_score,
-        "heuristic_score": heuristic_score,
-        "overall_score": overall_score
-    }
+revision_chain = LLMChain(llm=my_llm, prompt=revision_prompt)
 
-# Example Usage
-task_description = "Summarize the key points of a news article."
-model_response = "The article discusses climate change, its effects, and mitigation strategies."
-reference_texts = [
-    "The article talks about the impact of climate change and ways to reduce it.",
-    "Climate change and its mitigation strategies are highlighted in the article."
-]
-key_terms = ["climate change", "mitigation"]
+# Function to evaluate accuracy
+def evaluate_issue_description(title, description, initial_response, num_revisions=2):
+    results = []
+    current_response = initial_response
 
-evaluation_result = evaluate_accuracy(task_description, model_response, reference_texts, key_terms)
-print(evaluation_result)
+    for revision in range(num_revisions):
+        # Evaluate the current response
+        feedback = evaluation_chain.run(
+            title=title,
+            description=description,
+            response=current_response
+        )
+
+        # Parse feedback to extract scores and suggestions
+        evaluation = extract_scores_and_feedback(feedback)
+        results.append({
+            "revision": revision,
+            "response": current_response,
+            "evaluation": evaluation,
+        })
+
+        # Generate a revised response if applicable
+        if revision < num_revisions - 1:
+            current_response = revision_chain.run(
+                title=title,
+                description=description,
+                response=current_response,
+                feedback=feedback
+            )
+
+    return results
+
+# Function to extract scores and feedback from LLM output
+def extract_scores_and_feedback(feedback_text):
+    # Parse the feedback to extract individual scores and comments for each "C"
+    # This could involve splitting the text or using another LLM prompt to parse the output
+    scores = {
+        "Condition": {"presence": "Yes", "clarity": 8, "completeness": 7},
+        "Con
