@@ -1,29 +1,17 @@
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-
-# Define a feedback extraction prompt
-feedback_parsing_prompt = PromptTemplate(
-    input_variables=["feedback_text"],
-    template="""
-    You are a parser that extracts structured feedback from text.
-
-    Feedback Text:
-    {feedback_text}
-
-    Extract the following for each element of the 5 C's (Condition, Context, Criteria, Consequence, Cause):
-    - Presence: Yes/No
-    - Clarity: Score (1-10)
-    - Completeness: Score (1-10)
-    - Specific Feedback: Highlight strengths and weaknesses for this element.
-
-    Provide the output in JSON format with keys: Condition, Context, Criteria, Consequence, Cause.
-    """
-)
-
-# Create an LLM chain for parsing feedback
-feedback_parsing_chain = LLMChain(llm=my_llm, prompt=feedback_parsing_prompt)
-
 def extract_scores_and_feedback(feedback_text):
-    # Use the LLM to parse and structure the feedback
-    parsed_feedback = feedback_parsing_chain.run(feedback_text=feedback_text)
-    return eval(parsed_feedback)  # Convert JSON string to Python dictionary
+    """
+    Extract structured feedback from LLM output and clean up formatting.
+    Handles cases where the response is wrapped in triple backticks.
+    """
+    try:
+        # Clean the feedback text to remove backticks and extra formatting
+        if feedback_text.startswith("```json") and feedback_text.endswith("```"):
+            feedback_text = feedback_text[7:-3].strip()  # Remove ```json and ```
+        
+        # Convert the cleaned JSON string into a Python dictionary
+        parsed_feedback = eval(feedback_text)
+        return parsed_feedback
+
+    except Exception as e:
+        print(f"Error parsing feedback: {e}")
+        return {}
