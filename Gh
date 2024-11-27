@@ -1,108 +1,29 @@
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-# Define the evaluator prompt
-evaluation_prompt = PromptTemplate(
-    input_variables=["title", "description", "response"],
+# Define a feedback extraction prompt
+feedback_parsing_prompt = PromptTemplate(
+    input_variables=["feedback_text"],
     template="""
-    You are an evaluator for an issue description based on the 5 C's framework. 
-    The framework includes:
-    - Condition: What is or was the problem?
-    - Consequence: What risk does this expose?
-    - Context: How big is or was the problem?
-    - Criteria: By what standard is or was it judged?
-    - Cause: Why did it happen?
+    You are a parser that extracts structured feedback from text.
 
-    Task:
-    Issue Title: {title}
-    Issue Description: {description}
-    LLM Response: {response}
+    Feedback Text:
+    {feedback_text}
 
-    For each "C", evaluate the response for:
-    - Presence: Is the element present? (Yes/No)
-    - Clarity: Is it clearly and effectively described? (Score: 1-10)
-    - Completeness: Is it comprehensive and relevant? (Score: 1-10)
+    Extract the following for each element of the 5 C's (Condition, Context, Criteria, Consequence, Cause):
+    - Presence: Yes/No
+    - Clarity: Score (1-10)
+    - Completeness: Score (1-10)
+    - Specific Feedback: Highlight strengths and weaknesses for this element.
 
-    Highlight any missing or incomplete elements for each "C". Suggest improvements to address gaps.
+    Provide the output in JSON format with keys: Condition, Context, Criteria, Consequence, Cause.
     """
 )
 
-# Define a chain to generate feedback
-evaluation_chain = LLMChain(llm=my_llm, prompt=evaluation_prompt)
+# Create an LLM chain for parsing feedback
+feedback_parsing_chain = LLMChain(llm=my_llm, prompt=feedback_parsing_prompt)
 
-# Define a revision prompt
-revision_prompt = PromptTemplate(
-    input_variables=["title", "description", "response", "feedback"],
-    template="""
-    Using the feedback below, revise the LLM-generated issue description to better align with the 5 C's framework.
-
-    Issue Title: {title}
-    Issue Description: {description}
-    Current Response: {response}
-    Feedback: {feedback}
-
-    Revise the response to address missing or incomplete elements while improving clarity and relevance.
-    """
-)
-
-revision_chain = LLMChain(llm=my_llm, prompt=revision_prompt)
-
-# Function to evaluate accuracy
-def evaluate_issue_description(title, description, initial_response, num_revisions=2):
-    results = []
-    current_response = initial_response
-
-    for revision in range(num_revisions):
-        # Evaluate the current response
-        feedback = evaluation_chain.run(
-            title=title,
-            description=description,
-            response=current_response
-        )
-
-        # Parse feedback to extract scores and suggestions
-        evaluation = extract_scores_and_feedback(feedback)
-        results.append({
-            "revision": revision,
-            "response": current_response,
-            "evaluation": evaluation,
-        })
-
-        # Generate a revised response if applicable
-        if revision < num_revisions - 1:
-            current_response = revision_chain.run(
-                title=title,
-                description=description,
-                response=current_response,
-                feedback=feedback
-            )
-
-    return results
-
-# Function to extract scores and feedback from LLM output
 def extract_scores_and_feedback(feedback_text):
-    # Parse the feedback to extract individual scores and comments for each "C"
-    # This could involve splitting the text or using another LLM prompt to parse the output
-    scores = {
-        "Condition": {"presence": "Yes", "clarity": 8, "completeness": 7},
-        "Consequence": {"presence": "Yes", "clarity": 9, "completeness": 8},
-        "Context": {"presence": "No", "clarity": 0, "completeness": 0},
-        "Criteria": {"presence": "Yes", "clarity": 7, "completeness": 6},
-        "Cause": {"presence": "Yes", "clarity": 8, "completeness": 8},
-    }
-    return scores
-
-# Example Usage
-title = "Payment system error"
-description = "Recurring payments fail due to a bug in the payment module."
-initial_response = """Condition: Recurring payments fail.
-Consequence: This exposes a financial risk as transactions are delayed.
-Context: Affects 10% of users.
-Criteria: Based on payment success rate.
-Cause: A bug in the payment module."""
-
-results = evaluate_issue_description(title, description, initial_response)
-for result in results:
-    print(f"Revision {result['revision']}:")
-    print("Response:", result["response"])
-    print("Evaluation:", result["evaluation"])
+    # Use the LLM to parse and structure the feedback
+    parsed_feedback = feedback_parsing_chain.run(feedback_text=feedback_text)
+    return eval(parsed_feedback)  # Convert JSON string to Python dictionary
