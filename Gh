@@ -1,17 +1,180 @@
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+# Define the LLM (replace with your LLM initialization)
+from langchain.llms import OpenAI
+my_llm = OpenAI(temperature=0)
+
+# Evaluation Prompt: Assess the output based on 5 C's, Additional Information, and Hallucinations
+evaluation_prompt = PromptTemplate(
+    input_variables=["issue_title", "issue_description", "output_data"],
+    template="""
+    You are an evaluator tasked with assessing an issue description.
+
+    Issue Title: {issue_title}
+    Issue Description: {issue_description}
+
+    Generated Output:
+    {output_data}
+
+    Evaluate each element of the 5 C's (Condition, Context, Criteria, Consequence, Cause):
+    - Presence (Yes/No)
+    - Clarity (Score 1-10)
+    - Completeness (Score 1-10)
+
+    Additionally:
+    - Verify that the "Issue Title" appears exactly as given in the input.
+    - Identify any "Additional Information" that should be included where the 5 C's are incomplete or missing.
+    - Assess hallucinations:
+        - Presence: Are there any fabricated or unsupported statements? (Yes/No)
+        - Severity: Rate hallucinations on a scale of 1-10 (1 = minor, 10 = severe).
+
+    Example format:
+    Condition: Present, clarity - 8, completeness - 7. Feedback: [details]
+    Context: Not present. Feedback: [details]
+    Additional Information: [Details about missing information.]
+    Issue Title Consistency: [Yes/No with explanation if No]
+    Hallucinations:
+      - Presence: [Yes/No]
+      - Severity: [Score]
+    """
+)
+evaluation_chain = LLMChain(llm=my_llm, prompt=evaluation_prompt)
+
+# Revision Prompt: Revise the output based on evaluator feedback
+revision_prompt = PromptTemplate(
+    input_variables=["issue_title", "issue_description", "feedback_text"],
+    template="""
+    You are tasked with revising an issue description based on feedback.
+
+    Issue Title: {issue_title}
+    Issue Description: {issue_description}
+
+    Feedback:
+    {feedback_text}
+
+    Revise the issue description to address the feedback and ensure the 5 C's are:
+    1. Clearly Present
+    2. Clarity and Completeness are maximized.
+    3. Remove any hallucinated or unsupported content.
+
+    The revised description must:
+    - Start with the Issue Title exactly as provided.
+    - Include any missing "Additional Information" identified in the feedback.
+
+    Output the revised issue description.
+    """
+)
+revision_chain = LLMChain(llm=my_llm, prompt=revision_prompt)
+
+# Feedback Prompt: Compare the original and revised descriptions
+feedback_prompt = PromptTemplate(
+    input_variables=["issue_title", "original_output", "revised_output"],
+    template="""
+    You are tasked with evaluating the revisions made to an issue description.
+
+    Issue Title: {issue_title}
+
+    Original Description:
+    {original_output}
+
+    Revised Description:
+    {revised_output}
+
+    Compare the two descriptions and evaluate the following:
+    1. Does the revised description address the feedback provided earlier?
+    2. Are all 5 C's (Condition, Context, Criteria, Consequence, Cause) present in the revised description?
+    3. Score the revised description's clarity (1-10) and completeness (1-10) for each C.
+    4. Does the revised description include the "Additional Information" identified earlier?
+    5. Verify that the "Issue Title" remains exactly as provided.
+    6. Assess hallucinations in the revised description:
+       - Presence: Are there any fabricated or unsupported statements? (Yes/No)
+       - Severity: Rate hallucinations on a scale of 1-10 (1 = minor, 10 = severe).
+
+    Provide feedback on whether the revised description is a significant improvement and highlight any remaining gaps.
+    """
+)
+feedback_chain = LLMChain(llm=my_llm, prompt=feedback_prompt)
+
+# Function to parse feedback
 def extract_scores_and_feedback(feedback_text):
-    """
-    Extract structured feedback from LLM output and clean up formatting.
-    Handles cases where the response is wrapped in triple backticks.
-    """
     try:
         # Clean the feedback text to remove backticks and extra formatting
         if feedback_text.startswith("```json") and feedback_text.endswith("```"):
             feedback_text = feedback_text[7:-3].strip()  # Remove ```json and ```
-        
         # Convert the cleaned JSON string into a Python dictionary
         parsed_feedback = eval(feedback_text)
         return parsed_feedback
-
     except Exception as e:
         print(f"Error parsing feedback: {e}")
         return {}
+
+# Function to calculate accuracy with hallucination metric
+def calculate_accuracy_with_hallucinations(feedback_dict):
+    """
+    Calculate accuracy based on presence, clarity, completeness scores, additional information, and hallucinations.
+    """
+    total_elements = len(feedback_dict) * 3  # 3 criteria (presence, clarity, completeness) per C
+    actual_score = 0
+
+    for element, scores in feedback_dict.items():
+        if element not in ["Additional Information", "Issue Title Consistency", "Hallucinations"]:
+            if scores["presence"] == "Yes":
+                actual_score += 1
+            actual_score += scores["clarity"] / 10  # Normalize to a 1-point scale
+            actual_score += scores["completeness"] / 10  # Normalize to a 1-point scale
+
+    # Check if "Additional Information" and "Issue Title Consistency" are addressed
+    additional_info_present = feedback_dict.get("Additional Information", "").strip()
+    if additional_info_present:
+        total_elements += 1
+        actual_score += 1  # Consider "Additional Information" as one element scored as either present or not
+
+    title_consistency = feedback_dict.get("Issue Title Consistency", "No") == "Yes"
+    if title_consistency:
+        total_elements += 1
+        actual_score += 1  # Ensure the title is consistent
+
+    # Deduct points for hallucination severity
+    hallucinations = feedback_dict.get("Hallucinations", {})
+    hallucination_presence = hallucinations.get("Presence", "No") == "Yes"
+    hallucination_severity = hallucinations.get("Severity", 0)
+
+    if hallucination_presence:
+        total_elements += 1
+        actual_score -= hallucination_severity / 10  # Deduct points based on severity
+
+    accuracy = (actual_score / total_elements) * 100  # Convert to percentage
+    return max(0, accuracy)  # Ensure accuracy doesn't go negative
+
+# Example input and output data
+issue_title = "Data Access Control Gap"
+issue_description = "There is insufficient control over sensitive data access."
+output_data = "Data Access Control Gap: The system lacks advanced encryption, risking data breaches."
+
+# Step 1: Evaluate the initial output
+feedback_text = evaluation_chain.run(
+    issue_title=issue_title,
+    issue_description=issue_description,
+    output_data=output_data
+)
+feedback_dict = extract_scores_and_feedback(feedback_text)
+
+# Step 2: Generate a revised output based on feedback
+revised_output = revision_chain.run(
+    issue_title=issue_title,
+    issue_description=issue_description,
+    feedback_text=feedback_text
+)
+
+# Step 3: Evaluate the revised output
+revision_feedback_text = feedback_chain.run(
+    issue_title=issue_title,
+    original_output=output_data,
+    revised_output=revised_output
+)
+revision_feedback_dict = extract_scores_and_feedback(revision_feedback_text)
+
+# Step 4: Calculate accuracy after revision with hallucination deduction
+accuracy = calculate_accuracy_with_hallucinations(revision_feedback_dict)
+print(f"Final Accuracy after revision: {accuracy}%")
