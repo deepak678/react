@@ -1,31 +1,4 @@
-feedback_prompt = PromptTemplate(
-    input_variables=["evaluations"],
-    template="""
-    You are a data analyst reviewing multiple evaluations of a language model's output.
-
-    Here are the evaluations:
-    {evaluations}
-
-    Based on this data, calculate the average scores for the following metrics:
-    - "accuracy": Provide the average of all provided accuracy scores.
-    - "completeness": Provide the average of all provided completeness scores.
-    - "hallucination_severity": Provide the average of all hallucination severity scores.
-
-    Return your response strictly in this JSON format:
-    {
-        "average_accuracy": <numeric_score>,
-        "average_completeness": <numeric_score>,
-        "average_hallucination_severity": <numeric_score>
-    }
-
-    Ensure the format is followed exactly and no other text is included.
-    """
-)
-
-Accuracy measures alignment with the 5 C's. Completeness measures whether the description is fully developed. Hallucination severity measures unsupported content (10 is severe). 
-    Do not include any other text outside this JSON format.
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+We will also leverage embeddings to calculate these metrics, ensuring a more robust and nuanced evaluation. Additionally, the results generated will incorporate revised prompts derived from feedback provided by manual testers. This approach will enhance clarity around the evaluation metrics, their criteria, and their definitions, enabling more consistent and accurate assessments.
 
 # Define the LLM (replace with your LLM initialization)
 from langchain.llms import OpenAI
