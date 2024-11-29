@@ -1,5 +1,12 @@
-We will also leverage embeddings to calculate these metrics, ensuring a more robust and nuanced evaluation. Additionally, the results generated will incorporate revised prompts derived from feedback provided by manual testers. This approach will enhance clarity around the evaluation metrics, their criteria, and their definitions, enabling more consistent and accurate assessments.
+Leverage Embeddings for Metrics Calculation
 
+Utilize embeddings to calculate evaluation metrics, ensuring more robust and detailed assessments.
+Incorporate Revised Prompts
+
+Integrate prompts revised based on feedback from manual testers to improve evaluation consistency.
+Enhance Clarity on Metrics
+
+Refine the evaluation criteria and definitions for each metric to provide better clarity and alignment for all evaluators.
 # Define the LLM (replace with your LLM initialization)
 from langchain.llms import OpenAI
 my_llm = OpenAI(temperature=0)
