@@ -1,3 +1,5 @@
+Accuracy measures alignment with the 5 C's. Completeness measures whether the description is fully developed. Hallucination severity measures unsupported content (10 is severe). 
+    Do not include any other text outside this JSON format.
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
