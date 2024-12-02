@@ -1,186 +1,128 @@
-Leverage Embeddings for Metrics Calculation
+Slide 1: Title Slide
+Title: Evaluation Framework for LLM Outputs Using Metrics and Feedback
+Subtitle: A Structured Approach for Measuring Accuracy, Completeness, and Hallucination Severity
 
-Utilize embeddings to calculate evaluation metrics, ensuring more robust and detailed assessments.
-Incorporate Revised Prompts
+Slide 2: Problem Statement
+Objective:
+To evaluate the quality of language model outputs against a structured framework when:
 
-Integrate prompts revised based on feedback from manual testers to improve evaluation consistency.
-Enhance Clarity on Metrics
+Inputs are provided in the form of an Issue Title and Issue Description.
+Outputs follow a predefined 5 C's framework:
+Condition: What is or was the problem?
+Context: How big is or was the problem?
+Criteria: By what standard is or was it judged?
+Consequence: What risk does this expose?
+Cause: Why did it happen?
+Slide 3: Challenges
+Lack of Ground Truth:
+No reference outputs to directly compare the generated responses.
+Subjective Metrics:
+Evaluating aspects like "completeness" and "hallucination" can vary depending on interpretation.
+Output Inconsistencies:
+Model responses may differ in format, missing elements of the framework, or including hallucinations.
+Slide 4: Approach Overview
+Goal: To design an automated and scalable evaluation pipeline that:
 
-Refine the evaluation criteria and definitions for each metric to provide better clarity and alignment for all evaluators.
-# Define the LLM (replace with your LLM initialization)
-from langchain.llms import OpenAI
-my_llm = OpenAI(temperature=0)
+Assesses outputs using structured metrics (accuracy, completeness, hallucination).
+Ensures consistent evaluation and format adherence.
+Aggregates results from multiple evaluations for actionable insights.
+Key Components:
 
-# Evaluation Prompt: Assess the output based on 5 C's, Additional Information, and Hallucinations
-evaluation_prompt = PromptTemplate(
-    input_variables=["issue_title", "issue_description", "output_data"],
-    template="""
-    You are an evaluator tasked with assessing an issue description.
+Evaluation Metrics: Accuracy, Completeness, Hallucination Severity.
+Feedback Aggregation: Averages scores across multiple evaluations.
+Retry Mechanism: Ensures adherence to strict formats.
+Slide 5: Workflow
+Input Data:
 
-    Issue Title: {issue_title}
-    Issue Description: {issue_description}
+Issue Title and Description.
+Model Output:
 
-    Generated Output:
-    {output_data}
+Adheres to the 5 C's framework and includes "additional information" on missing/incomplete elements.
+Evaluation Step:
 
-    Evaluate each element of the 5 C's (Condition, Context, Criteria, Consequence, Cause):
-    - Presence (Yes/No)
-    - Clarity (Score 1-10)
-    - Completeness (Score 1-10)
+Use a structured Evaluation Prompt to assess:
+Accuracy: Alignment with input details.
+Completeness: Inclusion of all 5 C's and additional information.
+Hallucination: Presence and severity of unsupported claims.
+Feedback Aggregation:
 
-    Additionally:
-    - Verify that the "Issue Title" appears exactly as given in the input.
-    - Identify any "Additional Information" that should be included where the 5 C's are incomplete or missing.
-    - Assess hallucinations:
-        - Presence: Are there any fabricated or unsupported statements? (Yes/No)
-        - Severity: Rate hallucinations on a scale of 1-10 (1 = minor, 10 = severe).
+Collate results from multiple evaluations to calculate average scores.
+Results Summary:
 
-    Example format:
-    Condition: Present, clarity - 8, completeness - 7. Feedback: [details]
-    Context: Not present. Feedback: [details]
-    Additional Information: [Details about missing information.]
-    Issue Title Consistency: [Yes/No with explanation if No]
-    Hallucinations:
-      - Presence: [Yes/No]
-      - Severity: [Score]
-    """
-)
-evaluation_chain = LLMChain(llm=my_llm, prompt=evaluation_prompt)
+Consistent feedback in a structured JSON format.
+Slide 6: Key Prompts
+Evaluation Prompt:
 
-# Revision Prompt: Revise the output based on evaluator feedback
-revision_prompt = PromptTemplate(
-    input_variables=["issue_title", "issue_description", "feedback_text"],
-    template="""
-    You are tasked with revising an issue description based on feedback.
+Guides the model to score outputs based on metrics.
+Ensures JSON-formatted results for programmatic analysis.
+Feedback Prompt:
 
-    Issue Title: {issue_title}
-    Issue Description: {issue_description}
+Aggregates evaluations, computing average metrics for insights.
+Enforces a standardized output structure for consistency.
+Slide 7: Code Overview
+Main Components:
 
-    Feedback:
-    {feedback_text}
+Evaluation Chain:
 
-    Revise the issue description to address the feedback and ensure the 5 C's are:
-    1. Clearly Present
-    2. Clarity and Completeness are maximized.
-    3. Remove any hallucinated or unsupported content.
+Processes model outputs using the Evaluation Prompt.
+Validates responses for structure and content.
+Feedback Chain:
 
-    The revised description must:
-    - Start with the Issue Title exactly as provided.
-    - Include any missing "Additional Information" identified in the feedback.
+Aggregates scores using the Feedback Prompt.
+Computes averages for all metrics.
+Validation Logic:
 
-    Output the revised issue description.
-    """
-)
-revision_chain = LLMChain(llm=my_llm, prompt=revision_prompt)
+Ensures JSON outputs adhere to the expected format.
+Key Metrics:
 
-# Feedback Prompt: Compare the original and revised descriptions
-feedback_prompt = PromptTemplate(
-    input_variables=["issue_title", "original_output", "revised_output"],
-    template="""
-    You are tasked with evaluating the revisions made to an issue description.
+Accuracy: Measures alignment with input.
+Completeness: Assesses 5 C's coverage and missing elements.
+Hallucination: Evaluates fabricated or unsupported claims.
+Slide 8: How It Works
+Step	Description
+Input Preparation	Issue Title and Description are fed into the system.
+Output Evaluation	Model outputs are scored based on the 5 C's framework and additional criteria.
+JSON Validation	Ensures outputs are formatted correctly for analysis.
+Feedback Aggregation	Averages scores across multiple evaluations for actionable insights.
+Results Generation	Outputs average scores for accuracy, completeness, and hallucination severity.
+Slide 9: Benefits of This Approach
+Scalable and Automated:
 
-    Issue Title: {issue_title}
+Eliminates manual effort in scoring large datasets.
+Consistency:
 
-    Original Description:
-    {original_output}
+Prompts enforce strict formatting and criteria adherence.
+Comprehensive Evaluation:
 
-    Revised Description:
-    {revised_output}
+Metrics cover multiple dimensions of output quality, including hallucination severity.
+Actionable Insights:
 
-    Compare the two descriptions and evaluate the following:
-    1. Does the revised description address the feedback provided earlier?
-    2. Are all 5 C's (Condition, Context, Criteria, Consequence, Cause) present in the revised description?
-    3. Score the revised description's clarity (1-10) and completeness (1-10) for each C.
-    4. Does the revised description include the "Additional Information" identified earlier?
-    5. Verify that the "Issue Title" remains exactly as provided.
-    6. Assess hallucinations in the revised description:
-       - Presence: Are there any fabricated or unsupported statements? (Yes/No)
-       - Severity: Rate hallucinations on a scale of 1-10 (1 = minor, 10 = severe).
+Aggregated scores provide clarity on overall model performance.
+Slide 10: Addressing Output Variability
+Retry Logic:
 
-    Provide feedback on whether the revised description is a significant improvement and highlight any remaining gaps.
-    """
-)
-feedback_chain = LLMChain(llm=my_llm, prompt=feedback_prompt)
+Handles inconsistencies by re-running the evaluation if the output fails validation.
+Embedding-Based Analysis:
 
-# Function to parse feedback
-def extract_scores_and_feedback(feedback_text):
-    try:
-        # Clean the feedback text to remove backticks and extra formatting
-        if feedback_text.startswith("```json") and feedback_text.endswith("```"):
-            feedback_text = feedback_text[7:-3].strip()  # Remove ```json and ```
-        # Convert the cleaned JSON string into a Python dictionary
-        parsed_feedback = eval(feedback_text)
-        return parsed_feedback
-    except Exception as e:
-        print(f"Error parsing feedback: {e}")
-        return {}
+Leverages embeddings to compare and evaluate text similarity for more robust scoring.
+Standardized Prompts:
 
-# Function to calculate accuracy with hallucination metric
-def calculate_accuracy_with_hallucinations(feedback_dict):
-    """
-    Calculate accuracy based on presence, clarity, completeness scores, additional information, and hallucinations.
-    """
-    total_elements = len(feedback_dict) * 3  # 3 criteria (presence, clarity, completeness) per C
-    actual_score = 0
+Revised prompts reduce variability and align results with evaluation criteria.
+Slide 11: Results Interpretation
+Accuracy: Measures how well the output aligns with input requirements.
+Completeness: Evaluates whether all elements of the 5 C's are covered.
+Hallucination Severity: Identifies and rates unsupported claims, aiding risk assessment.
+Slide 12: Future Enhancements
+Enhanced Scoring Models:
 
-    for element, scores in feedback_dict.items():
-        if element not in ["Additional Information", "Issue Title Consistency", "Hallucinations"]:
-            if scores["presence"] == "Yes":
-                actual_score += 1
-            actual_score += scores["clarity"] / 10  # Normalize to a 1-point scale
-            actual_score += scores["completeness"] / 10  # Normalize to a 1-point scale
+Use embeddings and ML models to refine scoring mechanisms further.
+Ground Truth Augmentation:
 
-    # Check if "Additional Information" and "Issue Title Consistency" are addressed
-    additional_info_present = feedback_dict.get("Additional Information", "").strip()
-    if additional_info_present:
-        total_elements += 1
-        actual_score += 1  # Consider "Additional Information" as one element scored as either present or not
+Collaborate with manual testers to create benchmark outputs for better comparisons.
+Adaptive Feedback Loops:
 
-    title_consistency = feedback_dict.get("Issue Title Consistency", "No") == "Yes"
-    if title_consistency:
-        total_elements += 1
-        actual_score += 1  # Ensure the title is consistent
+Continuously improve prompts and evaluation criteria based on iterative analysis.
+Slide 13: Conclusion
+This evaluation framework provides a robust and scalable solution for assessing language model outputs. By combining structured prompts, automated scoring, and feedback aggregation, it ensures reliable performance metrics for decision-making and continuous improvement.
 
-    # Deduct points for hallucination severity
-    hallucinations = feedback_dict.get("Hallucinations", {})
-    hallucination_presence = hallucinations.get("Presence", "No") == "Yes"
-    hallucination_severity = hallucinations.get("Severity", 0)
-
-    if hallucination_presence:
-        total_elements += 1
-        actual_score -= hallucination_severity / 10  # Deduct points based on severity
-
-    accuracy = (actual_score / total_elements) * 100  # Convert to percentage
-    return max(0, accuracy)  # Ensure accuracy doesn't go negative
-
-# Example input and output data
-issue_title = "Data Access Control Gap"
-issue_description = "There is insufficient control over sensitive data access."
-output_data = "Data Access Control Gap: The system lacks advanced encryption, risking data breaches."
-
-# Step 1: Evaluate the initial output
-feedback_text = evaluation_chain.run(
-    issue_title=issue_title,
-    issue_description=issue_description,
-    output_data=output_data
-)
-feedback_dict = extract_scores_and_feedback(feedback_text)
-
-# Step 2: Generate a revised output based on feedback
-revised_output = revision_chain.run(
-    issue_title=issue_title,
-    issue_description=issue_description,
-    feedback_text=feedback_text
-)
-
-# Step 3: Evaluate the revised output
-revision_feedback_text = feedback_chain.run(
-    issue_title=issue_title,
-    original_output=output_data,
-    revised_output=revised_output
-)
-revision_feedback_dict = extract_scores_and_feedback(revision_feedback_text)
-
-# Step 4: Calculate accuracy after revision with hallucination deduction
-accuracy = calculate_accuracy_with_hallucinations(revision_feedback_dict)
-print(f"Final Accuracy after revision: {accuracy}%")
+Feel free to adjust the level of technicality or focus to suit the audience for the presentation.
