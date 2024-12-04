@@ -1,3 +1,40 @@
-All 5 C's (Condition, Context, Criteria, Consequence, Cause) are included.
-Missing or incomplete components are explicitly addressed.
-Hallucinations are reduced or eliminated.
+import openai
+
+# Set your OpenAI API key
+openai.api_key = "your-api-key"
+
+def get_embeddings(texts, model="text-embedding-ada-002"):
+    """
+    Fetch embeddings for the given texts using OpenAI's embedding model.
+
+    Args:
+        texts (list): A list of strings to be embedded.
+        model (str): The name of the embedding model to use. Default is "text-embedding-ada-002".
+
+    Returns:
+        list: A list of embedding vectors.
+    """
+    if not isinstance(texts, list):
+        texts = [texts]
+
+    try:
+        # Call OpenAI's embedding endpoint
+        response = openai.Embedding.create(
+            input=texts,
+            model=model
+        )
+        # Extract embeddings from the response
+        embeddings = [item["embedding"] for item in response["data"]]
+        return embeddings
+    except Exception as e:
+        print(f"Error fetching embeddings: {e}")
+        return None
+
+# Example Usage
+texts = ["OpenAI creates powerful AI models.", "Embeddings can represent text as vectors."]
+embeddings = get_embeddings(texts)
+
+if embeddings:
+    for i, embed in enumerate(embeddings):
+        print(f"Text {i+1}: {texts[i]}")
+        print(f"Embedding: {embed[:10]}... (truncated)")  # Display first 10 dimensions for brevity
