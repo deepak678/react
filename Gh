@@ -1,15 +1,20 @@
-import openai
+import requests
+import json
 
-# Set your OpenAI API key
-openai.api_key = "your-api-key"
+# Azure OpenAI credentials
+api_key = "your-azure-api-key"
+endpoint = "https://your-resource-name.openai.azure.com/"
+deployment_name = "your-deployment-name"  # The name of your deployed embedding model
 
-def get_embeddings(texts, model="text-embedding-ada-002"):
+def get_embeddings_azure(texts, api_key, endpoint, deployment_name):
     """
-    Fetch embeddings for the given texts using OpenAI's embedding model.
+    Fetch embeddings using Azure OpenAI Service.
 
     Args:
-        texts (list): A list of strings to be embedded.
-        model (str): The name of the embedding model to use. Default is "text-embedding-ada-002".
+        texts (list): List of strings to embed.
+        api_key (str): Azure OpenAI API key.
+        endpoint (str): Azure OpenAI endpoint.
+        deployment_name (str): Name of the embedding model deployment.
 
     Returns:
         list: A list of embedding vectors.
@@ -17,22 +22,33 @@ def get_embeddings(texts, model="text-embedding-ada-002"):
     if not isinstance(texts, list):
         texts = [texts]
 
+    url = f"{endpoint}openai/deployments/{deployment_name}/embeddings?api-version=2023-03-15-preview"
+    headers = {
+        "Content-Type": "application/json",
+        "api-key": api_key,
+    }
+
+    payload = {
+        "input": texts
+    }
+
     try:
-        # Call OpenAI's embedding endpoint
-        response = openai.Embedding.create(
-            input=texts,
-            model=model
-        )
+        # Make the POST request to the Azure OpenAI embeddings endpoint
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()  # Raise exception for HTTP errors
+
         # Extract embeddings from the response
-        embeddings = [item["embedding"] for item in response["data"]]
+        result = response.json()
+        embeddings = [item["embedding"] for item in result["data"]]
         return embeddings
-    except Exception as e:
-        print(f"Error fetching embeddings: {e}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching embeddings from Azure: {e}")
         return None
 
 # Example Usage
-texts = ["OpenAI creates powerful AI models.", "Embeddings can represent text as vectors."]
-embeddings = get_embeddings(texts)
+texts = ["Azure OpenAI provides embeddings.", "Embeddings represent text as vectors."]
+embeddings = get_embeddings_azure(texts, api_key, endpoint, deployment_name)
 
 if embeddings:
     for i, embed in enumerate(embeddings):
