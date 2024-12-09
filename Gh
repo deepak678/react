@@ -1,37 +1,29 @@
-from langchain.embeddings import OpenAIEmbeddings
+from openai import azureopenai
 import os
 
-# Configure Azure OpenAI settings
-os.environ["OPENAI_API_TYPE"] = "azure"
-os.environ["OPENAI_API_BASE"] = "https://your-proxy.azurewebsites.net/"  # Proxy or Azure endpoint
-os.environ["OPENAI_API_KEY"] = "your-api-key"  # API key for the proxy
-os.environ["OPENAI_API_VERSION"] = "2023-03-15-preview"  # Ensure this matches your setup
+# Configure Azure OpenAI client
+client = azureopenai.AzureOpenAIClient(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),  # Set this environment variable with your API key
+    endpoint="https://<your-resource-name>.openai.azure.com",  # Replace with your Azure endpoint
+    api_version="2023-06-01-preview"  # Use the appropriate API version
+)
 
-# Initialize OpenAI embeddings with Azure setup
-def get_embeddings(texts):
-    """
-    Fetch embeddings using LangChain's OpenAIEmbeddings class with Azure setup.
+# Set up a proxy
+client.config.proxies = {
+    "http": "http://your-proxy-host:your-proxy-port",
+    "https": "http://your-proxy-host:your-proxy-port"
+}
 
-    Args:
-        texts (list): List of strings to embed.
-
-    Returns:
-        list: A list of embedding vectors.
-    """
-    embeddings = OpenAIEmbeddings(
-        deployment="embeddings-ada",  # The name of your model deployment
-        model="text-embedding-ada-002"  # Specify the model
+# Use the Azure OpenAI client to call a GPT model
+try:
+    response = client.chat_completions.create(
+        engine="<your-deployment-name>",  # Replace with your model deployment name
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Hello! How do I use Azure OpenAI GPT with a proxy?"}
+        ],
+        max_tokens=150
     )
-
-    # Get embeddings for all texts
-    results = [embeddings.embed_query(text) for text in texts]
-    return results
-
-# Example Usage
-texts = ["LangChain simplifies OpenAI integrations.", "Azure provides powerful AI capabilities."]
-embeddings = get_embeddings(texts)
-
-if embeddings:
-    for i, embed in enumerate(embeddings):
-        print(f"Text {i+1}: {texts[i]}")
-        print(f"Embedding: {embed[:10]}... (truncated)")  # Show the first 10 dimensions
+    print(response["choices"][0]["message"]["content"])
+except azureopenai.AzureOpenAIError as e:
+    print(f"Error: {e}")
