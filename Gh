@@ -1,29 +1,22 @@
-from openai import azureopenai
+import openai
 import os
 
-# Configure Azure OpenAI client
-client = azureopenai.AzureOpenAIClient(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),  # Set this environment variable with your API key
-    endpoint="https://<your-resource-name>.openai.azure.com",  # Replace with your Azure endpoint
-    api_version="2023-06-01-preview"  # Use the appropriate API version
-)
+# Configure the OpenAI client for Azure
+openai.api_type = "azure"
+openai.api_base = "https://<your-app-name>.azurewebsites.net"  # Replace with your Azure App Service URL
+openai.api_version = "2023-06-01-preview"  # Use the appropriate API version
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")  # Set your API key as an environment variable
 
-# Set up a proxy
-client.config.proxies = {
-    "http": "http://your-proxy-host:your-proxy-port",
-    "https": "http://your-proxy-host:your-proxy-port"
-}
-
-# Use the Azure OpenAI client to call a GPT model
+# Make a request to the Azure OpenAI GPT model
 try:
-    response = client.chat_completions.create(
+    response = openai.ChatCompletion.create(
         engine="<your-deployment-name>",  # Replace with your model deployment name
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello! How do I use Azure OpenAI GPT with a proxy?"}
+            {"role": "user", "content": "How do I use Azure OpenAI via a proxy like azurewebsites.net?"}
         ],
         max_tokens=150
     )
     print(response["choices"][0]["message"]["content"])
-except azureopenai.AzureOpenAIError as e:
+except openai.error.OpenAIError as e:
     print(f"Error: {e}")
