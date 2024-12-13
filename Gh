@@ -1,38 +1,30 @@
-import openai
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import subprocess
+import os
 
-# Set OpenAI API key
-openai.api_key = "your_api_key"
+def clone_or_pull_repo(repo_url, local_dir):
+    """
+    Clones the repo if it doesn't exist locally; otherwise, pulls the latest changes.
+    
+    :param repo_url: URL of the GitHub repository.
+    :param local_dir: Directory to clone the repository into.
+    """
+    try:
+        if not os.path.exists(local_dir):
+            # Clone the repository if the directory does not exist
+            print(f"Cloning repository from {repo_url} into {local_dir}...")
+            subprocess.run(["git", "clone", repo_url, local_dir], check=True)
+        else:
+            # Pull the latest changes if the directory already exists
+            print(f"Pulling latest changes for the repository in {local_dir}...")
+            subprocess.run(["git", "-C", local_dir, "pull"], check=True)
+        print("Operation completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
-# Example data
-prompt = "Explain the concept of gravity, how it affects objects, and why it is important in physics."
-response = "Gravity is a force that attracts objects toward each other and plays a key role in physics."
+# Example usage
+repo_url = "https://github.com/your-username/your-repo.git"  # Replace with your repo URL
+local_dir = "path/to/local/directory"  # Replace with your desired local directory path
 
-# Extract keywords from the prompt using TF-IDF
-def extract_keywords(text, n_keywords=5):
-    vectorizer = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = vectorizer.fit_transform([text])
-    feature_array = vectorizer.get_feature_names_out()
-    tfidf_scores = tfidf_matrix.toarray()[0]
-    sorted_indices = tfidf_scores.argsort()[::-1]
-    return [feature_array[idx] for idx in sorted_indices[:n_keywords]]
-
-keywords = extract_keywords(prompt)
-print(f"Extracted Keywords: {keywords}")
-
-# Get embeddings for keywords and response
-def get_embedding(text, model="text-embedding-ada-002"):
-    result = openai.Embedding.create(input=text, model=model)
-    return result['data'][0]['embedding']
-
-keyword_embeddings = [get_embedding(keyword) for keyword in keywords]
-response_embedding = get_embedding(response)
-
-# Measure coverage of keywords in the response
-coverage_scores = [cosine_similarity([response_embedding], [keyword_emb]).item() for keyword_emb in keyword_embeddings]
-coverage_threshold = 0.5  # Define a threshold for relevance
-covered_keywords = sum(score >= coverage_threshold for score in coverage_scores)
-
-completeness_score = covered_keywords / len(keywords)  # Proportion of covered keywords
-print(f"Completeness Score: {completeness_score:.2f}")
+clone_or_pull_repo(repo_url, local_dir)
