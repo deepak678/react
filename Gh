@@ -1,22 +1,28 @@
-import openai
-import os
+ChatGPT
 
-# Configure the OpenAI client for Azure
-openai.api_type = "azure"
-openai.api_base = "https://<your-app-name>.azurewebsites.net"  # Replace with your Azure App Service URL
-openai.api_version = "2023-06-01-preview"  # Use the appropriate API version
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")  # Set your API key as an environment variable
+You said:
+Write an email to tell I am attaching a prompt which we are using as evaluation please let us know if the definition we are using for the metrics and the evaluation criteria wr are seeking is correct or not also we have calculated scores for three metrics accuracy completeness and hallucination which is present in the evaluation sheet attached with this email places where there's a deviation of more than 1 in any of the scores we have highlighted it also for those places and where our scores are less than the score given during manual testing wr have generated a revised response presme which is present in the second sheet attached wr are not able to detect any hallucination after the revised definition of it please look for it in prompt as well please let us know if you need any assistance from our side
+ChatGPT said:
+ChatGPT
+Subject: Request for Feedback on Evaluation Criteria and Scores
 
-# Make a request to the Azure OpenAI GPT model
-try:
-    response = openai.ChatCompletion.create(
-        engine="<your-deployment-name>",  # Replace with your model deployment name
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "How do I use Azure OpenAI via a proxy like azurewebsites.net?"}
-        ],
-        max_tokens=150
-    )
-    print(response["choices"][0]["message"]["content"])
-except openai.error.OpenAIError as e:
-    print(f"Error: {e}")
+Dear [Recipient's Name],
+
+I hope this email finds you well.
+
+I am attaching a prompt we are currently using for evaluation purposes. We kindly request your feedback on whether the definitions we are using for the metrics and the evaluation criteria we are seeking align with your expectations.
+
+Additionally, we have calculated scores for three metrics—accuracy, completeness, and hallucination—which are presented in the attached evaluation sheet. To make the analysis clearer:
+
+Deviations: Instances where there is a deviation of more than 1 in any of the scores are highlighted.
+Revised Responses: For cases where our scores are lower than the scores provided during manual testing, we have generated revised responses, which are included in the second sheet of the attachment.
+Furthermore, after revising the definition of hallucination, we could not detect any instances of it. We request you to review this aspect in the provided prompt as well.
+
+Please let us know if any clarifications or assistance are needed from our side.
+
+Looking forward to your feedback.
+
+Best regards,
+[Your Full Name]
+[Your Job Title]
+[Your Contact Information]
