@@ -1,22 +1,27 @@
 import subprocess
 import os
 
-def clone_or_pull_repo(repo_url, local_dir):
+def clone_or_pull_repo_with_credentials(repo_url, local_dir, token):
     """
-    Clones the repo if it doesn't exist locally; otherwise, pulls the latest changes.
-    
-    :param repo_url: URL of the GitHub repository.
+    Clones the repo if it doesn't exist locally; otherwise, pulls the latest changes using a token.
+
+    :param repo_url: URL of the GitHub repository (e.g., https://github.com/org/repo.git).
     :param local_dir: Directory to clone the repository into.
+    :param token: Personal Access Token (PAT) for GitHub authentication.
     """
     try:
+        # Insert token into the repository URL
+        authenticated_url = repo_url.replace("https://", f"https://{token}@")
+        
         if not os.path.exists(local_dir):
             # Clone the repository if the directory does not exist
             print(f"Cloning repository from {repo_url} into {local_dir}...")
-            subprocess.run(["git", "clone", repo_url, local_dir], check=True)
+            subprocess.run(["git", "clone", authenticated_url, local_dir], check=True)
         else:
             # Pull the latest changes if the directory already exists
             print(f"Pulling latest changes for the repository in {local_dir}...")
             subprocess.run(["git", "-C", local_dir, "pull"], check=True)
+        
         print("Operation completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred: {e}")
@@ -24,7 +29,8 @@ def clone_or_pull_repo(repo_url, local_dir):
         print(f"Unexpected error: {e}")
 
 # Example usage
-repo_url = "https://github.com/your-username/your-repo.git"  # Replace with your repo URL
+repo_url = "https://github.com/your-org/your-repo.git"  # Replace with your repo URL
 local_dir = "path/to/local/directory"  # Replace with your desired local directory path
+token = "your_personal_access_token"  # Replace with your GitHub PAT
 
-clone_or_pull_repo(repo_url, local_dir)
+clone_or_pull_repo_with_credentials(repo_url, local_dir, token)
