@@ -1,6 +1,38 @@
-Action Items for You:
+import openai
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-Confirm if the definitions and evaluation criteria are correct.
-Review highlighted deviations and provide feedback if necessary.
-Verify if the revised responses align with expectations for cases where manual testing scores were higher.
-Review the updated definition of hallucination in the prompt and confirm its accuracy.
+# Set OpenAI API key
+openai.api_key = "your_api_key"
+
+# Example data
+prompt = "Explain the concept of gravity, how it affects objects, and why it is important in physics."
+response = "Gravity is a force that attracts objects toward each other and plays a key role in physics."
+
+# Extract keywords from the prompt using TF-IDF
+def extract_keywords(text, n_keywords=5):
+    vectorizer = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = vectorizer.fit_transform([text])
+    feature_array = vectorizer.get_feature_names_out()
+    tfidf_scores = tfidf_matrix.toarray()[0]
+    sorted_indices = tfidf_scores.argsort()[::-1]
+    return [feature_array[idx] for idx in sorted_indices[:n_keywords]]
+
+keywords = extract_keywords(prompt)
+print(f"Extracted Keywords: {keywords}")
+
+# Get embeddings for keywords and response
+def get_embedding(text, model="text-embedding-ada-002"):
+    result = openai.Embedding.create(input=text, model=model)
+    return result['data'][0]['embedding']
+
+keyword_embeddings = [get_embedding(keyword) for keyword in keywords]
+response_embedding = get_embedding(response)
+
+# Measure coverage of keywords in the response
+coverage_scores = [cosine_similarity([response_embedding], [keyword_emb]).item() for keyword_emb in keyword_embeddings]
+coverage_threshold = 0.5  # Define a threshold for relevance
+covered_keywords = sum(score >= coverage_threshold for score in coverage_scores)
+
+completeness_score = covered_keywords / len(keywords)  # Proportion of covered keywords
+print(f"Completeness Score: {completeness_score:.2f}")
