@@ -1,36 +1,16 @@
-import subprocess
-import os
+from sentence_transformers import SentenceTransformer, util
 
-def clone_or_pull_repo_with_credentials(repo_url, local_dir, token):
-    """
-    Clones the repo if it doesn't exist locally; otherwise, pulls the latest changes using a token.
+# Load model
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
-    :param repo_url: URL of the GitHub repository (e.g., https://github.com/org/repo.git).
-    :param local_dir: Directory to clone the repository into.
-    :param token: Personal Access Token (PAT) for GitHub authentication.
-    """
-    try:
-        # Insert token into the repository URL
-        authenticated_url = repo_url.replace("https://", f"https://{token}@")
-        
-        if not os.path.exists(local_dir):
-            # Clone the repository if the directory does not exist
-            print(f"Cloning repository from {repo_url} into {local_dir}...")
-            subprocess.run(["git", "clone", authenticated_url, local_dir], check=True)
-        else:
-            # Pull the latest changes if the directory already exists
-            print(f"Pulling latest changes for the repository in {local_dir}...")
-            subprocess.run(["git", "-C", local_dir, "pull"], check=True)
-        
-        print("Operation completed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred: {e}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
+# Example data
+input_text = "Describe the benefits of a credit card."
+generated_output = "Credit cards provide benefits like rewards, cashback, and convenience."
 
-# Example usage
-repo_url = "https://github.com/your-org/your-repo.git"  # Replace with your repo URL
-local_dir = "path/to/local/directory"  # Replace with your desired local directory path
-token = "your_personal_access_token"  # Replace with your GitHub PAT
+# Generate embeddings
+input_embedding = model.encode(input_text, convert_to_tensor=True)
+output_embedding = model.encode(generated_output, convert_to_tensor=True)
 
-clone_or_pull_repo_with_credentials(repo_url, local_dir, token)
+# Calculate similarity
+similarity = util.cos_sim(input_embedding, output_embedding).item()
+print(f"Accuracy (semantic similarity): {similarity:.2f}")
