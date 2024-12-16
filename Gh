@@ -1,16 +1,17 @@
-from sentence_transformers import SentenceTransformer, util
+from nltk.tokenize import sent_tokenize
 
-# Load model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Tokenize output into sentences
+output_sentences = sent_tokenize(output_text)
 
-# Example data
-input_text = "Describe the benefits of a credit card."
-generated_output = "Credit cards provide benefits like rewards, cashback, and convenience."
+# Compute similarity for each sentence
+hallucination_flags = []
+for sentence in output_sentences:
+    sentence_embedding = get_embedding(sentence)
+    similarity = np.dot(input_embedding, sentence_embedding) / (
+        np.linalg.norm(input_embedding) * np.linalg.norm(sentence_embedding)
+    )
+    hallucination_flags.append(similarity < 0.6)  # Threshold: 0.6
 
-# Generate embeddings
-input_embedding = model.encode(input_text, convert_to_tensor=True)
-output_embedding = model.encode(generated_output, convert_to_tensor=True)
-
-# Calculate similarity
-similarity = util.cos_sim(input_embedding, output_embedding).item()
-print(f"Accuracy (semantic similarity): {similarity:.2f}")
+# Count hallucinated sentences
+hallucination_count = sum(hallucination_flags)
+print(f"Hallucinated sentences: {hallucination_count} out of {len(output_sentences)}")
