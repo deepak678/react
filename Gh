@@ -1,17 +1,25 @@
-from nltk.tokenize import sent_tokenize
+import numpy as np
+import openai
 
-# Tokenize output into sentences
-output_sentences = sent_tokenize(output_text)
+# Set your OpenAI API key
+openai.api_key = "your-api-key"
 
-# Compute similarity for each sentence
-hallucination_flags = []
-for sentence in output_sentences:
-    sentence_embedding = get_embedding(sentence)
-    similarity = np.dot(input_embedding, sentence_embedding) / (
-        np.linalg.norm(input_embedding) * np.linalg.norm(sentence_embedding)
-    )
-    hallucination_flags.append(similarity < 0.6)  # Threshold: 0.6
+# Function to get Ada embeddings
+def get_embedding(text, model="text-embedding-ada-002"):
+    response = openai.Embedding.create(input=text, model=model)
+    return np.array(response['data'][0]['embedding'])
 
-# Count hallucinated sentences
-hallucination_count = sum(hallucination_flags)
-print(f"Hallucinated sentences: {hallucination_count} out of {len(output_sentences)}")
+# Input and output texts
+input_text = "Explain the benefits of renewable energy."
+output_text = "Renewable energy is sustainable and reduces carbon emissions."
+
+# Generate embeddings
+input_embedding = get_embedding(input_text)
+output_embedding = get_embedding(output_text)
+
+# Cosine similarity calculation
+cosine_similarity = np.dot(input_embedding, output_embedding) / (
+    np.linalg.norm(input_embedding) * np.linalg.norm(output_embedding)
+)
+
+print(f"Accuracy (semantic similarity): {cosine_similarity:.2f}")
