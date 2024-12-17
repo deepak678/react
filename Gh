@@ -73,3 +73,33 @@ We sum up all the flagged sentences and report the number of hallucinated senten
 
 python
 Copy code
+
+
+
+import numpy as np
+import openai
+
+openai.api_key = "your-api-key"
+
+def get_embedding(text, model="text-embedding-ada-002"):
+    response = openai.Embedding.create(input=text, model=model)
+    return np.array(response['data'][0]['embedding'])
+
+# Input and output texts
+input_text = "Explain the benefits of renewable energy."
+output_text = "Renewable energy is clean and sustainable. Fossil fuels are costly."
+
+# Generate embeddings
+input_embedding = get_embedding(input_text)
+output_embedding = get_embedding(output_text)
+
+# Cosine similarity
+cosine_similarity = np.dot(input_embedding, output_embedding) / (
+    np.linalg.norm(input_embedding) * np.linalg.norm(output_embedding)
+)
+
+# Set threshold for hallucination
+if cosine_similarity < 0.6:
+    print("Hallucination detected in the output.")
+else:
+    print("Output aligns with the input.")
