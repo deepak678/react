@@ -1,21 +1,18 @@
-import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
-def normalize(vector):
-    return vector / np.linalg.norm(vector)
+# Load pre-trained SBERT model
+model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
-# Example embeddings
-vector1 = np.array([1, 2, 3])
-vector2 = np.array([4, 5, 6])
+# Define two opposite sentences
+sentence1 = "I love programming."
+sentence2 = "I hate programming."
 
-# Normalize vectors
-vector1 = normalize(vector1)
-vector2 = normalize(vector2)
+# Convert sentences to embeddings
+embeddings1 = model.encode([sentence1])
+embeddings2 = model.encode([sentence2])
 
+# Calculate cosine similarity
+similarity = cosine_similarity(embeddings1, embeddings2)
 
-def cosine_similarity(vector1, vector2):
-    dot_product = np.dot(vector1, vector2)
-    norm_product = np.linalg.norm(vector1) * np.linalg.norm(vector2)
-    return dot_product / norm_product
-
-similarity = cosine_similarity(vector1, vector2)
-print(f"Cosine Similarity: {similarity}")
+print(f"Cosine Similarity: {similarity[0][0]}")
