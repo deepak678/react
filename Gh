@@ -1,10 +1,39 @@
-Thank you for being a part of the insightful conversation about evaluation metrics. Your contributions were invaluable as we work toward refining this process.
+from langchain.llms import BaseLLM
 
-Here are some key points to consider as we move forward:
+class GeminiLLM(BaseLLM):
+    def __init__(self, api_key: str, endpoint: str):
+        self.api_key = api_key
+        self.endpoint = endpoint
 
-Overlapping Definitions: We need to analyze where the definitions for different metrics overlap and identify opportunities to streamline them for better clarity.
-SME Collaboration: It's essential to sit down with Subject Matter Experts (SMEs) to discuss their perspectives on evaluation improvement and understand the reasoning behind the scores they have provided.
-Generalization of Scores: We need to think critically about how to generalize the scoring process for users, ensuring consistency despite varying and sometimes confusing metrics.
-In our next steps, we plan to explore additional metrics, including consistency, context relevance, and semantic relevance, to further enhance our evaluation framework.
+    def _call(self, prompt: str, stop: list = None) -> str:
+        # Logic to send the prompt to Gemini API and fetch the response
+        response = requests.post(
+            self.endpoint,
+            json={"prompt": prompt, "api_key": self.api_key}
+        )
+        return response.json()["output"]
 
-We look forward to your continued insights as we refine and improve this process. Please feel free to share any further thoughts or suggestions.
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
+# Define a prompt template
+prompt_template = PromptTemplate(
+    input_variables=["question"],
+    template="Answer the question based on the provided context: {question}",
+)
+
+# Load Gemini LLM
+gemini_llm = GeminiLLM(api_key="your_api_key", endpoint="https://gemini-model.api/endpoint")
+
+# Create an LLM chain
+llm_chain = LLMChain(llm=gemini_llm, prompt=prompt_template)
+
+# Test the chain
+question = "What is the capital of France?"
+response = llm_chain.run(question=question)
+print(response)
+
+
+
+
+
