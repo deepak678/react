@@ -1,75 +1,42 @@
-import requests
-from langchain.llms import BaseLLM
-from typing import List, Dict, Any
+from nltk.translate.bleu_score import sentence_bleu
+from rouge_score import rouge_scorer
 
-class GeminiLLM(BaseLLM):
-    def __init__(self, api_key: str, endpoint: str, proxy_url: str, timeout: int = 10):
-        """
-        Initialize the GeminiLLM class with API key, endpoint, and proxy settings.
-        
-        :param api_key: The API key for accessing the Gemini model.
-        :param endpoint: The endpoint of the Gemini model.
-        :param proxy_url: The Azure proxy URL.
-        :param timeout: Request timeout in seconds (default is 10).
-        """
-        self.api_key = api_key
-        self.endpoint = endpoint
-        self.proxy_url = proxy_url
-        self.timeout = timeout
+# Input and outputs
+input_text = "Benefits of Exercise: Regular physical activity improves health and reduces risk of diseases."
+generated_output = {
+    "Condition": "Regular exercise is vital for health.",
+    "Consequence": "It reduces the risk of chronic diseases.",
+    "Context": "Physical inactivity is common in modern lifestyles.",
+    "Criteria": "Exercise must be regular and varied.",
+    "Cause": "Lack of exercise leads to poor health."
+}
 
-    @property
-    def _llm_type(self) -> str:
-        """
-        Return the type of LLM.
-        """
-        return "gemini"
+# BLEU Score
+def calculate_bleu(reference, candidate):
+    ref_tokens = reference.split()
+    cand_tokens = candidate.split()
+    return sentence_bleu([ref_tokens], cand_tokens)
 
-    def _call(self, prompt: str, stop: List[str] = None) -> str:
-        """
-        Send the prompt to the Gemini model via the Azure proxy and fetch the response.
+# ROUGE Score
+scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
-        :param prompt: The input prompt for the model.
-        :param stop: Optional stop tokens.
-        :return: The model's response as a string.
-        """
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
+def calculate_rouge(reference, candidate):
+    scores = scorer.score(reference, candidate)
+    return {k: v.fmeasure for k, v in scores.items()}
 
-        payload = {
-            "prompt": prompt,
-            "stop": stop or [],
-        }
+# Evaluate each 5C component
+bleu_scores = {}
+rouge_scores = {}
 
-        proxies = {
-            "http": self.proxy_url,
-            "https": self.proxy_url,
-        }
+for key, value in generated_output.items():
+    bleu_scores[key] = calculate_bleu(input_text, value)
+    rouge_scores[key] = calculate_rouge(input_text, value)
 
-        try:
-            response = requests.post(
-                self.endpoint,
-                json=payload,
-                headers=headers,
-                proxies=proxies,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            return response.json().get("output", "No output received from the model.")
-        except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error communicating with the Gemini model: {e}")
+# Aggregate scores
+average_bleu = sum(bleu_scores.values()) / len(bleu_scores)
+average_rouge = {k: sum([v[k] for v in rouge_scores.values()]) / len(rouge_scores) for k in ['rouge1', 'rouge2', 'rougeL']}
 
-    def _generate(self, prompts: List[str], stop: List[str] = None) -> List[Dict[str, Any]]:
-        """
-        Generate a response for a list of prompts.
-
-        :param prompts: A list of input prompts.
-        :param stop: Optional stop tokens.
-        :return: A list of dictionaries containing the response for each prompt.
-        """
-        results = []
-        for prompt in prompts:
-            output = self._call(prompt, stop=stop)
-            results.append({"text": output})
-        return results
+print("BLEU Scores:", bleu_scores)
+print("Average BLEU Score:", average_bleu)
+print("ROUGE Scores:", rouge_scores)
+print("Average ROUGE Scores:", average_rouge)
