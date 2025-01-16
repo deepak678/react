@@ -1,27 +1,48 @@
-from nltk.translate.bleu_score import sentence_bleu
-from rouge_score import rouge_scorer
+from openai import ChatCompletion
 
-# Input and Output Strings
-input_text = "Exercise benefits health by improving immunity and reducing stress."
-output_text = "Regular exercise improves health, boosts immunity, and reduces stress."
+# Function to evaluate with G-Eval
+def evaluate_g_eval(input_text, output_text, evaluation_type):
+    if evaluation_type == "context":
+        prompt = f"""
+        The input text is:
+        "{input_text}"
 
-# BLEU Score Calculation
-def calculate_bleu(reference, candidate):
-    ref_tokens = reference.split()
-    cand_tokens = candidate.split()
-    return sentence_bleu([ref_tokens], cand_tokens)
+        The output text is:
+        "{output_text}"
 
-# ROUGE Score Calculation
-scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+        Evaluate how well the output restructures and organizes the content from the input into the given framework. 
+        Rate the context relevance on a scale from 1 (completely irrelevant) to 5 (highly relevant) and explain your reasoning.
+        """
+    elif evaluation_type == "semantic":
+        prompt = f"""
+        The input text is:
+        "{input_text}"
 
-def calculate_rouge(reference, candidate):
-    scores = scorer.score(reference, candidate)
-    return {k: v.fmeasure for k, v in scores.items()}
+        The output text is:
+        "{output_text}"
 
-# Evaluate
-bleu_score = calculate_bleu(input_text, output_text)
-rouge_scores = calculate_rouge(input_text, output_text)
+        Evaluate if the output preserves all critical details and meaning from the input without adding new, unrelated information. 
+        Rate the semantic relevance on a scale from 1 (low) to 5 (high) and explain your reasoning.
+        """
+    
+    # Use the LLM for evaluation
+    response = ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are an expert evaluator for generative AI outputs."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    return response["choices"][0]["message"]["content"]
 
-# Display Results
-print("BLEU Score:", bleu_score)
-print("ROUGE Scores:", rouge_scores)
+# Example input and output
+input_text = "Regular physical activity improves health and reduces disease risks."
+output_text = "Exercise helps in improving overall health and reducing the risks of chronic diseases."
+
+# Evaluate context and semantic relevance
+context_score = evaluate_g_eval(input_text, output_text, "context")
+semantic_score = evaluate_g_eval(input_text, output_text, "semantic")
+
+print("Context Relevance Evaluation:", context_score)
+print("Semantic Relevance Evaluation:", semantic_score)
