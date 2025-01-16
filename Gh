@@ -1,3 +1,12 @@
+import openai
+
+# Set Azure OpenAI configurations
+openai.api_type = "azure"
+openai.api_base = "https://<your-resource-name>.openai.azure.com/"  # Replace with your Azure endpoint
+openai.api_key = "your-azure-api-key"
+openai.api_version = "2023-06-01-preview"
+
+
 # Function to evaluate using Azure OpenAI
 def azure_evaluate_g_eval(input_text, output_text, evaluation_type):
     if evaluation_type == "context":
