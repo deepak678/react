@@ -1,7 +1,5 @@
-from openai import ChatCompletion
-
-# Function to evaluate with G-Eval
-def evaluate_g_eval(input_text, output_text, evaluation_type):
+# Function to evaluate using Azure OpenAI
+def azure_evaluate_g_eval(input_text, output_text, evaluation_type):
     if evaluation_type == "context":
         prompt = f"""
         The input text is:
@@ -25,9 +23,9 @@ def evaluate_g_eval(input_text, output_text, evaluation_type):
         Rate the semantic relevance on a scale from 1 (low) to 5 (high) and explain your reasoning.
         """
     
-    # Use the LLM for evaluation
-    response = ChatCompletion.create(
-        model="gpt-4",
+    # Call Azure OpenAI API
+    response = openai.ChatCompletion.create(
+        engine=deployment_name,  # Specify deployment name
         messages=[
             {"role": "system", "content": "You are an expert evaluator for generative AI outputs."},
             {"role": "user", "content": prompt}
@@ -41,8 +39,8 @@ input_text = "Regular physical activity improves health and reduces disease risk
 output_text = "Exercise helps in improving overall health and reducing the risks of chronic diseases."
 
 # Evaluate context and semantic relevance
-context_score = evaluate_g_eval(input_text, output_text, "context")
-semantic_score = evaluate_g_eval(input_text, output_text, "semantic")
+context_score = azure_evaluate_g_eval(input_text, output_text, "context")
+semantic_score = azure_evaluate_g_eval(input_text, output_text, "semantic")
 
 print("Context Relevance Evaluation:", context_score)
 print("Semantic Relevance Evaluation:", semantic_score)
