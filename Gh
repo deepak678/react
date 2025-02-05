@@ -1,55 +1,63 @@
-import openai
+from sentence_transformers import SentenceTransformer
+import numpy as np
 
-# Set Azure OpenAI configurations
-openai.api_type = "azure"
-openai.api_base = "https://<your-resource-name>.openai.azure.com/"  # Replace with your Azure endpoint
-openai.api_key = "your-azure-api-key"
-openai.api_version = "2023-06-01-preview"
-
-
-# Function to evaluate using Azure OpenAI
-def azure_evaluate_g_eval(input_text, output_text, evaluation_type):
-    if evaluation_type == "context":
-        prompt = f"""
-        The input text is:
-        "{input_text}"
-
-        The output text is:
-        "{output_text}"
-
-        Evaluate how well the output restructures and organizes the content from the input into the given framework. 
-        Rate the context relevance on a scale from 1 (completely irrelevant) to 5 (highly relevant) and explain your reasoning.
+class RAGRelevancyScorer:
+    def __init__(self, model_name="all-MiniLM-L6-v2"):
         """
-    elif evaluation_type == "semantic":
-        prompt = f"""
-        The input text is:
-        "{input_text}"
-
-        The output text is:
-        "{output_text}"
-
-        Evaluate if the output preserves all critical details and meaning from the input without adding new, unrelated information. 
-        Rate the semantic relevance on a scale from 1 (low) to 5 (high) and explain your reasoning.
+        Initialize the RAG relevancy scorer with a sentence embedding model.
+        Default model: all-MiniLM-L6-v2 (fast and efficient).
         """
+        self.model = SentenceTransformer(model_name)
     
-    # Call Azure OpenAI API
-    response = openai.ChatCompletion.create(
-        engine=deployment_name,  # Specify deployment name
-        messages=[
-            {"role": "system", "content": "You are an expert evaluator for generative AI outputs."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    def compute_embeddings(self, sentences):
+        """
+        Compute sentence embeddings for a list of sentences.
+        """
+        return self.model.encode(sentences, normalize_embeddings=True)
     
-    return response["choices"][0]["message"]["content"]
+    def cosine_similarity(self, emb1, emb2):
+        """
+        Compute cosine similarity between two embeddings.
+        """
+        return np.dot(emb1, emb2)
+    
+    def compute_relevancy(self, query_sentences, context_sentences, weights=None, mode="average"):
+        """
+        Compute context relevancy score for a given query and context.
+        
+        Parameters:
+        - query_sentences: List of sentences in the query (𝒬).
+        - context_sentences: List of sentences in the context (𝒞).
+        - weights: Optional weights for each query sentence (default: uniform).
+        - mode: "average" (default), "weighted", or "minimax".
+        
+        Returns:
+        - A relevancy score between -1 and 1.
+        """
+        query_embeddings = self.compute_embeddings(query_sentences)
+        context_embeddings = self.compute_embeddings(context_sentences)
 
-# Example input and output
-input_text = "Regular physical activity improves health and reduces disease risks."
-output_text = "Exercise helps in improving overall health and reducing the risks of chronic diseases."
+        # Compute cosine similarities for all (qi, cj) pairs
+        similarity_matrix = np.matmul(query_embeddings, context_embeddings.T)
+        
+        # Get S_max(qi) for each query sentence
+        S_max = np.max(similarity_matrix, axis=1)
 
-# Evaluate context and semantic relevance
-context_score = azure_evaluate_g_eval(input_text, output_text, "context")
-semantic_score = azure_evaluate_g_eval(input_text, output_text, "semantic")
+        if mode == "average":
+            return np.mean(S_max)
+        elif mode == "weighted":
+            if weights is None or len(weights) != len(query_sentences):
+                raise ValueError("Weights must be provided and match the number of query sentences.")
+            return np.dot(weights, S_max)  # Weighted sum
+        elif mode == "minimax":
+            return np.min(S_max)  # Focus on the least addressed query sentence
+        else:
+            raise ValueError("Invalid mode. Choose from 'average', 'weighted', or 'minimax'.")
 
-print("Context Relevance Evaluation:", context_score)
-print("Semantic Relevance Evaluation:", semantic_score)
+# Example Usage
+query = ["What is the capital of France?", "Tell me about the Eiffel Tower."]
+context = ["Paris is the capital of France.", "The Eiffel Tower is a landmark in Paris."]
+
+scorer = RAGRelevancyScorer()
+score = scorer.compute_relevancy(query, context, mode="average")
+print("Context Relevancy Score:", score)
