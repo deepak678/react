@@ -1,6 +1,2 @@
-Accuracy: Measures how factually correct the model's output is compared to the expected answer.
-Completeness: Assesses whether the response fully addresses all parts of the query.
-Hallucination: Detects when the model generates information not supported by the input or facts.
-Context Relevance: Evaluates how well the response aligns with the context of the prompt.
-Semantic Relevance: Checks if the meaning of the response logically matches the user's intent.
-Consistency: Ensures the model provides stable and coherent answers across similar inputs.
+Provides a qualitative judgment (e.g., Satisfactory, Partially Correct, Incorrect) for further scoring.
+Acts as the foundation for the next feedback scoring prompt.
