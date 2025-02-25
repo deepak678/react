@@ -1,13 +1,25 @@
-Continuous Improvement Focus:
+Objective:
 
-Prompt Evolution: Continuously refine prompts to capture evolving language patterns and improve metric accuracy.
+To assess how closely the meaning of the response aligns with the intent of the request.
 
-Contextual Awareness: Enhance the evaluation's ability to understand nuanced contexts.
+Methodology:
 
-Deeper Semantic Relevance Checks: Introduce advanced semantic similarity techniques.
+Single Prompt Evaluation: Uses one prompt where the LLM itself acts as a judge.
 
-Dynamic Benchmarking: Update benchmarks based on new data and user feedback.
+The prompt compares the semantic similarity between the request and the response.
 
-Cross-Metric Consistency Analysis: Ensure scoring consistency across different metrics over time.
+Scoring Process:
 
-Real-time Feedback Loop: Incorporate real-time user feedback for continuous learning and adaptation.
+The LLM provides a relevance score based on contextual and semantic alignment.
+
+Focuses on capturing deep meaning beyond literal word matching.
+
+Example Outcome:
+
+Semantic Relevance Score: 92%
+
+Visual Design Suggestion:
+
+A diagram illustrating:
+
+Request and Response → 2. LLM as Judge → 3. Semantic Relevance Score
