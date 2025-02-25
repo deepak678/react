@@ -1,63 +1,6 @@
-from sentence_transformers import SentenceTransformer
-import numpy as np
-
-class RAGRelevancyScorer:
-    def __init__(self, model_name="all-MiniLM-L6-v2"):
-        """
-        Initialize the RAG relevancy scorer with a sentence embedding model.
-        Default model: all-MiniLM-L6-v2 (fast and efficient).
-        """
-        self.model = SentenceTransformer(model_name)
-    
-    def compute_embeddings(self, sentences):
-        """
-        Compute sentence embeddings for a list of sentences.
-        """
-        return self.model.encode(sentences, normalize_embeddings=True)
-    
-    def cosine_similarity(self, emb1, emb2):
-        """
-        Compute cosine similarity between two embeddings.
-        """
-        return np.dot(emb1, emb2)
-    
-    def compute_relevancy(self, query_sentences, context_sentences, weights=None, mode="average"):
-        """
-        Compute context relevancy score for a given query and context.
-        
-        Parameters:
-        - query_sentences: List of sentences in the query (𝒬).
-        - context_sentences: List of sentences in the context (𝒞).
-        - weights: Optional weights for each query sentence (default: uniform).
-        - mode: "average" (default), "weighted", or "minimax".
-        
-        Returns:
-        - A relevancy score between -1 and 1.
-        """
-        query_embeddings = self.compute_embeddings(query_sentences)
-        context_embeddings = self.compute_embeddings(context_sentences)
-
-        # Compute cosine similarities for all (qi, cj) pairs
-        similarity_matrix = np.matmul(query_embeddings, context_embeddings.T)
-        
-        # Get S_max(qi) for each query sentence
-        S_max = np.max(similarity_matrix, axis=1)
-
-        if mode == "average":
-            return np.mean(S_max)
-        elif mode == "weighted":
-            if weights is None or len(weights) != len(query_sentences):
-                raise ValueError("Weights must be provided and match the number of query sentences.")
-            return np.dot(weights, S_max)  # Weighted sum
-        elif mode == "minimax":
-            return np.min(S_max)  # Focus on the least addressed query sentence
-        else:
-            raise ValueError("Invalid mode. Choose from 'average', 'weighted', or 'minimax'.")
-
-# Example Usage
-query = ["What is the capital of France?", "Tell me about the Eiffel Tower."]
-context = ["Paris is the capital of France.", "The Eiffel Tower is a landmark in Paris."]
-
-scorer = RAGRelevancyScorer()
-score = scorer.compute_relevancy(query, context, mode="average")
-print("Context Relevancy Score:", score)
+Ensure Performance: Validates the model's accuracy, relevance, and fluency in responses.
+Detect Errors: Identifies issues like hallucinations, bias, or incomplete outputs.
+Improve Reliability: Ensures consistent and robust behavior across different scenarios.
+Maintain Fairness: Checks for unbiased and equitable responses.
+Optimize Efficiency: Monitors latency, load handling, and resource usage.
+Goal: Ensure the model delivers accurate, complete, and reliable outputs for real-world applications.
