@@ -1,2 +1,17 @@
-Provides a qualitative judgment (e.g., Satisfactory, Partially Correct, Incorrect) for further scoring.
-Acts as the foundation for the next feedback scoring prompt.
+Objective:
+
+Use subjective feedback from the first prompt as input to generate quantitative scores for each metric.
+How It Works:
+
+Completeness: Checks whether all essential parts of the request are addressed.
+Accuracy: Measures factual correctness based on provided data.
+Hallucination Detection: Flags any unsupported or false statements.
+Scoring Process:
+
+Translates subjective evaluation into a score (e.g., 0-1 scale or percentage) for each metric.
+Provides objective feedback that can be tracked over multiple prompts.
+Example Scoring Outcome:
+
+Completeness: 85%
+Accuracy: 90%
+Hallucination: 5%
