@@ -1,25 +1,27 @@
-Objective:
+import json
+import re
 
-To assess how closely the meaning of the response aligns with the intent of the request.
+def extract_and_convert_json(text):
+    # Use regex to find the first occurrence of a JSON-like structure
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    
+    if match:
+        json_string = match.group(0)  # Extract JSON part
+        try:
+            return json.loads(json_string)  # Convert to dictionary
+        except json.JSONDecodeError as e:
+            print("Invalid JSON:", e)
+            return None
+    else:
+        print("No valid JSON found in the input")
+        return None
 
-Methodology:
+# Example input with unwanted text before JSON
+input_text = '''random text here
+{ "avg" : 6, "score": 9 }'''
 
-Single Prompt Evaluation: Uses one prompt where the LLM itself acts as a judge.
+# Convert to dictionary
+data_dict = extract_and_convert_json(input_text)
 
-The prompt compares the semantic similarity between the request and the response.
-
-Scoring Process:
-
-The LLM provides a relevance score based on contextual and semantic alignment.
-
-Focuses on capturing deep meaning beyond literal word matching.
-
-Example Outcome:
-
-Semantic Relevance Score: 92%
-
-Visual Design Suggestion:
-
-A diagram illustrating:
-
-Request and Response → 2. LLM as Judge → 3. Semantic Relevance Score
+# Output
+print(data_dict)
