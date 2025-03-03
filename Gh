@@ -1,1 +1,9 @@
-Process: Multiple responses are generated from the model using the same input, and these responses are compared using embeddings to measure their similarity. The consistency score is derived from how closely the responses align with each other.
+The input query and the retrieved context are broken down into individual sentences.
+
+Embeddings are generated for each sentence using an embedding model.
+
+Cosine similarity is computed between each pair of query and context sentences.
+
+The highest similarity score for each query sentence is recorded.
+
+The overall context relevance score is calculated as the average of these maximum similarity scores across all query sentences.
