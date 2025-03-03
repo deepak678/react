@@ -1,27 +1,91 @@
-import json
-import re
+Functional Metrics Evaluation Document
 
-def extract_and_convert_json(text):
-    # Use regex to find the first occurrence of a JSON-like structure
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    
-    if match:
-        json_string = match.group(0)  # Extract JSON part
-        try:
-            return json.loads(json_string)  # Convert to dictionary
-        except json.JSONDecodeError as e:
-            print("Invalid JSON:", e)
-            return None
-    else:
-        print("No valid JSON found in the input")
-        return None
+1. Introduction
 
-# Example input with unwanted text before JSON
-input_text = '''random text here
-{ "avg" : 6, "score": 9 }'''
+This document outlines the functional metrics to be evaluated, the number of evaluations performed, and the methodologies used to calculate these metrics. The purpose of this document is to ensure consistency in measurement and establish a standardized approach.
 
-# Convert to dictionary
-data_dict = extract_and_convert_json(input_text)
+2. List of Functional Metrics
 
-# Output
-print(data_dict)
+Below are the key functional metrics identified for evaluation:
+
+Accuracy
+
+Completeness
+
+Hallucination Detection
+
+Consistency
+
+Context Relevance
+
+Semantic Relevance
+
+3. Evaluations Performed
+
+Metric
+
+Evaluations Performed
+
+Accuracy
+
+TBD
+
+Completeness
+
+TBD
+
+Hallucination
+
+TBD
+
+Consistency
+
+TBD
+
+Context Relevance
+
+TBD
+
+Semantic Relevance
+
+TBD
+
+4. Methodologies Used
+
+Each metric is calculated using a specific approach:
+
+4.1 Accuracy
+
+Methodology: AI-to-AI evaluation using LangChain.
+
+Process: Compare model output against a reference response using cosine similarity and structured scoring.
+
+4.2 Completeness
+
+Methodology: Two-prompt approach using LangChain.
+
+Process: First prompt evaluates response coverage, and second prompt assigns completeness scores.
+
+4.3 Hallucination Detection
+
+Methodology: Embedding similarity-based detection.
+
+Process: Checks if generated content is grounded in the input.
+
+4.4 Consistency
+
+Methodology: AI consistency checks across multiple responses.
+
+Process: Evaluate whether the model provides coherent responses across repeated queries.
+
+4.5 Context Relevance
+
+Methodology: Single prompt evaluation.
+
+Process: LLM judges whether response is contextually aligned with the input query.
+
+4.6 Semantic Relevance
+
+Methodology: Embedding-based semantic similarity.
+
+Process: Compare model output embeddings with input embeddings to assess semantic closeness.
