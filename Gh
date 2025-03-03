@@ -1,5 +1,1 @@
-4.1 Accuracy, Completeness & Hallucination Detection
-
-Methodology: AI-to-AI evaluation using LangChain.
-
-Process: A two-prompt approach is used where the first prompt evaluates response coverage, accuracy, and potential hallucinations. The second prompt assigns structured scores based on the evaluation done using the 5C's framework (Condition, Context, Criteria, Consequence, Cause) and provides individual scores for each metric.
+Process: Multiple responses are generated from the model using the same input, and these responses are compared using embeddings to measure their similarity. The consistency score is derived from how closely the responses align with each other.
