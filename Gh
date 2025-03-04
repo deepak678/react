@@ -1,29 +1,32 @@
 import json
+import pandas as pd
+import re
 
-def fix_json_values(json_str):
+def fix_and_extract_json(json_str):
+    """Fix unquoted string values in JSON and return the first three values."""
     try:
-        # Try loading the JSON normally
-        data = json.loads(json_str)
-    except json.JSONDecodeError:
-        # Handle broken JSON (e.g., unquoted values)
-        data = eval(json_str)  # Use eval cautiously for trusted input only
+        # Fix unquoted strings (detect words without quotes after `:`)
+        json_str_fixed = re.sub(r'(".*?"\s*:\s*)([a-zA-Z_]+)', r'\1"\2"', json_str)
 
-    # Fix values dynamically
-    for key, value in data.items():
-        if not isinstance(value, (int, float)):  # If not a number, convert to string
-            data[key] = str(value)
+        # Parse the fixed JSON
+        data = json.loads(json_str_fixed)
 
-    return json.dumps(data)  # Convert back to JSON string
+        # Extract first three values
+        values = list(data.values())[:3]
 
-# Example JSON string (some values are unquoted)
-a = '{"1": "value1", "2": "value2", "third": 123, "fourth": abc, "fifth": 45.67, "sixth": no, "seventh": "already fine"}'
+        return values  # Returning list (apply will convert to separate columns)
 
-# Fix JSON
-fixed_json_str = fix_json_values(a)
+    except (json.JSONDecodeError, TypeError) as e:
+        return json_str  # If parsing fails, return the original string
 
-# Convert back to dictionary
-try:
-    json_data = json.loads(fixed_json_str)
-    print(json_data)
-except json.JSONDecodeError as e:
-    print("JSON decoding error:", e)
+# Example DataFrame
+df = pd.DataFrame({'json_column': [
+    '{"1": "value1", "2": "value2", "third": 123, "fourth": abc, "fifth": 45.67}',  # Unquoted string (abc)
+    '{"a": "apple", "b": banana, "c": cherry, "d": "date"}',  # Unquoted banana, cherry
+    '{"x": 100, "y": 200}',  # Valid JSON
+]})
+
+# Apply function and expand into columns
+df[['val1', 'val2', 'val3']] = df['json_column'].apply(fix_and_extract_json).apply(pd.Series)
+
+print(df)
