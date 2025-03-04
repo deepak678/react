@@ -1,9 +1,30 @@
-The input query and the retrieved context are broken down into individual sentences.
+import json
+import re
 
-Embeddings are generated for each sentence using an embedding model.
+def fix_json_values(json_str):
+    def replace_value(match):
+        key, value = match.groups()
+        # Check if the value is purely numeric (integer or float)
+        if re.fullmatch(r"-?\d+(\.\d+)?", value):  
+            return f'{key}{value}'  # Keep numbers unquoted
+        else:
+            return f'{key}"{value}"'  # Quote non-numeric values
 
-Cosine similarity is computed between each pair of query and context sentences.
+    # Regex to match key-value pairs, allowing for numbers and strings
+    pattern = r'(".*?"\s*:\s*)([^",}\]]+)'
+    json_str_fixed = re.sub(pattern, replace_value, json_str)
+    
+    return json_str_fixed
 
-The highest similarity score for each query sentence is recorded.
+# Example input
+a = '{"1": "value1", "2": "value2", "third": 123, "fourth": abc, "fifth": 45.67, "sixth": no, "seventh": "already fine"}'
 
-The overall context relevance score is calculated as the average of these maximum similarity scores across all query sentences.
+# Fix JSON string
+fixed_json_str = fix_json_values(a)
+
+# Load as JSON
+try:
+    json_data = json.loads(fixed_json_str)
+    print(json_data)
+except json.JSONDecodeError as e:
+    print("JSON decoding error:", e)
