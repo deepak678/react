@@ -1,28 +1,27 @@
 import json
-import re
 
 def fix_json_values(json_str):
-    def replace_value(match):
-        key, value = match.groups()
-        # Check if the value is purely numeric (integer or float)
-        if re.fullmatch(r"-?\d+(\.\d+)?", value):  
-            return f'{key}{value}'  # Keep numbers unquoted
-        else:
-            return f'{key}"{value}"'  # Quote non-numeric values
+    try:
+        # Try loading the JSON normally
+        data = json.loads(json_str)
+    except json.JSONDecodeError:
+        # Handle broken JSON (e.g., unquoted values)
+        data = eval(json_str)  # Use eval cautiously for trusted input only
 
-    # Regex to match key-value pairs, allowing for numbers and strings
-    pattern = r'(".*?"\s*:\s*)([^",}\]]+)'
-    json_str_fixed = re.sub(pattern, replace_value, json_str)
-    
-    return json_str_fixed
+    # Fix values dynamically
+    for key, value in data.items():
+        if not isinstance(value, (int, float)):  # If not a number, convert to string
+            data[key] = str(value)
 
-# Example input
+    return json.dumps(data)  # Convert back to JSON string
+
+# Example JSON string (some values are unquoted)
 a = '{"1": "value1", "2": "value2", "third": 123, "fourth": abc, "fifth": 45.67, "sixth": no, "seventh": "already fine"}'
 
-# Fix JSON string
+# Fix JSON
 fixed_json_str = fix_json_values(a)
 
-# Load as JSON
+# Convert back to dictionary
 try:
     json_data = json.loads(fixed_json_str)
     print(json_data)
