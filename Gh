@@ -1,32 +1,36 @@
-import json
-import pandas as pd
-import re
+Approach 1: Iterative Contextual Evaluation (Sliding Window)
+Instead of sending all input-output pairs at once, process them sequentially while retaining context.
 
-def fix_and_extract_json(json_str):
-    """Fix unquoted string values in JSON and return the first three values."""
-    try:
-        # Fix unquoted strings (detect words without quotes after `:`)
-        json_str_fixed = re.sub(r'(".*?"\s*:\s*)([a-zA-Z_]+)', r'\1"\2"', json_str)
+Steps:
+Process Turn-by-Turn
 
-        # Parse the fixed JSON
-        data = json.loads(json_str_fixed)
+For each (input_i, output_i), call the subjective evaluation prompt.
+Append the evaluation results as context for the next turn.
+Sliding Window for Context Awareness
 
-        # Extract first three values
-        values = list(data.values())[:3]
+Instead of sending the entire history, send a subset of previous turns (last k turns).
+This ensures evaluation remains context-aware without exceeding API limits.
+Final Aggregation & Scoring
 
-        return values  # Returning list (apply will convert to separate columns)
+Once all turns are evaluated, pass the aggregated subjective evaluations to the scoring prompt.
+The scoring prompt can then consider overall coherence, consistency, and logical flow across turns.
+Example Flow:
+sql
+Copy
+Edit
+For each turn i:
+  - Call Subjective Evaluation Prompt with (Input_i, Output_i, Context from previous k turns)
+  - Store the subjective evaluation result
 
-    except (json.JSONDecodeError, TypeError) as e:
-        return json_str  # If parsing fails, return the original string
+After all turns:
+  - Call Scoring Prompt with the collected evaluations
+  - Generate the final score for the entire sequence
+✅ Pros:
 
-# Example DataFrame
-df = pd.DataFrame({'json_column': [
-    '{"1": "value1", "2": "value2", "third": 123, "fourth": abc, "fifth": 45.67}',  # Unquoted string (abc)
-    '{"a": "apple", "b": banana, "c": cherry, "d": "date"}',  # Unquoted banana, cherry
-    '{"x": 100, "y": 200}',  # Valid JSON
-]})
-
-# Apply function and expand into columns
-df[['val1', 'val2', 'val3']] = df['json_column'].apply(fix_and_extract_json).apply(pd.Series)
-
-print(df)
+Reduces API payload per call.
+Keeps evaluations context-aware.
+Works even for long conversations.
+Approach 2: Batch Processing with Progressive Summarization
+Break the conversation into smaller batches (e.g., 3-5 turns per batch).
+Evaluate each batch independently using the subjective evaluation prompt.
+Summarize the evaluations and pass them into a higher-level scoring prompt.
