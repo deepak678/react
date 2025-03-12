@@ -1,36 +1,62 @@
-Approach 1: Iterative Contextual Evaluation (Sliding Window)
-Instead of sending all input-output pairs at once, process them sequentially while retaining context.
+Input
+Title: Server downtime
+Description: The application experienced unexpected downtime due to server overload.
+Previous Model Output (Baseline)
+Field	Output
+Condition	Server overload
+Consequence	Application downtime
+Context	During peak traffic hours
+Criteria	Ensure server capacity meets demand
+Cause	High concurrent requests
+New Model Output
+Field	Output
+Condition	Server failure
+Consequence	System unresponsive
+Context	Peak hours
+Criteria	Optimize server load balancing
+Cause	Insufficient server resources
+Comparison & Analysis
+Field	Baseline Output	New Model Output	Assessment
+Condition	Server overload	Server failure	Worse (Less specific)
+Consequence	Application downtime	System unresponsive	Worse (Less descriptive)
+Context	During peak traffic hours	Peak hours	Same
+Criteria	Ensure server capacity meets demand	Optimize server load balancing	Better (More actionable)
+Cause	High concurrent requests	Insufficient server resources	Better (More detailed cause)
+Final Verdict: Mixed Performance
+Worse: The condition and consequence are less precise in the new model.
+Better: The criteria and cause give better insights into the issue.
+✦ Overall Assessment: Needs Improvement (Some fields improved, but others became less specific).
 
-Steps:
-Process Turn-by-Turn
+Another Example: Performance Lag Issue
+Input
+Title: Performance lag
+Description: Application response time increased to more than 10 seconds.
+Previous Model Output (Baseline)
+Field	Output
+Condition	Slow response
+Consequence	User dissatisfaction
+Context	Under high load
+Criteria	Optimize query performance
+Cause	Unoptimized database queries
+New Model Output
+Field	Output
+Condition	High latency issue
+Consequence	Application slowdown
+Context	During concurrent user activity
+Criteria	Implement caching mechanisms
+Cause	Excessive database load
+Comparison & Analysis
+Field	Baseline Output	New Model Output	Assessment
+Condition	Slow response	High latency issue	Same
+Consequence	User dissatisfaction	Application slowdown	Better (More specific)
+Context	Under high load	During concurrent user activity	Better (More detailed context)
+Criteria	Optimize query performance	Implement caching mechanisms	Better (New strategy introduced)
+Cause	Unoptimized database queries	Excessive database load	Better (More precise diagnosis)
+Final Verdict: Better
+✦ Overall Assessment: Improved model performance (More detailed and actionable insights).
 
-For each (input_i, output_i), call the subjective evaluation prompt.
-Append the evaluation results as context for the next turn.
-Sliding Window for Context Awareness
-
-Instead of sending the entire history, send a subset of previous turns (last k turns).
-This ensures evaluation remains context-aware without exceeding API limits.
-Final Aggregation & Scoring
-
-Once all turns are evaluated, pass the aggregated subjective evaluations to the scoring prompt.
-The scoring prompt can then consider overall coherence, consistency, and logical flow across turns.
-Example Flow:
-sql
-Copy
-Edit
-For each turn i:
-  - Call Subjective Evaluation Prompt with (Input_i, Output_i, Context from previous k turns)
-  - Store the subjective evaluation result
-
-After all turns:
-  - Call Scoring Prompt with the collected evaluations
-  - Generate the final score for the entire sequence
-✅ Pros:
-
-Reduces API payload per call.
-Keeps evaluations context-aware.
-Works even for long conversations.
-Approach 2: Batch Processing with Progressive Summarization
-Break the conversation into smaller batches (e.g., 3-5 turns per batch).
-Evaluate each batch independently using the subjective evaluation prompt.
-Summarize the evaluations and pass them into a higher-level scoring prompt.
+Conclusion
+If the new model provides more precise outputs, it is marked as better.
+If it generalizes too much or loses detail, it is marked as worse.
+If there is no meaningful difference, it is marked as same.
+Would you like an automated script that compares outputs and highlights the changes?
