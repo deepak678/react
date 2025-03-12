@@ -1,62 +1,8 @@
-Input
-Title: Server downtime
-Description: The application experienced unexpected downtime due to server overload.
-Previous Model Output (Baseline)
-Field	Output
-Condition	Server overload
-Consequence	Application downtime
-Context	During peak traffic hours
-Criteria	Ensure server capacity meets demand
-Cause	High concurrent requests
-New Model Output
-Field	Output
-Condition	Server failure
-Consequence	System unresponsive
-Context	Peak hours
-Criteria	Optimize server load balancing
-Cause	Insufficient server resources
-Comparison & Analysis
-Field	Baseline Output	New Model Output	Assessment
-Condition	Server overload	Server failure	Worse (Less specific)
-Consequence	Application downtime	System unresponsive	Worse (Less descriptive)
-Context	During peak traffic hours	Peak hours	Same
-Criteria	Ensure server capacity meets demand	Optimize server load balancing	Better (More actionable)
-Cause	High concurrent requests	Insufficient server resources	Better (More detailed cause)
-Final Verdict: Mixed Performance
-Worse: The condition and consequence are less precise in the new model.
-Better: The criteria and cause give better insights into the issue.
-✦ Overall Assessment: Needs Improvement (Some fields improved, but others became less specific).
-
-Another Example: Performance Lag Issue
-Input
-Title: Performance lag
-Description: Application response time increased to more than 10 seconds.
-Previous Model Output (Baseline)
-Field	Output
-Condition	Slow response
-Consequence	User dissatisfaction
-Context	Under high load
-Criteria	Optimize query performance
-Cause	Unoptimized database queries
-New Model Output
-Field	Output
-Condition	High latency issue
-Consequence	Application slowdown
-Context	During concurrent user activity
-Criteria	Implement caching mechanisms
-Cause	Excessive database load
-Comparison & Analysis
-Field	Baseline Output	New Model Output	Assessment
-Condition	Slow response	High latency issue	Same
-Consequence	User dissatisfaction	Application slowdown	Better (More specific)
-Context	Under high load	During concurrent user activity	Better (More detailed context)
-Criteria	Optimize query performance	Implement caching mechanisms	Better (New strategy introduced)
-Cause	Unoptimized database queries	Excessive database load	Better (More precise diagnosis)
-Final Verdict: Better
-✦ Overall Assessment: Improved model performance (More detailed and actionable insights).
-
-Conclusion
-If the new model provides more precise outputs, it is marked as better.
-If it generalizes too much or loses detail, it is marked as worse.
-If there is no meaningful difference, it is marked as same.
-Would you like an automated script that compares outputs and highlights the changes?
+Test Name	What It Checks	Key Metrics
+Performance Testing	Speed & resource usage	Inference time, Memory, CPU/GPU load
+Consistency Testing	Stable, repeatable outputs	Deterministic outputs, Variance
+Accuracy Testing	Expected structured output	Pass/Fail rate, Semantic similarity
+Completeness Testing	No missing fields	Missing elements count
+Robustness Testing	Handles different input variations	Handles short/long/noisy inputs
+Hallucination Testing	No extra/unverified information	Hallucination score
+Regression Stability	No unintended model regressions	Unexpected format changes
