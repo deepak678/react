@@ -1,43 +1,7 @@
-Accuracy is evaluated based on factual correctness and expected content. Additionally, accuracy is influenced by the completeness of the response and the presence or absence of hallucinated information. A response with missing key components or hallucinated details will inherently have lower accuracy.
+The issue title is a critical component of the response and must be present. It can either be:
 
-Accuracy measures how well the response aligns with factual correctness and expected content. The scoring criteria are as follows:
+The same as the input issue title, ensuring consistency with the original.
 
-Score (1-5)
+An improved version that better reflects the issue description while maintaining accuracy and relevance.
 
-Criteria
-
-5 (Excellent)
-
-The response is factually correct, fully aligned with the expected answer, and has no errors.
-
-4 (Good)
-
-The response is mostly accurate but may contain minor errors or omissions that do not impact the overall correctness.
-
-3 (Satisfactory)
-
-The response contains noticeable factual inaccuracies but still conveys some correct information.
-
-2 (Needs Improvement)
-
-The response has significant factual errors that reduce its reliability.
-
-1 (Poor)
-
-The response is completely incorrect or misleading.
-
-4.4 Hallucination Scoring Framework
-
-Hallucination measures whether the response includes information that is not supported by the input data. The scoring criteria are as follows:
-
-Hallucination
-
-Criteria
-
-No
-
-The response is entirely based on input data with no unsupported information.
-
-Yes
-
-The response contains information that is not present in the input data and is considered hallucinated.
+The evaluator should ensure that the issue title is not missing and that any modifications enhance clarity and alignment with the provided issue details.
