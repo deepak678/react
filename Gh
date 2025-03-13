@@ -1,8 +1,23 @@
-Test Name	What It Checks	Key Metrics
-Performance Testing	Speed & resource usage	Inference time, Memory, CPU/GPU load
-Consistency Testing	Stable, repeatable outputs	Deterministic outputs, Variance
-Accuracy Testing	Expected structured output	Pass/Fail rate, Semantic similarity
-Completeness Testing	No missing fields	Missing elements count
-Robustness Testing	Handles different input variations	Handles short/long/noisy inputs
-Hallucination Testing	No extra/unverified information	Hallucination score
-Regression Stability	No unintended model regressions	Unexpected format changes
+Score (1-5)
+
+Criteria
+
+5 (Excellent)
+
+All required components (Issue Title, 5C's, Issue Severity Rationale, Additional Information, if needed) are present and well-articulated.
+
+4 (Good)
+
+Most key components are present, but minor details are missing or need slight refinement.
+
+3 (Satisfactory)
+
+Some essential components are missing or incomplete, reducing the clarity and usability of the response.
+
+2 (Needs Improvement)
+
+Significant gaps in key components, making the response difficult to interpret or incomplete.
+
+1 (Poor)
+
+Majority of required components are absent, making the response largely unusable.
