@@ -1,23 +1,43 @@
+Accuracy is evaluated based on factual correctness and expected content. Additionally, accuracy is influenced by the completeness of the response and the presence or absence of hallucinated information. A response with missing key components or hallucinated details will inherently have lower accuracy.
+
+Accuracy measures how well the response aligns with factual correctness and expected content. The scoring criteria are as follows:
+
 Score (1-5)
 
 Criteria
 
 5 (Excellent)
 
-All required components (Issue Title, 5C's, Issue Severity Rationale, Additional Information, if needed) are present and well-articulated.
+The response is factually correct, fully aligned with the expected answer, and has no errors.
 
 4 (Good)
 
-Most key components are present, but minor details are missing or need slight refinement.
+The response is mostly accurate but may contain minor errors or omissions that do not impact the overall correctness.
 
 3 (Satisfactory)
 
-Some essential components are missing or incomplete, reducing the clarity and usability of the response.
+The response contains noticeable factual inaccuracies but still conveys some correct information.
 
 2 (Needs Improvement)
 
-Significant gaps in key components, making the response difficult to interpret or incomplete.
+The response has significant factual errors that reduce its reliability.
 
 1 (Poor)
 
-Majority of required components are absent, making the response largely unusable.
+The response is completely incorrect or misleading.
+
+4.4 Hallucination Scoring Framework
+
+Hallucination measures whether the response includes information that is not supported by the input data. The scoring criteria are as follows:
+
+Hallucination
+
+Criteria
+
+No
+
+The response is entirely based on input data with no unsupported information.
+
+Yes
+
+The response contains information that is not present in the input data and is considered hallucinated.
