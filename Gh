@@ -1,7 +1,5 @@
-Context Relevance Scoring Framework (Mapped to 1-5 Scale)
-Score (1-5)	Cosine Similarity Range (Sim)	Criteria
-5 (Excellent)	Sim ≥ 0.85	The retrieved context is highly relevant to the query. Covers all key aspects with no irrelevant content.
-4 (Good)	0.70 ≤ Sim < 0.85	The context is mostly relevant, but some minor details are missing or slightly off-topic.
-3 (Satisfactory)	0.50 ≤ Sim < 0.70	The context provides partial relevance. Some key details are missing, or minor unrelated content is present.
-2 (Needs Improvement)	0.30 ≤ Sim < 0.50	The context is weakly relevant, missing crucial details or including a significant amount of irrelevant data.
-1 (Poor)	Sim < 0.30	The context is completely misaligned with the query, either unrelated or failing to address key aspects.
+5 (Excellent)	The response perfectly aligns with the query’s intended meaning. No key points are missing or distorted.
+4 (Good)	The response is mostly relevant but may have minor omissions or slight rewording that slightly affects meaning.
+3 (Satisfactory)	The response captures the general meaning but lacks key details or slightly alters the intended interpretation.
+2 (Needs Improvement)	The response only weakly reflects the intended meaning. It contains noticeable semantic drift or missing context.
+1 (Poor)	The response is semantically unrelated to the query or severely misinterprets the intended meaning.
