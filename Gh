@@ -1,6 +1,7 @@
-Goal 1: Amplifying Innovation and Advocacy
-Description: Promote innovation and knowledge-sharing within and outside the organization by actively advocating for emerging technologies and best practices. This will be achieved through internal and external sessions to drive engagement and thought leadership.
-Measure & Target: Conduct one internal (1-hour) session and one external (1-hour) session on innovation and technology advancements.
-Goal 2: Prioritizing Personal Well-being
-Description: Focus on enhancing physical and mental well-being by incorporating structured wellness activities into my routine.
-Measure & Target: Engage in at least three wellness activities per week, such as meditation, exercise, or digital detox sessions, ensuring a balanced and healthier lifestyle.
+Context Relevance Scoring Framework (Mapped to 1-5 Scale)
+Score (1-5)	Cosine Similarity Range (Sim)	Criteria
+5 (Excellent)	Sim ≥ 0.85	The retrieved context is highly relevant to the query. Covers all key aspects with no irrelevant content.
+4 (Good)	0.70 ≤ Sim < 0.85	The context is mostly relevant, but some minor details are missing or slightly off-topic.
+3 (Satisfactory)	0.50 ≤ Sim < 0.70	The context provides partial relevance. Some key details are missing, or minor unrelated content is present.
+2 (Needs Improvement)	0.30 ≤ Sim < 0.50	The context is weakly relevant, missing crucial details or including a significant amount of irrelevant data.
+1 (Poor)	Sim < 0.30	The context is completely misaligned with the query, either unrelated or failing to address key aspects.
