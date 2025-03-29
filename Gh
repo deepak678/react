@@ -1,4 +1,1 @@
-**Accuracy Evaluation Rule:**
-- The output must **not** modify abbreviations unless they were already expanded in the input.
-- If an abbreviation is **not expanded in the input** but **expanded in the output**, apply a penalty.
-- The accuracy score should reflect this inconsistency, as the model is introducing additional information.
+Identify all abbreviations in the input and check if they remain unchanged in the output. Any expansion of an abbreviation—even if followed by its acronym in parentheses (e.g., "The Non-Performing Assets (NPA)")—that was not explicitly present in the input should be marked as an accuracy violation and penalized accordingly.
