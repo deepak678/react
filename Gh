@@ -1,1 +1,86 @@
-The monitoring test for the RMC Risk Management Copilot (RMC) aims to assess its ability to accurately transform unstructured issue descriptions and titles into a structured 5C framework while maintaining data integrity and completeness. The test is designed to ensure that all key risk dimensions are measured effectively, aligning with regulatory and business requirements.
+Performance Test Plan for RMC Risk Management Copilot
+The performance test plan evaluates the RMC's ability to transform unstructured issue descriptions and titles into a structured 5C format while ensuring accuracy, completeness, and reliability.
+
+Step 1: Test Case Selection
+To ensure a comprehensive assessment, test cases will be selected based on the following criteria:
+
+1.1 Input Complexity Levels
+Simple Cases: Well-structured issue descriptions with clear 5C components.
+
+Moderate Cases: Issues with implicit cause or consequence requiring inference.
+
+Complex Cases: Ambiguous descriptions with missing components that require contextual understanding.
+
+1.2 Data Diversity
+Domain Coverage: Financial risk, operational risk, compliance risk, etc.
+
+Varying Input Lengths: Short vs. long issue descriptions.
+
+Missing Information Scenarios: Cases where additional information should or should not be inferred.
+
+Step 2: Baseline Comparison & Ground Truth Generation
+For accurate evaluation, a gold-standard dataset (ground truth) will be created by:
+
+Manually structuring a sample set of issues into the 5C format using SMEs.
+
+Assigning scores for accuracy, completeness, and hallucination based on SME evaluation.
+
+Creating a dataset of acceptable and unacceptable transformations to train and validate the model's consistency.
+
+Step 3: Evaluation Metrics & Scoring Methodology
+The RMC system output will be evaluated against the ground truth based on the following metrics:
+
+3.1 Completeness Score (1-5 Scale)
+Score 5 – All 5C elements present and correctly extracted.
+
+Score 4 – One minor component missing but no impact on interpretation.
+
+Score 3 – One major component missing, requiring manual intervention.
+
+Score 2 – Multiple key components missing, significantly impacting usability.
+
+Score 1 – Output is largely incomplete and unusable.
+
+3.2 Accuracy Score (1-5 Scale)
+Score 5 – Fully correct extraction, no hallucinations, and high semantic overlap with the ground truth.
+
+Score 4 – Minor discrepancies but overall aligned.
+
+Score 3 – Noticeable errors but retains partial correctness.
+
+Score 2 – Major factual inaccuracies affecting usability.
+
+Score 1 – Output is largely incorrect.
+
+3.3 Hallucination Detection (Yes/No)
+Yes – If any information is generated in the output that was not present in the input.
+
+No – If output strictly adheres to the input information without extrapolation.
+
+3.4 Consistency Score (1-5 Scale)
+Score 5 – Identical issues receive identical structured outputs.
+
+Score 4 – Minor variations but still understandable.
+
+Score 3 – Moderate variations requiring review.
+
+Score 2 – Significant inconsistencies making the model unreliable.
+
+Score 1 – No consistency; outputs for similar inputs vary widely.
+
+Step 4: Threshold Definition & Pass Criteria
+Metric	Threshold for Acceptance
+Completeness	≥ 90% cases should score ≥ 4
+Accuracy	≥ 85% cases should score ≥ 4
+Hallucination	≤ 5% cases flagged as ‘Yes’
+Consistency	≥ 80% cases should score ≥ 4
+If the model fails to meet the above criteria, retraining and parameter adjustments will be required.
+
+Step 5: Continuous Monitoring & Automation
+Automated Weekly Testing: Run scheduled AI-to-AI validation using LangChain-based LLM scoring.
+
+Real-Time Error Logging: Any structured output failing the threshold will be logged in Helios for SME review.
+
+Periodic Human Evaluation: A quarterly manual review of random samples to detect unnoticed drifts.
+
+Feedback Loop for Model Improvement: Any deviations will be fed back into the training pipeline to iteratively refine performance.
