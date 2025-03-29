@@ -1,5 +1,4 @@
-5 (Excellent)	The response perfectly aligns with the query’s intended meaning. No key points are missing or distorted.
-4 (Good)	The response is mostly relevant but may have minor omissions or slight rewording that slightly affects meaning.
-3 (Satisfactory)	The response captures the general meaning but lacks key details or slightly alters the intended interpretation.
-2 (Needs Improvement)	The response only weakly reflects the intended meaning. It contains noticeable semantic drift or missing context.
-1 (Poor)	The response is semantically unrelated to the query or severely misinterprets the intended meaning.
+**Accuracy Evaluation Rule:**
+- The output must **not** modify abbreviations unless they were already expanded in the input.
+- If an abbreviation is **not expanded in the input** but **expanded in the output**, apply a penalty.
+- The accuracy score should reflect this inconsistency, as the model is introducing additional information.
