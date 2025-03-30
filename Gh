@@ -1,57 +1,72 @@
-6. Governance
-The ongoing monitoring plan must define a clear governance structure, outlining roles and responsibilities to ensure effective, timely monitoring and oversight through appropriate forums.
+9. Reporting
+The ongoing monitoring plan must establish a structured reporting process to inform key stakeholders about the model's performance, identified issues, and corrective actions undertaken during periodic monitoring.​
 
-6.1 Governance Structure
-The governance of RMC Risk Management Copilot monitoring follows a structured approach, involving key stakeholders to ensure accountability and continuous oversight.
+9.1 Reporting Objectives
+Transparency: Provide clear insights into the model's performance metrics and any deviations from expected outcomes.​
 
-Role	Responsibility
-Model Monitoring Team	Conducts ongoing monitoring, tracks key performance metrics, and generates periodic reports.
-Risk Management Role Holders	Review model-generated outputs, validate structured data, and provide feedback on usability.
-AI Governance Team	Ensures adherence to risk policies, compliance guidelines, and AI ethics principles.
-Executive Oversight (Risk Committee)	Reviews monitoring reports and approves necessary mitigation actions.
-6.2 Governance Forums
-Monthly Monitoring Review: The Model Monitoring Team presents performance insights and risk trends to the AI Governance Team.
+Accountability: Document identified issues, root causes, and the steps taken to address them.​
 
-Quarterly Risk Committee Review: Critical performance degradation cases are escalated for discussion and decision-making.
+Continuous Improvement: Facilitate informed decision-making to enhance model reliability and effectiveness.​
 
-Ad-hoc Escalation Meetings: In cases of severe degradation (e.g., consecutive red alerts in critical metrics), an immediate review is conducted.
+9.2 Reporting Frequency and Formats
+Weekly Performance Summaries:
 
-7. Escalation Plan
-The ongoing monitoring plan must define a structured escalation process and mitigation strategy for poorly rated metrics to ensure timely interventions.
+Format: Concise reports highlighting key performance indicators (KPIs), recent trends, and any immediate concerns.​
 
-7.1 Escalation Process for Poorly Rated Metrics
-Metrics rated Amber or Red trigger an escalation, ensuring that necessary actions are taken before performance issues impact business processes.
+Distribution: Shared with the Model Monitoring Team and Risk Management Role Holders.​
 
-Escalation Level	Trigger Condition	Action Required
-Level 1 (Warning)	Amber alert (50-69%)	Investigation by Model Monitoring Team; validation of affected responses.
-Level 2 (Review Required)	Consecutive Amber alerts for a metric	AI Governance Team conducts root cause analysis; feedback gathered from users.
-Level 3 (Critical Alert)	Red alert (0-49%) for any metric	Immediate escalation to Risk Committee; mitigation plan implementation.
-7.2 Mitigation Strategy
-If a metric enters the Red Zone (0-49%), the following corrective actions are initiated:
+Monthly Comprehensive Reports:
 
-Root Cause Analysis: Identify model-related issues (e.g., prompt misalignment, data inconsistencies).
+Format: Detailed analyses encompassing all monitored metrics, identified issues, root cause analyses, and implemented mitigation strategies.​
 
-Model Adjustment: If needed, adjust prompt engineering, retrain model components, or introduce additional user validation steps.
+Distribution: Circulated to the AI Governance Team and made accessible to Risk Management Role Holders.​
 
-Threshold Review: If business requirements evolve, recalibrate thresholds based on updated performance expectations.
+Quarterly Executive Summaries:
 
-Interim Manual Oversight: Implement temporary manual intervention for impacted use cases until resolution.
+Format: High-level overviews emphasizing strategic insights, long-term trends, and recommendations for policy or process adjustments.​
 
-8. Monitoring Frequency
-The ongoing monitoring plan must define the monitoring frequency, aligning with the use case complexity and risk tiering of the model.
+Distribution: Presented to the Executive Oversight (Risk Committee) during quarterly reviews.​
 
-8.1 Risk Tiering Alignment
-The RMC Risk Management Copilot falls under moderate-risk AI applications, meaning that monitoring should be frequent enough to detect performance drifts but does not require real-time intervention unless a severe issue is detected.
+9.3 Reporting Forums and Stakeholder Engagement
+Weekly Monitoring Meetings:
 
-Risk Tier	Monitoring Frequency
-High-Risk AI (e.g., Credit Scoring Models)	Daily Monitoring
-Moderate-Risk AI (e.g., RMC Copilot)	Weekly Performance Checks
-Low-Risk AI (e.g., Informational Chatbots)	Monthly Monitoring
-8.2 Monitoring Intervals
-Automated Performance Tracking: Metrics are logged and visualized in real-time on the dashboard.
+Participants: Model Monitoring Team and Risk Management Role Holders.​
 
-Weekly Review: Model Monitoring Team analyzes metric trends every week.
+Purpose: Review weekly summaries, discuss immediate concerns, and coordinate prompt responses to emerging issues.​
 
-Quarterly Deep-Dive Assessment: AI Governance Team reviews overall trends, identifies systemic patterns, and recommends model adjustments.
+Monthly Governance Reviews:
 
-Ad-Hoc Monitoring: If a red alert is triggered, an immediate review is conducted outside the scheduled monitoring cycle.
+Participants: AI Governance Team and Model Monitoring Team.​
+
+Purpose: Evaluate monthly comprehensive reports, assess the effectiveness of mitigation strategies, and plan for any necessary model adjustments.​
+
+Quarterly Risk Committee Meetings:
+
+Participants: Executive Oversight (Risk Committee), AI Governance Team, and representatives from the Model Monitoring Team.​
+
+Purpose: Discuss executive summaries, deliberate on strategic implications, and approve recommendations for policy or operational changes.​
+
+9.4 Stakeholder Notification Protocols
+Immediate Notifications:
+
+Trigger: Detection of critical issues (e.g., metrics in the Red Zone).​
+
+Recipients: Model Monitoring Team, AI Governance Team, and relevant Risk Management Role Holders.​
+
+Method: Real-time alerts via email and dashboard notifications.​
+
+Scheduled Notifications:
+
+Trigger: Regular reporting intervals (weekly, monthly, quarterly).​
+
+Recipients: As per the distribution lists outlined in sections 9.2 and 9.3.​
+
+Method: Email distribution of reports and scheduled meetings.​
+
+9.5 Documentation and Record-Keeping
+Archival: All reports and meeting minutes are systematically archived in a centralized document management system to ensure traceability and support future audits.​
+
+Access Control: Access to reports is restricted based on roles and responsibilities to maintain confidentiality and data integrity.​
+
+This structured reporting framework ensures that all relevant stakeholders are consistently informed about the RMC Risk Management Copilot's performance, fostering transparency, accountability, and continuous improvement.​
+
