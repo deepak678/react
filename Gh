@@ -1,30 +1,59 @@
+The ongoing monitoring plan must outline the extent to which AI-generated outputs are used without modification and whether users validate the accuracy and reliability of the model’s output.
 
-3. Usage Controls
-The ongoing monitoring plan must outline the model's usage details, including its users, frequency of use, and purpose. This section ensures transparency and accountability in the deployment of the RMC Risk Management Copilot.
+4.1 Extent of AI Output Usage
+The RMC Risk Management Copilot generates structured outputs based on issue descriptions and titles, following the 5C’s framework.
 
-3.1 Model Users
-The primary users of the model are Risk Management Role Holders who interact with the system to transform unstructured issue descriptions into structured risk data artifacts.
+The AI-generated output is not directly used without human review. Risk management role holders are expected to:
 
-These users operate within risk, audit, and compliance functions, leveraging the model’s outputs for documentation and reporting purposes.
+Verify the structured output to ensure it aligns with their risk assessment needs.
 
-The model’s structured outputs are stored in Helios, where they are accessed by risk teams for further review and validation.
+Modify the output as required before final documentation and storage in Helios.
 
-3.2 Model Use Frequency
-The model is used on an irregular basis, depending on individual user needs.
+4.2 Accuracy and Reliability Checks
+Since the model primarily restructures input data rather than generating entirely new content, the risk of hallucination is low. However, accuracy checks remain critical.
 
-There is no fixed frequency of use—risk management role holders initiate model interactions based on their specific requirements for drafting risk-related documentation.
+The model’s accuracy, completeness, and hallucination detection metrics are monitored continuously to assess performance.
 
-The system is available on demand, allowing users to generate structured outputs whenever necessary.
+If an accuracy threshold is not met, users are prompted to review and refine the output before finalization.
 
-3.3 Purpose of Model Use
-The RMC Risk Management Copilot is used to:
+In cases where key components are missing, the model suggests additional information that may be required.
 
-Obtain draft versions of risk data artifacts to aid in the creation of structured risk documentation.
+5. Action Plan for Performance Degradation
+The ongoing monitoring plan must define the action plan in case of performance degradation, including early warning signals, alert mechanisms, and mitigation steps.
 
-Standardize issue descriptions into the 5C’s framework (Condition, Cause, Criteria, Consequence, Context).
+5.1 Early Warning Signals
+Performance degradation is detected using predefined thresholds for monitoring metrics, visualized on the dashboard using a color-coded system:
 
-Ensure completeness by identifying missing details and prompting for additional information when necessary.
+Metric	Red (0-49%)	Amber (50-69%)	Green (70-98%)	Purple (98-100%)
+Accuracy	Needs immediate intervention	Moderate risk, requires review	Acceptable range	Potential overconfidence
+Completeness	Critical gaps in structured output	Some missing components	All required elements present	NA
+Hallucination	AI-generated incorrect content	Potential inconsistencies	No hallucination detected	NA
+Red Alerts indicate critical failure and require immediate investigation.
 
-Improve efficiency in risk assessment by structuring data in a clear and consistent format.
+Amber Alerts suggest potential issues and prompt a manual review of model outputs.
 
-By defining clear usage controls, this monitoring plan ensures that the model is used consistently, responsibly, and in alignment with its intended purpose.
+Green represents a normal range of performance.
+
+Purple indicates potential overconfidence, requiring analysis to avoid misinterpretation.
+
+5.2 Alert Mechanism and Mitigation Steps
+The system employs real-time monitoring with the following alert mechanisms:
+
+Dashboard notifications: Visual alerts update in real-time.
+
+Email alerts: If accuracy falls below 50% (Red Zone), an automated notification is sent to the monitoring team.
+
+Trend analysis: Historical data is analyzed to detect performance declines over time.
+
+Mitigation Steps for Performance Degradation:
+
+Investigate Model Outputs: Identify patterns in low-scoring responses (e.g., frequent missing components, inaccuracies).
+
+User Feedback Collection: Engage risk management users to determine if model-generated drafts require excessive modification.
+
+Model Refinement: Adjust prompt engineering, data preprocessing, or retraining strategies based on observed gaps.
+
+Threshold Recalibration: If needed, adjust alert thresholds based on business needs and evolving performance trends.
+
+This structured action plan ensures that any decline in model performance is detected early, investigated thoroughly, and addressed proactively to maintain output quality and reliability.
+
