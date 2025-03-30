@@ -1,59 +1,57 @@
-The ongoing monitoring plan must outline the extent to which AI-generated outputs are used without modification and whether users validate the accuracy and reliability of the model’s output.
+6. Governance
+The ongoing monitoring plan must define a clear governance structure, outlining roles and responsibilities to ensure effective, timely monitoring and oversight through appropriate forums.
 
-4.1 Extent of AI Output Usage
-The RMC Risk Management Copilot generates structured outputs based on issue descriptions and titles, following the 5C’s framework.
+6.1 Governance Structure
+The governance of RMC Risk Management Copilot monitoring follows a structured approach, involving key stakeholders to ensure accountability and continuous oversight.
 
-The AI-generated output is not directly used without human review. Risk management role holders are expected to:
+Role	Responsibility
+Model Monitoring Team	Conducts ongoing monitoring, tracks key performance metrics, and generates periodic reports.
+Risk Management Role Holders	Review model-generated outputs, validate structured data, and provide feedback on usability.
+AI Governance Team	Ensures adherence to risk policies, compliance guidelines, and AI ethics principles.
+Executive Oversight (Risk Committee)	Reviews monitoring reports and approves necessary mitigation actions.
+6.2 Governance Forums
+Monthly Monitoring Review: The Model Monitoring Team presents performance insights and risk trends to the AI Governance Team.
 
-Verify the structured output to ensure it aligns with their risk assessment needs.
+Quarterly Risk Committee Review: Critical performance degradation cases are escalated for discussion and decision-making.
 
-Modify the output as required before final documentation and storage in Helios.
+Ad-hoc Escalation Meetings: In cases of severe degradation (e.g., consecutive red alerts in critical metrics), an immediate review is conducted.
 
-4.2 Accuracy and Reliability Checks
-Since the model primarily restructures input data rather than generating entirely new content, the risk of hallucination is low. However, accuracy checks remain critical.
+7. Escalation Plan
+The ongoing monitoring plan must define a structured escalation process and mitigation strategy for poorly rated metrics to ensure timely interventions.
 
-The model’s accuracy, completeness, and hallucination detection metrics are monitored continuously to assess performance.
+7.1 Escalation Process for Poorly Rated Metrics
+Metrics rated Amber or Red trigger an escalation, ensuring that necessary actions are taken before performance issues impact business processes.
 
-If an accuracy threshold is not met, users are prompted to review and refine the output before finalization.
+Escalation Level	Trigger Condition	Action Required
+Level 1 (Warning)	Amber alert (50-69%)	Investigation by Model Monitoring Team; validation of affected responses.
+Level 2 (Review Required)	Consecutive Amber alerts for a metric	AI Governance Team conducts root cause analysis; feedback gathered from users.
+Level 3 (Critical Alert)	Red alert (0-49%) for any metric	Immediate escalation to Risk Committee; mitigation plan implementation.
+7.2 Mitigation Strategy
+If a metric enters the Red Zone (0-49%), the following corrective actions are initiated:
 
-In cases where key components are missing, the model suggests additional information that may be required.
+Root Cause Analysis: Identify model-related issues (e.g., prompt misalignment, data inconsistencies).
 
-5. Action Plan for Performance Degradation
-The ongoing monitoring plan must define the action plan in case of performance degradation, including early warning signals, alert mechanisms, and mitigation steps.
+Model Adjustment: If needed, adjust prompt engineering, retrain model components, or introduce additional user validation steps.
 
-5.1 Early Warning Signals
-Performance degradation is detected using predefined thresholds for monitoring metrics, visualized on the dashboard using a color-coded system:
+Threshold Review: If business requirements evolve, recalibrate thresholds based on updated performance expectations.
 
-Metric	Red (0-49%)	Amber (50-69%)	Green (70-98%)	Purple (98-100%)
-Accuracy	Needs immediate intervention	Moderate risk, requires review	Acceptable range	Potential overconfidence
-Completeness	Critical gaps in structured output	Some missing components	All required elements present	NA
-Hallucination	AI-generated incorrect content	Potential inconsistencies	No hallucination detected	NA
-Red Alerts indicate critical failure and require immediate investigation.
+Interim Manual Oversight: Implement temporary manual intervention for impacted use cases until resolution.
 
-Amber Alerts suggest potential issues and prompt a manual review of model outputs.
+8. Monitoring Frequency
+The ongoing monitoring plan must define the monitoring frequency, aligning with the use case complexity and risk tiering of the model.
 
-Green represents a normal range of performance.
+8.1 Risk Tiering Alignment
+The RMC Risk Management Copilot falls under moderate-risk AI applications, meaning that monitoring should be frequent enough to detect performance drifts but does not require real-time intervention unless a severe issue is detected.
 
-Purple indicates potential overconfidence, requiring analysis to avoid misinterpretation.
+Risk Tier	Monitoring Frequency
+High-Risk AI (e.g., Credit Scoring Models)	Daily Monitoring
+Moderate-Risk AI (e.g., RMC Copilot)	Weekly Performance Checks
+Low-Risk AI (e.g., Informational Chatbots)	Monthly Monitoring
+8.2 Monitoring Intervals
+Automated Performance Tracking: Metrics are logged and visualized in real-time on the dashboard.
 
-5.2 Alert Mechanism and Mitigation Steps
-The system employs real-time monitoring with the following alert mechanisms:
+Weekly Review: Model Monitoring Team analyzes metric trends every week.
 
-Dashboard notifications: Visual alerts update in real-time.
+Quarterly Deep-Dive Assessment: AI Governance Team reviews overall trends, identifies systemic patterns, and recommends model adjustments.
 
-Email alerts: If accuracy falls below 50% (Red Zone), an automated notification is sent to the monitoring team.
-
-Trend analysis: Historical data is analyzed to detect performance declines over time.
-
-Mitigation Steps for Performance Degradation:
-
-Investigate Model Outputs: Identify patterns in low-scoring responses (e.g., frequent missing components, inaccuracies).
-
-User Feedback Collection: Engage risk management users to determine if model-generated drafts require excessive modification.
-
-Model Refinement: Adjust prompt engineering, data preprocessing, or retraining strategies based on observed gaps.
-
-Threshold Recalibration: If needed, adjust alert thresholds based on business needs and evolving performance trends.
-
-This structured action plan ensures that any decline in model performance is detected early, investigated thoroughly, and addressed proactively to maintain output quality and reliability.
-
+Ad-Hoc Monitoring: If a red alert is triggered, an immediate review is conducted outside the scheduled monitoring cycle.
