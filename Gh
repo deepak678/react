@@ -1,22 +1,30 @@
-Monitoring Data
-The scope and nature of the data used for monitoring are critical to ensuring accurate evaluation. This section outlines the data sources, collection methodology, sample size, representativeness, and approach for expected output verification.
 
-2.1 Data Source
-The monitoring process will utilize audit logs as the primary data source. These logs capture all relevant transactions, providing a complete record of input issue descriptions, structured outputs, and system interactions.
+3. Usage Controls
+The ongoing monitoring plan must outline the model's usage details, including its users, frequency of use, and purpose. This section ensures transparency and accountability in the deployment of the RMC Risk Management Copilot.
 
-2.2 Data Collection Methodology
-Data will be directly extracted from audit logs, ensuring no additional data processing or transformation is required before evaluation.
+3.1 Model Users
+The primary users of the model are Risk Management Role Holders who interact with the system to transform unstructured issue descriptions into structured risk data artifacts.
 
-The monitoring system will continuously retrieve logs to ensure real-time assessment.
+These users operate within risk, audit, and compliance functions, leveraging the model’s outputs for documentation and reporting purposes.
 
-2.3 Sample Size & Representativeness
-The monitoring process will be applied to the entire set of audit logs, ensuring a full population analysis rather than a sampled subset.
+The model’s structured outputs are stored in Helios, where they are accessed by risk teams for further review and validation.
 
-Since the entire dataset is used, the monitored data fully represents the operational landscape of RMC Risk Management Copilot.
+3.2 Model Use Frequency
+The model is used on an irregular basis, depending on individual user needs.
 
-2.4 Ground Truth & Expected Output Verification
-Ground truth data is not explicitly available, as the LLM does not generate new content but restructures the input into a predefined framework.
+There is no fixed frequency of use—risk management role holders initiate model interactions based on their specific requirements for drafting risk-related documentation.
 
-To ensure evaluation accuracy, a manual review process is used to validate that the output follows the 5C's structure, issue severity rationale, and additional information sections correctly.
+The system is available on demand, allowing users to generate structured outputs whenever necessary.
 
-The expected output is determined by human reviewers, ensuring alignment with the intended structured format.
+3.3 Purpose of Model Use
+The RMC Risk Management Copilot is used to:
+
+Obtain draft versions of risk data artifacts to aid in the creation of structured risk documentation.
+
+Standardize issue descriptions into the 5C’s framework (Condition, Cause, Criteria, Consequence, Context).
+
+Ensure completeness by identifying missing details and prompting for additional information when necessary.
+
+Improve efficiency in risk assessment by structuring data in a clear and consistent format.
+
+By defining clear usage controls, this monitoring plan ensures that the model is used consistently, responsibly, and in alignment with its intended purpose.
