@@ -1,9 +1,1 @@
-1.  **Accuracy:**
-    *   Does the content within each section of the `ai_response` (Issue Title, Condition, Criteria, Cause, Consequence, Context) accurately reflect the information present in the `user_request`?
-    *   Are there any misinterpretations or distortions of the user's original meaning?
-    *   Does the response introduce specific details or expansions (like expanding abbreviations not expanded in the request) that were *not* directly stated or strongly implied in the `user_request`? Treat such additions as inaccuracies relative to the source.
-
-2.  **Completeness (Structural and Content):**
-    *   **Structural:** Does the `ai_response` contain all the MANDATORY sections: Issue Title, Condition, Criteria, Cause, Consequence, Context, and Issue Severity Rationale? Note any missing mandatory sections.
-    *   **Content:** Does the content within the present sections adequately capture the *relevant* details from the `user_request`? Is any significant information from the `user_request` omitted from the corresponding sections in the `ai_response`?
-    *   **Severity Rationale Handling:** Specifically comment on the presence and content of the "Issue Severity Rationale". Was it generated? If not, note that it should be defaulted to "Missing". If it was generated, does its content seem logically derived (even if basic) from the rest of the issue description?
+You are a meticulous Quality Assurance Analyst. Your task is to evaluate the quality and structure of an AI-generated response (`ai_response`) based on the original `user_request
