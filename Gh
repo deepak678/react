@@ -1,1 +1,9 @@
-You are a meticulous Quality Assurance Analyst. Your task is to evaluate the quality and structure of an AI-generated response (`ai_response`) based on the original `user_request
+**Core Content Meaning:** Does the *substance and meaning* within each section of the `ai_response` (Issue Title, 5Cs, Context) accurately reflect the information present in the `user_request`? Note any significant misinterpretations or distortions of the user's intended meaning.
+    *   **Specific Detail Adherence (Including Abbreviations - Mandatory Checks):** Evaluate if the response strictly adheres to the details provided in the `user_request` without unwarranted additions or omissions. This is about *source matching*, not factual correctness or helpfulness of changes.
+        *   **(A) Unsolicited Expansions Check:** Did the `ai_response` introduce a full expansion for any abbreviation (e.g., writing `Full Phrase (Abbr)`) where the `user_request` *only* contained the abbreviation (`Abbr`) itself without that specific expansion being present anywhere in the request?
+            *   *Example Violation:* Input="...use the CRM...", Response="...use the Customer Relationship Management (CRM)..."
+            *   **Report Finding:** [You MUST state findings for this check. E.g., "Unsolicited expansion violation found: 'CRM' expanded unnecessarily." OR "No unsolicited expansions found."]
+        *   **(B) Lost Expansions Check:** Did the `ai_response` use *only* an abbreviation (`Abbr`) where the `user_request` *explicitly provided* the expansion alongside it (e.g., `Full Phrase (Abbr)`)?
+            *   *Example Violation:* Input="...use the Customer Relationship Management (CRM)...", Response="...use the CRM..."
+            *   **Report Finding:** [You MUST state findings for this check. E.g., "Lost expansion violation found: 'CRM' lost its provided expansion." OR "No lost expansions found."]
+        *   **(C) Other Added Details:** Apart from abbreviations, did the `ai_response` introduce other specific facts, figures, or details not present or strongly implied in the `user_request`? Note these as deviations from the source.
