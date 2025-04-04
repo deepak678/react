@@ -1,9 +1,168 @@
-**Core Content Meaning:** Does the *substance and meaning* within each section of the `ai_response` (Issue Title, 5Cs, Context) accurately reflect the information present in the `user_request`? Note any significant misinterpretations or distortions of the user's intended meaning.
-    *   **Specific Detail Adherence (Including Abbreviations - Mandatory Checks):** Evaluate if the response strictly adheres to the details provided in the `user_request` without unwarranted additions or omissions. This is about *source matching*, not factual correctness or helpfulness of changes.
-        *   **(A) Unsolicited Expansions Check:** Did the `ai_response` introduce a full expansion for any abbreviation (e.g., writing `Full Phrase (Abbr)`) where the `user_request` *only* contained the abbreviation (`Abbr`) itself without that specific expansion being present anywhere in the request?
-            *   *Example Violation:* Input="...use the CRM...", Response="...use the Customer Relationship Management (CRM)..."
-            *   **Report Finding:** [You MUST state findings for this check. E.g., "Unsolicited expansion violation found: 'CRM' expanded unnecessarily." OR "No unsolicited expansions found."]
-        *   **(B) Lost Expansions Check:** Did the `ai_response` use *only* an abbreviation (`Abbr`) where the `user_request` *explicitly provided* the expansion alongside it (e.g., `Full Phrase (Abbr)`)?
-            *   *Example Violation:* Input="...use the Customer Relationship Management (CRM)...", Response="...use the CRM..."
-            *   **Report Finding:** [You MUST state findings for this check. E.g., "Lost expansion violation found: 'CRM' lost its provided expansion." OR "No lost expansions found."]
-        *   **(C) Other Added Details:** Apart from abbreviations, did the `ai_response` introduce other specific facts, figures, or details not present or strongly implied in the `user_request`? Note these as deviations from the source.
+Okay, here is a draft Jira Epic requirement for creating the ADA Model Monitoring capability. This structure aims to be comprehensive for planning and breakdown into smaller stories.
+
+Epic Name: Implement Comprehensive Model Monitoring Capability for ADA
+
+Project: [Your Project Name/Key]
+
+Labels: ModelMonitoring, ADA, GenAI, DataScience, Analytics, RMC-Framework
+
+Reporter: [Your Name]
+Assignee: [Relevant Team Lead/Product Owner]
+
+Description:
+
+The goal of this epic is to establish a robust model monitoring capability for the ADA Generative AI system. This capability is crucial for ensuring the quality, reliability, safety, performance, and cost-effectiveness of ADA's responses.
+
+We will leverage the existing monitoring framework initially developed for RMC, adapting and extending it to meet ADA's specific needs. The monitoring will encompass both functional AI quality metrics (calculated using novel methods like LLM-as-judge, embedding similarity, and ROUGE) and essential non-functional/business performance indicators.
+
+This monitoring system will provide critical insights into ADA's behaviour in production, enabling data-driven decisions for model improvements, operational adjustments, risk management, and cost optimization.
+
+Business Value / Goals:
+
+Improve Response Quality: Track and measure key aspects like accuracy, completeness, and hallucination to maintain high standards.
+
+Ensure Reliability & Consistency: Monitor model performance over time to detect drift or degradation.
+
+Enhance User Trust & Adoption: Provide transparency into model performance and use metrics like adoption rate to gauge user acceptance.
+
+Manage Operational Costs: Track cost per response and infrastructure usage.
+
+Optimize Performance: Monitor latency and turnaround times (TAT) for better user experience and operational efficiency.
+
+Identify & Mitigate Risks: Use metrics and tags to flag potentially problematic, low-quality, or high-risk interactions.
+
+Enable Data-Driven Improvement: Collect quantitative and qualitative data to inform future model iterations and fine-tuning.
+
+Requirements / Scope:
+
+1. Framework Integration & Adaptation:
+* Integrate ADA's request/response lifecycle with the existing RMC monitoring framework's data ingestion pipeline.
+* Adapt the framework's data schema and processing logic to accommodate ADA's specific data structures and monitoring requirements.
+* Establish reliable data pipelines for capturing necessary inputs: user queries, GenAI responses, reference data (if applicable), timestamps, user feedback, cost data, etc.
+
+2. Functional Metric Calculation:
+* LLM-as-Judge (AI-to-AI) Metrics:
+* Develop and implement prompts and logic for an LLM judge to evaluate ADA responses based on the input query (and potentially reference data/context).
+* Calculate Accuracy: How factually correct and relevant is the response to the query?
+* Calculate Completeness: Does the response fully address all aspects of the query?
+* Calculate Hallucination: Does the response contain fabricated or nonsensical information?
+* Embedding-based Similarity Metric:
+* Implement a process to generate vector embeddings for the 'ask response' (assuming this is a reference/ideal response) and the 'GenAI response'.
+* Calculate Cosine Similarity between the reference and GenAI response embeddings.
+* ROUGE Score Calculation:
+* Implement standard ROUGE score calculations (e.g., ROUGE-1, ROUGE-2, ROUGE-L) comparing the GenAI response against a reference text (if available, otherwise potentially against the 'ask response').
+
+3. Non-Functional / Business Metric Collection & Calculation:
+* Latency: Integrate with existing GCP (or relevant environment) logging/monitoring to capture end-to-end request latency (if available and suitable, reuse RMC method).
+* Cost per Response:
+* Define and implement a method to calculate the estimated cost per ADA response.
+* Identify cost components (e.g., LLM API calls, compute, storage, potential license fees).
+* Formula: (Total relevant costs over Period X) / (Total ADA requests in Period X).
+* TAT 1 (GenAI Response Time): Measure and log the time taken from when ADA receives the request to when it generates the full response.
+* TAT 2 (Time to User Acceptance): Measure and log the time from query assignment (to an advisor/process involving ADA) until the advisor explicitly accepts/uses the GenAI response. (Requires integration with advisor workflow/UI).
+* TAT 3 (Time to Query Closure): Measure and log the time from query assignment until the entire query/ticket associated with the ADA interaction is closed. (Requires integration with advisor workflow/ticketing system).
+* L1 and L2 Feedback: Implement mechanisms to capture structured L1 (e.g., thumbs up/down, rating) and L2 (e.g., categorization, free-text comments) feedback provided manually by advisors/users, linking it to specific ADA interactions.
+* Aggregated Adoption Rate: Calculate the ratio of GenAI responses marked as 'used' or 'accepted' by advisors compared to the total number of GenAI responses generated and presented. (Requires tracking adoption status).
+* Query Control Tag 1 (Incomplete/Irrelevant): Implement mechanisms to capture tags applied (manually or potentially automatically) indicating the initial user query was poor quality.
+* Query Control Tag 2 (High Risk/Complex): Implement mechanisms to capture tags applied (manually or potentially automatically) indicating the query pertains to a sensitive or complex topic requiring careful handling.
+* Content Moderation: Integrate with the outputs of the separate Content Moderation system/workstream, logging relevant flags/scores associated with ADA inputs or outputs.
+
+4. Data Storage & Persistence:
+* Define and implement a storage solution (e.g., BigQuery, dedicated monitoring database) for all captured raw data and calculated metrics.
+* Ensure data retention policies are defined and implemented.
+
+5. Reporting & Alerting:
+* Develop dashboards (e.g., using Looker, Grafana, GCP Monitoring Dashboards) to visualize all functional and non-functional metrics over time, allowing filtering and drill-down.
+* Implement an alerting mechanism to notify relevant teams when key metrics breach predefined thresholds (e.g., sudden drop in Similarity, spike in Hallucination score, high latency).
+
+Acceptance Criteria:
+
+ADA interaction data (query, response, timestamps, metadata) is successfully ingested into the monitoring system.
+
+Accuracy, Completeness, and Hallucination scores (LLM-as-judge) are calculated and stored for ADA responses.
+
+Embedding Similarity scores are calculated and stored for relevant response pairs.
+
+ROUGE scores are calculated and stored.
+
+Latency metrics are captured and associated with responses (utilizing existing infra where possible).
+
+Cost per Response can be calculated periodically based on defined inputs.
+
+TAT1, TAT2, and TAT3 metrics are captured and stored (dependent on workflow integrations).
+
+L1/L2 feedback can be ingested and linked to specific interactions.
+
+Aggregated Adoption Rate is calculated and tracked.
+
+Query Control Tags 1 & 2 can be ingested and linked to specific interactions.
+
+Content Moderation flags/results are linked to relevant interactions.
+
+A monitoring dashboard displaying all specified metrics is available and functional.
+
+Alerts can be configured and triggered based on metric thresholds.
+
+The monitoring data is stored reliably and is queryable.
+
+Documentation outlining the monitoring setup, metric definitions, and data locations is created.
+
+Out of Scope:
+
+Building the underlying RMC framework (only leveraging/adapting it).
+
+Developing the core ADA Generative AI model.
+
+Building the user/advisor workflow systems required for TAT2, TAT3, Feedback, Adoption data capture (integration is in scope, building the source system is out).
+
+Building the Content Moderation system (integration is in scope).
+
+Automated model retraining triggered by monitoring alerts (this would be a separate initiative).
+
+Defining the exact LLM prompts for the judge (this will be done during implementation, though the capability is required).
+
+Dependencies:
+
+Availability and documentation of the existing RMC monitoring framework.
+
+Access to ADA production logs and interaction data streams.
+
+Access to reference data or 'ask responses' for Similarity/ROUGE calculations.
+
+Access to cost data sources (GCP billing, LLM provider costs, etc.).
+
+Integration points with advisor workflow/ticketing systems for TAT2, TAT3, Feedback, Adoption Rate, Query Tags.
+
+Availability of an LLM API/service suitable for use as an evaluation judge.
+
+Availability of embedding models/APIs.
+
+Integration points with the Content Moderation system.
+
+Infrastructure resources (compute, storage, monitoring tools like GCP Monitoring/Looker).
+
+Collaboration with Platform/Infra, Data Engineering, ADA development team, and potentially teams managing advisor tools.
+
+Assumptions:
+
+The RMC framework architecture is sufficiently flexible to be adapted for ADA.
+
+Necessary data sources can be accessed or instrumented.
+
+LLM-as-judge is a feasible approach for evaluating Accuracy, Completeness, and Hallucination within budget and performance constraints.
+
+Cosine similarity on chosen embeddings provides meaningful quality signals.
+
+Mechanisms to capture TAT2, TAT3, Feedback, Adoption, and Tags exist or will be created (and integration is possible).
+
+Content Moderation outputs will be available for integration.
+
+Success Metrics (for this Epic):
+
+Percentage of ADA production interactions successfully processed by the monitoring pipeline > 99%.
+
+Availability of the monitoring dashboard > 99.5%.
+
+Data latency from interaction to metric availability in the dashboard within acceptable limits (e.g., < 1 hour).
+
+Stakeholder (Product, DS, Ops) confirmation that the provided metrics and dashboard meet monitoring needs.
