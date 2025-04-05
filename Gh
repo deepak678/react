@@ -1,168 +1,265 @@
-Okay, here is a draft Jira Epic requirement for creating the ADA Model Monitoring capability. This structure aims to be comprehensive for planning and breakdown into smaller stories.
+Okay, here is a PowerPoint template structure based on the outline we discussed. You can copy and paste this structure into your presentation software (like PowerPoint, Google Slides, Keynote) and then fill in the details and find appropriate visuals.
 
-Epic Name: Implement Comprehensive Model Monitoring Capability for ADA
+PowerPoint Template: Keeping Our Digital Brains Sharp
 
-Project: [Your Project Name/Key]
+Theme Suggestion: Choose a clean, modern, professional template with good white space. Use consistent fonts and colors. Prioritize visuals over dense text.
 
-Labels: ModelMonitoring, ADA, GenAI, DataScience, Analytics, RMC-Framework
+Slide 1: Title Slide
 
-Reporter: [Your Name]
-Assignee: [Relevant Team Lead/Product Owner]
+Layout: Title and Subtitle
 
-Description:
+Title: Keeping Our Digital Brains Sharp: An Intro to AI Model Monitoring
 
-The goal of this epic is to establish a robust model monitoring capability for the ADA Generative AI system. This capability is crucial for ensuring the quality, reliability, safety, performance, and cost-effectiveness of ADA's responses.
+Subtitle: Ensuring our AI works reliably in the real world
 
-We will leverage the existing monitoring framework initially developed for RMC, adapting and extending it to meet ADA's specific needs. The monitoring will encompass both functional AI quality metrics (calculated using novel methods like LLM-as-judge, embedding similarity, and ROUGE) and essential non-functional/business performance indicators.
+Text Box (Bottom): [Your Name/Team] | [Event Name] | [Date]
 
-This monitoring system will provide critical insights into ADA's behaviour in production, enabling data-driven decisions for model improvements, operational adjustments, risk management, and cost optimization.
+Visual:
 
-Business Value / Goals:
+Suggestion: Clean background image or graphic. Ideas: Stylized brain with circuits, magnifying glass over a simplified AI icon, network graphic. Keep it uncluttered.
 
-Improve Response Quality: Track and measure key aspects like accuracy, completeness, and hallucination to maintain high standards.
+Slide 2: Do We Just "Set It and Forget It"?
 
-Ensure Reliability & Consistency: Monitor model performance over time to detect drift or degradation.
+Layout: Title and Content (perhaps with Icons)
 
-Enhance User Trust & Adoption: Provide transparency into model performance and use metrics like adoption rate to gauge user acceptance.
+Title: Do We Just "Set It and Forget It"?
 
-Manage Operational Costs: Track cost per response and infrastructure usage.
+Body Text:
 
-Optimize Performance: Monitor latency and turnaround times (TAT) for better user experience and operational efficiency.
+Think about your car's dashboard (Speed, Fuel, Warnings). Why?
 
-Identify & Mitigate Risks: Use metrics and tags to flag potentially problematic, low-quality, or high-risk interactions.
+Think about health check-ups. Why?
 
-Enable Data-Driven Improvement: Collect quantitative and qualitative data to inform future model iterations and fine-tuning.
+Think about website monitoring (Is it up? Is it fast?). Why?
 
-Requirements / Scope:
+Key Message: We constantly monitor important systems to ensure they work correctly.
 
-1. Framework Integration & Adaptation:
-* Integrate ADA's request/response lifecycle with the existing RMC monitoring framework's data ingestion pipeline.
-* Adapt the framework's data schema and processing logic to accommodate ADA's specific data structures and monitoring requirements.
-* Establish reliable data pipelines for capturing necessary inputs: user queries, GenAI responses, reference data (if applicable), timestamps, user feedback, cost data, etc.
+Visual:
 
-2. Functional Metric Calculation:
-* LLM-as-Judge (AI-to-AI) Metrics:
-* Develop and implement prompts and logic for an LLM judge to evaluate ADA responses based on the input query (and potentially reference data/context).
-* Calculate Accuracy: How factually correct and relevant is the response to the query?
-* Calculate Completeness: Does the response fully address all aspects of the query?
-* Calculate Hallucination: Does the response contain fabricated or nonsensical information?
-* Embedding-based Similarity Metric:
-* Implement a process to generate vector embeddings for the 'ask response' (assuming this is a reference/ideal response) and the 'GenAI response'.
-* Calculate Cosine Similarity between the reference and GenAI response embeddings.
-* ROUGE Score Calculation:
-* Implement standard ROUGE score calculations (e.g., ROUGE-1, ROUGE-2, ROUGE-L) comparing the GenAI response against a reference text (if available, otherwise potentially against the 'ask response').
+Suggestion: Use 3 simple, clear icons side-by-side representing a car dashboard, a stethoscope/heartbeat, and a website status monitor.
 
-3. Non-Functional / Business Metric Collection & Calculation:
-* Latency: Integrate with existing GCP (or relevant environment) logging/monitoring to capture end-to-end request latency (if available and suitable, reuse RMC method).
-* Cost per Response:
-* Define and implement a method to calculate the estimated cost per ADA response.
-* Identify cost components (e.g., LLM API calls, compute, storage, potential license fees).
-* Formula: (Total relevant costs over Period X) / (Total ADA requests in Period X).
-* TAT 1 (GenAI Response Time): Measure and log the time taken from when ADA receives the request to when it generates the full response.
-* TAT 2 (Time to User Acceptance): Measure and log the time from query assignment (to an advisor/process involving ADA) until the advisor explicitly accepts/uses the GenAI response. (Requires integration with advisor workflow/UI).
-* TAT 3 (Time to Query Closure): Measure and log the time from query assignment until the entire query/ticket associated with the ADA interaction is closed. (Requires integration with advisor workflow/ticketing system).
-* L1 and L2 Feedback: Implement mechanisms to capture structured L1 (e.g., thumbs up/down, rating) and L2 (e.g., categorization, free-text comments) feedback provided manually by advisors/users, linking it to specific ADA interactions.
-* Aggregated Adoption Rate: Calculate the ratio of GenAI responses marked as 'used' or 'accepted' by advisors compared to the total number of GenAI responses generated and presented. (Requires tracking adoption status).
-* Query Control Tag 1 (Incomplete/Irrelevant): Implement mechanisms to capture tags applied (manually or potentially automatically) indicating the initial user query was poor quality.
-* Query Control Tag 2 (High Risk/Complex): Implement mechanisms to capture tags applied (manually or potentially automatically) indicating the query pertains to a sensitive or complex topic requiring careful handling.
-* Content Moderation: Integrate with the outputs of the separate Content Moderation system/workstream, logging relevant flags/scores associated with ADA inputs or outputs.
+Slide 3: Our "Digital Brains" at Work
 
-4. Data Storage & Persistence:
-* Define and implement a storage solution (e.g., BigQuery, dedicated monitoring database) for all captured raw data and calculated metrics.
-* Ensure data retention policies are defined and implemented.
+Layout: Title and Content (perhaps Two Content areas)
 
-5. Reporting & Alerting:
-* Develop dashboards (e.g., using Looker, Grafana, GCP Monitoring Dashboards) to visualize all functional and non-functional metrics over time, allowing filtering and drill-down.
-* Implement an alerting mechanism to notify relevant teams when key metrics breach predefined thresholds (e.g., sudden drop in Similarity, spike in Hallucination score, high latency).
+Title: What's an AI Model Anyway? (The Simple Version)
 
-Acceptance Criteria:
+Body Text (Left/Top):
 
-ADA interaction data (query, response, timestamps, metadata) is successfully ingested into the monitoring system.
+A program that learns from data.
 
-Accuracy, Completeness, and Hallucination scores (LLM-as-judge) are calculated and stored for ADA responses.
+Finds patterns to make predictions or decisions.
 
-Embedding Similarity scores are calculated and stored for relevant response pairs.
+Body Text (Right/Bottom - Examples):
 
-ROUGE scores are calculated and stored.
+📧 Email Spam Filter
 
-Latency metrics are captured and associated with responses (utilizing existing infra where possible).
+🎬 Movie Recommendations
 
-Cost per Response can be calculated periodically based on defined inputs.
+💳 Fraud Detection
 
-TAT1, TAT2, and TAT3 metrics are captured and stored (dependent on workflow integrations).
+Key Message: AI models help automate tasks and make smarter decisions.
 
-L1/L2 feedback can be ingested and linked to specific interactions.
+Visual:
 
-Aggregated Adoption Rate is calculated and tracked.
+Suggestion: A simple diagram: [Icon: Data] -> [Icon: Brain/Chip (Model)] -> [Icon: Checkmark/Lightbulb (Decision)]. Use small icons next to the examples.
 
-Query Control Tags 1 & 2 can be ingested and linked to specific interactions.
+Slide 4: The World Doesn't Stand Still!
 
-Content Moderation flags/results are linked to relevant interactions.
+Layout: Title and Content
 
-A monitoring dashboard displaying all specified metrics is available and functional.
+Title: Why Might a Smart Model Start Making Mistakes?
 
-Alerts can be configured and triggered based on metric thresholds.
+Body Text:
 
-The monitoring data is stored reliably and is queryable.
+Models learn from the PAST.
 
-Documentation outlining the monitoring setup, metric definitions, and data locations is created.
+The PRESENT world changes!
 
-Out of Scope:
+Customer habits shift.
 
-Building the underlying RMC framework (only leveraging/adapting it).
+New trends emerge (e.g., new types of spam).
 
-Developing the core ADA Generative AI model.
+Data sources change or have errors.
 
-Building the user/advisor workflow systems required for TAT2, TAT3, Feedback, Adoption data capture (integration is in scope, building the source system is out).
+This mismatch = Performance Decline ("Drift").
 
-Building the Content Moderation system (integration is in scope).
+Key Message: Models can become outdated because the world they operate in changes.
 
-Automated model retraining triggered by monitoring alerts (this would be a separate initiative).
+Visual:
 
-Defining the exact LLM prompts for the judge (this will be done during implementation, though the capability is required).
+Suggestion: A simple line graph showing a downward trend labeled "Accuracy Over Time". OR an image split down the middle: left side clean/orderly, right side messy/different. OR an image of an old, outdated map.
 
-Dependencies:
+Slide 5: Introducing... Model Monitoring!
 
-Availability and documentation of the existing RMC monitoring framework.
+Layout: Title and Content
 
-Access to ADA production logs and interaction data streams.
+Title: Our "Check-Up" for AI Models
 
-Access to reference data or 'ask responses' for Similarity/ROUGE calculations.
+Body Text:
 
-Access to cost data sources (GCP billing, LLM provider costs, etc.).
+Like the dashboard or health check... but for AI!
 
-Integration points with advisor workflow/ticketing systems for TAT2, TAT3, Feedback, Adoption Rate, Query Tags.
+Continuously watches model performance after launch.
 
-Availability of an LLM API/service suitable for use as an evaluation judge.
+Catches problems early.
 
-Availability of embedding models/APIs.
+Key Message: We need a system to keep an eye on our live models.
 
-Integration points with the Content Moderation system.
+Visual:
 
-Infrastructure resources (compute, storage, monitoring tools like GCP Monitoring/Looker).
+Suggestion: An icon of a magnifying glass focusing on the "Brain/Chip" icon from Slide 3. OR icons of a dashboard + stethoscope pointing towards the Brain/Chip icon.
 
-Collaboration with Platform/Infra, Data Engineering, ADA development team, and potentially teams managing advisor tools.
+Slide 6: Key Things We Monitor (The Dashboard Lights)
 
-Assumptions:
+Layout: Title and Four Content Blocks (or Bullet Points with Icons)
 
-The RMC framework architecture is sufficiently flexible to be adapted for ADA.
+Title: What Are We Looking For? (The Dashboard Lights)
 
-Necessary data sources can be accessed or instrumented.
+Content Blocks / Bullets:
 
-LLM-as-judge is a feasible approach for evaluating Accuracy, Completeness, and Hallucination within budget and performance constraints.
+(Icon: Data Input) Is New Data Weird? (Data Drift)
 
-Cosine similarity on chosen embeddings provides meaningful quality signals.
+Analogy: Trying to predict winter coats using summer data?
 
-Mechanisms to capture TAT2, TAT3, Feedback, Adoption, and Tags exist or will be created (and integration is possible).
+(Icon: Target/Checkmark) Is It Still Accurate? (Performance Drift)
 
-Content Moderation outputs will be available for integration.
+Analogy: Spam filter letting lots of junk through?
 
-Success Metrics (for this Epic):
+(Icon: Question Mark/Shift) Has the Meaning Changed? (Concept Drift)
 
-Percentage of ADA production interactions successfully processed by the monitoring pipeline > 99%.
+Analogy: What's "trendy" changes over time.
 
-Availability of the monitoring dashboard > 99.5%.
+(Icon: Gear/Wrench) Is the System Running OK? (Operational Health)
 
-Data latency from interaction to metric availability in the dashboard within acceptable limits (e.g., < 1 hour).
+Analogy: Is the website slow or down?
 
-Stakeholder (Product, DS, Ops) confirmation that the provided metrics and dashboard meet monitoring needs.
+Key Message (Optional Footer): We check the data going in, the answers coming out, and the system itself.
+
+Visual:
+
+Suggestion: Use 4 distinct, simple icons for each point. Maybe arrange in a 2x2 grid or a list with icons.
+
+Slide 7: Spotting Problems: The Monitoring Cycle
+
+Layout: Title and Content (Diagram focus)
+
+Title: How Do We Do It? (The Basic Idea)
+
+Body Text (Minimal - let diagram speak):
+
+Set Baseline (Know "Good")
+
+Watch Live Data & Predictions
+
+Measure Performance & Data Changes
+
+Compare to Baseline
+
+Alert on Issues!
+
+Visualize Trends (Dashboards)
+
+Key Message: It's a continuous loop: Watch -> Measure -> Compare -> Alert.
+
+Visual:
+
+Suggestion: A large, simple circular diagram showing these steps (1-5/6). Add a small, stylized image of a clean dashboard.
+
+Slide 8: When the Check Engine Light Comes On...
+
+Layout: Title and Content (Flowchart focus)
+
+Title: Uh Oh! An Alert! Now What?
+
+Body Text (Minimal - support flowchart):
+
+Alerts trigger investigation!
+
+Possible Actions:
+
+Dig Deeper (Analyze)
+
+Re-train Model
+
+Adjust Thresholds
+
+Fix Data Issues
+
+Key Message: Monitoring tells us WHEN to look; investigation tells us WHAT to do.
+
+Visual:
+
+Suggestion: A simple flowchart: [Icon: Alert Bell] -> Investigate? -> [Decision Box: Cause Found?] -> [Multiple Boxes: Re-train / Fix / Adjust / Ignore] -> [Icon: Checkmark (Resolved)]
+
+Slide 9: The Payoff: Keeping AI Helpful & Trustworthy
+
+Layout: Title and Content (Icon List or Grid)
+
+Title: Why Does This Matter? (The Payoff)
+
+Body Text (Use Icons + Short Labels):
+
+(Icon: Checkmark/Thumbs Up) Reliability & Trust
+
+(Icon: Shield) Risk Reduction (Fewer costly mistakes)
+
+(Icon: Piggy Bank/Coin) Efficiency & Cost Savings
+
+(Icon: Scales) Fairness & Bias Detection
+
+(Icon: Megaphone/Star) Protect Reputation
+
+Key Message: Monitoring protects value, manages risk, and maintains trust.
+
+Visual:
+
+Suggestion: Use clear icons for each benefit listed. Arrange them neatly.
+
+Slide 10: Key Takeaways
+
+Layout: Title and Bullet Points
+
+Title: Recap: Monitoring in a Nutshell
+
+Body Text (Concise Bullets):
+
+AI models need care after launch.
+
+The world changes -> Models can "drift".
+
+Monitoring = AI health check-up.
+
+We watch: Data, Performance, System Health.
+
+Benefits: Trust, Reliability, Risk Reduction.
+
+It's "Launch and Observe"! (Not "Set and Forget")
+
+Visual:
+
+Suggestion: Maybe reuse 2-3 key mini-icons from previous slides next to relevant points. Keep it clean.
+
+Slide 11: Questions?
+
+Layout: Centered Title / Text
+
+Title: Thank You & Questions?
+
+Text Box (Optional): [Your Contact Information: Email / LinkedIn]
+
+Visual:
+
+Suggestion: Clean background, perhaps with your company/event logo subtly placed.
+
+General Notes for You:
+
+Customize: Replace bracketed text [like this] with your specific info.
+
+Find Visuals: Use high-quality icons and images. Sites like Flaticon, Noun Project (check licenses), Unsplash, or Pexels can be helpful. Keep the style consistent.
+
+Keep Text Brief: Use keywords and short phrases. Elaborate verbally during the presentation.
+
+Practice: Rehearse your delivery, focusing on the analogies and the "why."
+
+This template provides the skeleton. Fill it with your specific context, find great visuals, and practice your delivery to make it engaging!
