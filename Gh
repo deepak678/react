@@ -1,19 +1,5 @@
-1. Accuracy
-Method: Mean – Standard Deviation
+Shoutout to [Name] for consistently setting the bar high and inspiring everyone around them! 💪
 
-Rationale: This approach helps identify outputs significantly below the typical performance, ensuring that only sufficiently accurate responses are considered acceptable.
+Your commitment to excellence, attention to detail, and refusal to settle for anything less than the best pushes all of us to grow and raise our own standards. Whether it's the way you approach challenges, support your teammates, or hold yourself accountable — it's truly admirable.
 
-2. Completeness
-Method: 5th Percentile of All Completeness Scores
-
-Rationale: Since completeness can vary with question complexity, the 5th percentile serves as a robust lower bound to flag only the most incomplete responses.
-
-3. Context Relevance
-Method: Mean – Standard Deviation
-
-Rationale: Similar to accuracy, this method filters out responses that fall significantly short in maintaining contextual relevance.
-
-4. Semantic Relevance
-Method: Median or Interquartile Range (IQR)
-
-Rationale: To reduce the influence of outliers and maintain robustness, the IQR method was applied. Only responses falling within the typical middle range of semantic relevance scores are accepted.
+Thank you for leading by example and showing us what it means to strive for greatness, not just in results, but in the way we get there. 🙌
