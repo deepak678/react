@@ -1,11 +1,19 @@
-Okay, here are very short hover descriptions for each metric:
+1. Accuracy
+Method: Mean – Standard Deviation
 
-Accuracy: Is the information factually correct?
+Rationale: This approach helps identify outputs significantly below the typical performance, ensuring that only sufficiently accurate responses are considered acceptable.
 
-Completeness: Does it include all necessary information?
+2. Completeness
+Method: 5th Percentile of All Completeness Scores
 
-Hallucination: Is the information fabricated or unsupported?
+Rationale: Since completeness can vary with question complexity, the 5th percentile serves as a robust lower bound to flag only the most incomplete responses.
 
-Context Relevance: Is the response on-topic for the given prompt/situation?
+3. Context Relevance
+Method: Mean – Standard Deviation
 
-Semantic Relevance: Does the response's meaning relate to the query's intent?
+Rationale: Similar to accuracy, this method filters out responses that fall significantly short in maintaining contextual relevance.
+
+4. Semantic Relevance
+Method: Median or Interquartile Range (IQR)
+
+Rationale: To reduce the influence of outliers and maintain robustness, the IQR method was applied. Only responses falling within the typical middle range of semantic relevance scores are accepted.
