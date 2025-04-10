@@ -1,42 +1,6 @@
-reliability = (
-    0.95 * 0.30 +
-    0.80 * 0.25 +
-    0.85 * 0.20 +
-    0.625 * 0.15 +
-    0.75 * 0.10
-) = 0.82275
+def fill_prompt(prompt_template: str, **kwargs) -> str:
+    class SafeDict(dict):
+        def __missing__(self, key):
+            return "{" + key + "}"  # Keep the placeholder if value is missing
 
-
-Hallucination (30%) — Highest Priority
-Rationale: Hallucinations — outputs that are factually incorrect or fabricated — severely impact trust in generative models. Even a small number of hallucinated outputs can undermine the model's credibility.
-
-Weight Justification: Given its critical importance in high-stakes or factual domains, we assign it the highest weight.
-
-2. Accuracy (25%)
-Rationale: Accuracy measures how well the output aligns with the expected or ground truth response. It reflects the correctness of reasoning and information delivery.
-
-Weight Justification: Accuracy is vital but often closely related to hallucination. While hallucination focuses on false content, accuracy measures overall correctness, hence a slightly lower but still substantial weight.
-
-3. Context Relevance (20%)
-Rationale: Context relevance ensures that the model's response stays on-topic and is informed by the input prompt. A response might be accurate or fluent but completely off-topic — thus still unreliable.
-
-Weight Justification: A relevant response is necessary for any meaningful interaction, making this metric essential, though secondary to factual correctness.
-
-4. Completeness (15%)
-Rationale: Completeness evaluates whether the response addresses all aspects of the prompt. It reflects the depth and thoroughness of the model’s understanding.
-
-Weight Justification: While important, incomplete responses can sometimes be acceptable in lower-risk scenarios. Hence, it is assigned moderate weight.
-
-5. Semantic Relevance (10%) — Lowest Priority
-Rationale: Semantic relevance looks at how well the generated response semantically aligns with the intent or meaning of the input. This is more nuanced and overlaps with other metrics.
-
-Weight Justification: Given the subtler nature of semantic alignment and partial overlap with context and accuracy, it receives the least weight in this version of the framework.
-
-Would you like a version of this structured for a slide (bullet style) or a markdown format for documentation?
-
-
-
-
-
-
-
+    return prompt_template.format_map(SafeDict(**kwargs))
