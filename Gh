@@ -1,6 +1,18 @@
-def fill_prompt(prompt_template: str, **kwargs) -> str:
-    class SafeDict(dict):
-        def __missing__(self, key):
-            return "{" + key + "}"  # Keep the placeholder if value is missing
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-    return prompt_template.format_map(SafeDict(**kwargs))
+plt.figure(figsize=(10, 6))
+
+# Plot accuracy
+sns.lineplot(data=df, x='version', y='accuracy', hue='issue_id', marker='o', label='Accuracy')
+
+# Plot completeness
+sns.lineplot(data=df, x='version', y='completeness', hue='issue_id', marker='s', linestyle='--', label='Completeness')
+
+plt.title('Variation of Accuracy and Completeness per Issue ID')
+plt.ylabel('Score')
+plt.ylim(0, 1)
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend(title='Issue ID', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
