@@ -1,22 +1,180 @@
-Red: < 5th Percentile (Manual)
-Yellow: 5th Percentile (Manual) <= Score < 25th Percentile (Manual) (or maybe median/50th)
-Green: >= 25th Percentile (Manual) (or maybe median/50th)
+Okay, using the Interquartile Range (IQR) is another robust statistical method, particularly good because it's less sensitive to extreme outliers than the mean and standard deviation approach. It focuses on the spread of the middle 50% of your data.
 
-Collect Manual Completeness Scores: You already have these from calculating the 5th percentile: C_manual = {c_1, c_2, ..., c_m}. Ensure they are based on a clear, consistent rubric for completeness.
-Choose a High Percentile: Decide what level of performance constitutes "unusually high" compared to your human evaluators. Common choices are:
-95th Percentile: The score exceeded by only the top 5% of your manual evaluations. This flags results better than most human-scored examples.
-99th Percentile: The score exceeded by only the top 1% of your manual evaluations. This flags truly exceptional (or potentially anomalous) results compared to the human baseline.
-Let's use the 95th percentile for this example.
-Calculate the Chosen High Percentile:
-Using your sorted manual completeness scores (C_manual), calculate the 95th percentile value.
-Use standard functions: PERCENTILE.INC(data_range, 0.95) in Excel/Sheets or numpy.percentile(scores, 95) in Python.
-Set the "Overconfidence" / "Unusually High" Threshold:
-The calculated 95th percentile (or your chosen percentile) becomes the lower bound for this zone.
-Threshold_Overconfidence = 95th_Percentile(C_manual)
-Define the Zone:
-Outputs with a completeness score above this threshold fall into your "Overconfidence" or "Unusually High" category.
-Overconfidence / Unusually High: LLM_Completeness_Score > Threshold_Overconfidence
-Red (Not Okay / Incomplete): Score < 5th Percentile (Manual)
-Yellow (Concern / Minimally Complete): 5th Percentile (Manual) <= Score < 25th Percentile (Manual) (or maybe 50th/Median)
-Green (Okay / Good Completeness): 25th Percentile (Manual) <= Score <= 95th Percentile (Manual) (adjust lower bound as needed)
-Blue (Overconfident / Unusually High): Score > 95th Percentile (Manual)
+Here's how you can calculate thresholds for semantic relevance using IQR, defining four zones:
+
+Concept:
+
+Semantic Relevance: First, you need a way to score this. This often involves human evaluation or potentially using another model (like a sentence-transformer) to get a numerical score (e.g., 0-1, 0-100) indicating how relevant the LLM's output is to the prompt or context.
+
+Quartiles:
+
+Q1 (First Quartile / 25th Percentile): The score below which 25% of your data falls.
+
+Q3 (Third Quartile / 75th Percentile): The score below which 75% of your data falls.
+
+Interquartile Range (IQR): The range containing the middle 50% of your data.
+IQR = Q3 - Q1
+
+Outlier Fences: These are common statistical boundaries used to identify potential outliers based on the IQR.
+
+Lower Fence: Q1 - 1.5 * IQR
+
+Upper Fence: Q3 + 1.5 * IQR
+
+We can use these quartiles and fences to define your zones.
+
+Steps:
+
+Gather Semantic Relevance Scores:
+
+Collect a representative set of semantic relevance scores for your LLM outputs. As discussed before, it's generally best if these are manual scores from human evaluators using a consistent rubric, as this grounds your thresholds in human perception of relevance. However, you could also apply this method to automatically generated relevance scores (e.g., from a scoring model), but interpret the results relative to that model's scoring distribution.
+
+Let your scores be S = {s_1, s_2, ..., s_n}.
+
+Calculate Q1, Q3, and IQR:
+
+Sort your relevance scores S in ascending order.
+
+Find the 25th percentile (Q1) and the 75th percentile (Q3). Most spreadsheet programs (Excel: QUARTILE.INC(range, 1) for Q1, QUARTILE.INC(range, 3) for Q3) or statistical packages (Python NumPy: np.percentile(scores, 25) for Q1, np.percentile(scores, 75) for Q3) can do this.
+
+Calculate the IQR: IQR = Q3 - Q1.
+
+Calculate the Fences:
+
+Lower Fence: LF = Q1 - 1.5 * IQR
+
+Upper Fence: UF = Q3 + 1.5 * IQR
+
+(Note: If your relevance scores cannot be negative (e.g., 0-1 scale), treat any calculated Lower Fence below 0 as 0.)
+
+(Note: If your scores have an absolute maximum (e.g., 0-1 scale), treat any calculated Upper Fence above that maximum as the maximum score possible.)
+
+Define Thresholds and Zones:
+Use the quartiles (Q1, Q3) and the fences (LF, UF) to set the boundaries for your four zones.
+
+Red Zone (Not Okay / Irrelevant): Scores are significantly below the typical range.
+
+Threshold: Score < LF (i.e., Score < Q1 - 1.5 * IQR)
+
+Interpretation: These outputs are statistically very low in relevance compared to the bulk of evaluations, likely indicating a failure to understand or address the prompt.
+
+Yellow Zone (Concern / Low Relevance): Scores are below the main cluster but not extremely low.
+
+Threshold: LF <= Score < Q1 (i.e., Q1 - 1.5 * IQR <= Score < Q1)
+
+Interpretation: Relevance is lower than the typical middle 50%, warranting concern. The LLM might be slightly off-topic or missing key aspects.
+
+Green Zone (Okay / Relevant): Scores fall within the main range, including the middle 50% and extending up to the upper outlier fence.
+
+Threshold: Q1 <= Score <= UF (i.e., Q1 <= Score <= Q3 + 1.5 * IQR)
+
+Interpretation: This represents the acceptable range of relevance, from minimally acceptable (bottom of Q1) up to high relevance that isn't statistically extreme. Note: You could split Green further if desired, e.g., having Q1-Q3 as "Typical" and Q3-UF as "High", but this keeps it to 4 zones.
+
+Blue Zone (Overconfident / Unusually High Relevance): Scores are statistically very high.
+
+Threshold: Score > UF (i.e., Score > Q3 + 1.5 * IQR)
+
+Interpretation: While high relevance is generally good, scores this high might indicate:
+
+Genuine excellent understanding and response.
+
+The LLM is "keyword stuffing" or matching surface-level terms very closely without deeper semantic understanding.
+
+The evaluation task/data was too easy or potentially flawed.
+
+The scoring method might be too simplistic.
+This zone flags outputs that are unusually relevant compared to the norm and likely warrant a qualitative review to confirm why.
+
+Summary Table (IQR Method):
+
+Category	Color	Threshold Range	Interpretation
+Not Okay / Irrelevant	Red	Score < Q1 - 1.5 * IQR	Statistically very low relevance.
+Concern / Low Relevance	Yellow	Q1 - 1.5 * IQR <= Score < Q1	Below the central 50%, warrants attention.
+Okay / Relevant	Green	Q1 <= Score <= Q3 + 1.5 * IQR	Typical to high relevance.
+Overconfident / Unusually High	Blue	Score > Q3 + 1.5 * IQR	Statistically very high relevance; investigate why.
+
+Example:
+
+Suppose you have 100 manual semantic relevance scores on a 0-1 scale.
+You calculate:
+
+Q1 = 0.65
+
+Q3 = 0.85
+
+IQR = Q3 - Q1 = 0.85 - 0.65 = 0.20
+
+Lower Fence (LF) = Q1 - 1.5 * IQR = 0.65 - 1.5 * 0.20 = 0.65 - 0.30 = 0.35
+
+Upper Fence (UF) = Q3 + 1.5 * IQR = 0.85 + 1.5 * 0.20 = 0.85 + 0.30 = 1.15 (Since scores are 0-1, cap UF at 1.0)
+
+Define Ranges:
+
+Red: Score < 0.35
+
+Yellow: 0.35 <= Score < 0.65
+
+Green: 0.65 <= Score <= 1.0 (Capped by max score)
+
+Blue: Score > 1.0 (This zone becomes impossible if scores are capped at 1.0. If UF was, say, 0.95, then Blue would be Score > 0.95). Let's adjust the example slightly for illustration: Assume Q3 = 0.80, IQR = 0.15, UF = 0.80 + 1.5*0.15 = 0.80 + 0.225 = 1.025 (capped at 1.0).
+
+Red: Score < 0.425 (assuming Q1=0.65, LF = 0.65 - 1.5*0.15 = 0.425)
+
+Yellow: 0.425 <= Score < 0.65
+
+Green: 0.65 <= Score <= 1.0
+
+Blue: Score > 1.0 (impossible)
+
+Let's try another example where Blue is possible:
+Suppose Q1=0.5, Q3=0.7, IQR=0.2.
+LF = 0.5 - 1.50.2 = 0.2
+UF = 0.7 + 1.50.2 = 0.7 + 0.3 = 1.0. Assume scores can actually go up to 1.0 perfectly.
+Let's make Q3=0.75, IQR=0.25.
+LF = 0.5 - 1.50.25 = 0.125
+UF = 0.75 + 1.50.25 = 0.75 + 0.375 = 1.125 (Cap at 1.0 if max is 1.0)
+If max score was, say, 5.
+Q1=2, Q3=4, IQR=2.
+LF = 2 - 1.52 = -1 (Treat as 0 if scores are non-negative)
+UF = 4 + 1.52 = 7 (Treat as 5 if max score is 5)
+Okay, let's use scores 0-100.
+Q1=60, Q3=85, IQR=25.
+LF = 60 - 1.525 = 60 - 37.5 = 22.5
+UF = 85 + 1.525 = 85 + 37.5 = 122.5 (Cap at 100 if max score is 100)
+
+Define Ranges (0-100 scores):
+
+Red: Score < 22.5
+
+Yellow: 22.5 <= Score < 60
+
+Green: 60 <= Score <= 100 (Capped)
+
+Blue: Score > 100 (Impossible)
+
+What if UF was below 100?
+Q1=70, Q3=80, IQR=10.
+LF = 70 - 1.510 = 55
+UF = 80 + 1.510 = 95
+
+Define Ranges (0-100 scores, UF < 100):
+
+Red: Score < 55
+
+Yellow: 55 <= Score < 70
+
+Green: 70 <= Score <= 95
+
+Blue: Score > 95
+
+Applying to New Scores (Using the last example):
+
+A score of 50: Falls in Red.
+
+A score of 65: Falls in Yellow.
+
+A score of 80: Falls in Green.
+
+A score of 97: Falls in Blue (Unusually High/Investigate).
+
+This IQR method provides a statistically sound way to segment your semantic relevance scores, grounded in the central tendency of your data and robust to extreme values. Remember that using manual evaluation scores for calculating Q1/Q3 makes the thresholds more inherently meaningful regarding human perception of relevance.
