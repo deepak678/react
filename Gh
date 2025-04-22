@@ -1,15 +1,7 @@
-import pandas as pd
-import re
-
-# Function to extract title and description
-def extract_fields(text):
-    title_match = re.search(r'title["\']?\s*:\s*["\']?(.+?)["\']?\s*(?=description|$)', text, re.IGNORECASE)
-    desc_match = re.search(r'description["\']?\s*:\s*["\']?(.+?)["\']?$', text, re.IGNORECASE)
+def extract_title_description(text):
+    title_match = re.search(r'"title"\s*:\s*"([^"]+)"', text, re.IGNORECASE)
+    desc_match = re.search(r'"description"\s*:\s*"([^"]+)"', text, re.IGNORECASE)
+    
     title = title_match.group(1).strip() if title_match else None
     description = desc_match.group(1).strip() if desc_match else None
     return pd.Series([title, description])
-
-# Apply the function
-df[['title', 'description']] = df['raw_text'].apply(extract_fields)
-
-print(df)
