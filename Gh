@@ -1,7 +1,28 @@
+import pandas as pd
+import re
+
+# Sample data
+df = pd.DataFrame({
+    'raw_text': [
+        '"title": "Simple title", "description": "Normal description"',
+        '"title": "Quote test", "description": "This is a \\"quoted\\" word"',
+        '"title": "Another", "description": "Line with "weird" quote"',
+        '"title": "Multiline title", "description": "Line with \\"quote\\" and newline\\nsecond line"'
+    ]
+})
+
+# Function to extract with support for escaped quotes
 def extract_title_description(text):
-    title_match = re.search(r'"title"\s*:\s*"([^"]+)"', text, re.IGNORECASE)
-    desc_match = re.search(r'"description"\s*:\s*"([^"]+)"', text, re.IGNORECASE)
+    # Match "key": "value", allowing escaped quotes inside value
+    matches = dict(re.findall(r'"(title|description)"\s*:\s*"((?:[^"\\]|\\.)*)"', text))
     
-    title = title_match.group(1).strip() if title_match else None
-    description = desc_match.group(1).strip() if desc_match else None
+    # Unescape any escaped quotes and other escaped characters
+    title = matches.get("title", "").encode().decode("unicode_escape")
+    description = matches.get("description", "").encode().decode("unicode_escape")
+    
     return pd.Series([title, description])
+
+# Apply to DataFrame
+df[['title', 'description']] = df['raw_text'].apply(extract_title_description)
+
+print(df[['title', 'description']])
