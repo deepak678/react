@@ -1,1 +1,7 @@
-Advisor feedback is a critical component in evaluating the real-world effectiveness of ADA’s LLM responses. While automated scoring via metrics like accuracy, completeness, and hallucination provides quantitative assessment, qualitative feedback from advisors offers practical validation of usefulness, clarity, and actionability. By systematically collecting and aggregating advisor feedback, we can surface trends, identify recurring gaps, and measure alignment between model outputs and advisor expectations. This aggregated view not only helps in refining prompt strategies and improving LLM tuning but also enables us to deliver a performance dashboard back to advisors — showcasing model reliability, areas of improvement, and transparency in how their feedback is driving better responses over time
+Incorporate advisor feedback into the model monitoring process for ADA.
+
+Aggregate qualitative and quantitative evaluation signals to assess LLM performance.
+
+Identify recurring gaps and improvement opportunities from feedback trends.
+
+Provide performance dashboards to advisors to drive transparency and trust.
