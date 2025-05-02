@@ -1,7 +1,21 @@
-Incorporate advisor feedback into the model monitoring process for ADA.
+import matplotlib.pyplot as plt
 
-Aggregate qualitative and quantitative evaluation signals to assess LLM performance.
+# Sample data
+column1 = [80, 75, 90, 60, 85]  # percentages from first column
+column2 = [78, 74, 88, 65, 83]  # percentages from second column
 
-Identify recurring gaps and improvement opportunities from feedback trends.
+# Create scatter plot
+plt.figure(figsize=(8, 5))
+plt.scatter(column1, column2, color='blue', edgecolor='black')
 
-Provide performance dashboards to advisors to drive transparency and trust.
+# Add labels and title
+plt.xlabel('Column 1 (%)')
+plt.ylabel('Column 2 (%)')
+plt.title('Variation Between Two Percentage Columns')
+plt.grid(True)
+plt.axline((0, 0), slope=1, color='red', linestyle='--', label='y = x')  # optional reference line
+
+# Show legend and plot
+plt.legend()
+plt.tight_layout()
+plt.show()
