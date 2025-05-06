@@ -1,29 +1,19 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
 
-# Sample data
-data = {
-    'Time': ['T1', 'T2', 'T3', 'T4', 'T5'],
-    'A': [2, 4, 6, 8, 10],   # 0–10 range
-    'B': [1, 2, 3, 4, 5]     # 0–5 range
-}
+# Example feedback scores (range 1 to 5)
+feedback_scores = [5, 4, 3, 5, 2, 1, 5, 4, 3, 2, 4, 5, 3, 2, 1, 5, 4, 3, 5, 2]
 
-df = pd.DataFrame(data)
+# Convert to DataFrame
+df = pd.DataFrame({'Score': feedback_scores})
 
-# Normalize A and B
-scaler = MinMaxScaler()
-df[['A_scaled', 'B_scaled']] = scaler.fit_transform(df[['A', 'B']])
-
-# Plot scaled values
-plt.figure(figsize=(8, 5))
-plt.plot(df['Time'], df['A_scaled'], marker='o', label='A (scaled)')
-plt.plot(df['Time'], df['B_scaled'], marker='s', label='B (scaled)')
-
-plt.title('Normalized Line Chart')
-plt.xlabel('Time')
-plt.ylabel('Normalized Value (0-1)')
-plt.legend()
-plt.grid(True)
+# Create histogram
+plt.figure(figsize=(7, 5))
+plt.hist(df['Score'], bins=[1, 2, 3, 4, 5, 6], edgecolor='black', align='left', rwidth=0.8)
+plt.title('Histogram of User Feedback Scores')
+plt.xlabel('Score (1 to 5)')
+plt.ylabel('Number of Responses')
+plt.xticks([1, 2, 3, 4, 5])
+plt.grid(axis='y')
 plt.tight_layout()
 plt.show()
