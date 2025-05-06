@@ -1,21 +1,24 @@
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # Sample data
-column1 = [80, 75, 90, 60, 85]  # percentages from first column
-column2 = [78, 74, 88, 65, 83]  # percentages from second column
+data = {
+    'Time': ['T1', 'T2', 'T3', 'T4', 'T5'],
+    'Score1': [10, 30, 50, 70, 90],
+    'Score2': [15, 35, 45, 65, 85]
+}
 
-# Create scatter plot
+df = pd.DataFrame(data)
+
+# Plotting line chart
 plt.figure(figsize=(8, 5))
-plt.scatter(column1, column2, color='blue', edgecolor='black')
+plt.plot(df['Time'], df['Score1'], marker='o', label='Score1')
+plt.plot(df['Time'], df['Score2'], marker='s', label='Score2')
 
-# Add labels and title
-plt.xlabel('Column 1 (%)')
-plt.ylabel('Column 2 (%)')
-plt.title('Variation Between Two Percentage Columns')
-plt.grid(True)
-plt.axline((0, 0), slope=1, color='red', linestyle='--', label='y = x')  # optional reference line
-
-# Show legend and plot
+plt.title('Line Chart: Score1 vs Score2')
+plt.xlabel('Time')
+plt.ylabel('Scores')
 plt.legend()
+plt.grid(True)
 plt.tight_layout()
 plt.show()
