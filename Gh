@@ -1,54 +1,28 @@
 from openpyxl import load_workbook
 from collections import Counter
-import matplotlib.pyplot as plt
 
-# Define your color list (hex values, no '#')
-target_colors = {
-    "B1A0C7": "Lavender",
-    "FFFF00": "Yellow",
-    "92D050": "Green"
-}
-
-def get_hex_color(cell):
-    fill = cell.fill
-    fg = fill.fgColor
-    if fg.type == 'rgb' and fg.rgb:
-        return fg.rgb[-6:]  # remove alpha
-    return None
-
-# Load Excel file
-file_path = 'your_file.xlsx'  # replace with your file
+file_path = 'your_file.xlsx'  # Change to your file
 wb = load_workbook(file_path)
 ws = wb.active
 
-# Set target column
-column_index = 2  # column B
+column_index = 2  # Column B
 
-# Count matched colors
 color_counts = Counter()
 
 for row in ws.iter_rows(min_col=column_index, max_col=column_index):
     for cell in row:
-        hex_color = get_hex_color(cell)
-        if hex_color in target_colors:
-            color_counts[hex_color] += 1
+        fill = cell.fill
+        fg = fill.fgColor
+        if fg.type == 'rgb' and fg.rgb:
+            color = fg.rgb[-6:].lower()
+        elif fg.type == 'theme':
+            color = f'theme_{fg.theme}'
+        elif fg.type == 'indexed':
+            color = f'indexed_{fg.indexed}'
+        else:
+            color = 'none'
+        color_counts[color] += 1
 
-# Plot histogram
-hex_codes = list(color_counts.keys())
-labels = [target_colors[c] for c in hex_codes]
-counts = list(color_counts.values())
-
-plt.figure(figsize=(8, 5))
-bars = plt.bar(labels, counts, color=[f'#{c}' for c in hex_codes])
-
-# Add labels
-for i, bar in enumerate(bars):
-    plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
-             str(counts[i]), ha='center', va='bottom')
-
-plt.title('Color-coded Cell Count (Mapped to Given Colors)')
-plt.xlabel('Color Name')
-plt.ylabel('Count')
-plt.grid(axis='y')
-plt.tight_layout()
-plt.show()
+print("Unique fill colors found in column:")
+for color, count in color_counts.items():
+    print(f"{color}: {count}")
