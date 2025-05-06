@@ -1,23 +1,28 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 # Sample data
 data = {
     'Time': ['T1', 'T2', 'T3', 'T4', 'T5'],
-    'Score1': [10, 30, 50, 70, 90],
-    'Score2': [15, 35, 45, 65, 85]
+    'A': [2, 4, 6, 8, 10],   # 0–10 range
+    'B': [1, 2, 3, 4, 5]     # 0–5 range
 }
 
 df = pd.DataFrame(data)
 
-# Plotting line chart
-plt.figure(figsize=(8, 5))
-plt.plot(df['Time'], df['Score1'], marker='o', label='Score1')
-plt.plot(df['Time'], df['Score2'], marker='s', label='Score2')
+# Normalize A and B
+scaler = MinMaxScaler()
+df[['A_scaled', 'B_scaled']] = scaler.fit_transform(df[['A', 'B']])
 
-plt.title('Line Chart: Score1 vs Score2')
+# Plot scaled values
+plt.figure(figsize=(8, 5))
+plt.plot(df['Time'], df['A_scaled'], marker='o', label='A (scaled)')
+plt.plot(df['Time'], df['B_scaled'], marker='s', label='B (scaled)')
+
+plt.title('Normalized Line Chart')
 plt.xlabel('Time')
-plt.ylabel('Scores')
+plt.ylabel('Normalized Value (0-1)')
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
