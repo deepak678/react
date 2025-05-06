@@ -1,35 +1,41 @@
-import openpyxl
-import matplotlib.pyplot as plt
+As a user,
+I want to reset my password through a "Forgot Password" option,
+So that I can regain access to my account if I forget my credentials.
 
-# Load the workbook and sheet
-wb = openpyxl.load_workbook('your_file.xlsx')
-sheet = wb.active
+Acceptance Criteria:
+Forgot Password Option
 
-# Define color codes for different themes (e.g., theme_7 is lavender, green, etc.)
-colors = {
-    'Red': 'FF0000',        # Red color
-    'Yellow': 'FFFF00',     # Yellow color
-    'Green': '00FF00',      # Green color
-    'Lavender': 'b1a0c7'    # Lavender color (light purple)
-}
+Given I’m on the login page,
+When I click on “Forgot Password?”,
+Then I should be redirected to a password reset page.
 
-# Initialize a dictionary to count occurrences of each color
-color_count = {key: 0 for key in colors.keys()}
+Email Input Validation
 
-# Iterate over cells in the specified column (e.g., column A)
-for row in sheet.iter_rows(min_col=1, max_col=1):  # Adjust column as necessary
-    for cell in row:
-        # Compare the background color of the cell with the predefined colors
-        for color_name, color_code in colors.items():
-            if cell.fill.start_color.index == color_code:
-                color_count[color_name] += 1
+Given I’m on the password reset page,
+When I enter an invalid or unregistered email,
+Then I should see an appropriate error message.
 
-# Print the color counts
-print(f"Color counts: {color_count}")
+Reset Email Sent
 
-# Plot a histogram of the color counts
-plt.bar(color_count.keys(), color_count.values(), color=['red', 'yellow', 'green', 'lavender'])
-plt.title('Histogram of Highlighted Cells')
-plt.xlabel('Colors')
-plt.ylabel('Frequency')
-plt.show()
+Given I enter a valid and registered email,
+When I click “Send Reset Link,”
+Then I should receive a reset password email with a secure link.
+
+Secure Reset Link
+
+Given I click the link in my email,
+When I open it,
+Then I should be directed to a page to enter and confirm a new password.
+
+Password Reset Confirmation
+
+Given I enter and confirm a valid new password,
+When I submit the form,
+Then my password should be updated, and I should see a confirmation message.
+
+Login with New Password
+
+Given I have reset my password,
+When I return to the login page and use the new password,
+Then I should be able to log in successfully.
+
