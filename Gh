@@ -1,41 +1,8 @@
-As a user,
-I want to reset my password through a "Forgot Password" option,
-So that I can regain access to my account if I forget my credentials.
+from langchain.prompts import PromptTemplate
 
-Acceptance Criteria:
-Forgot Password Option
+prompt_template = PromptTemplate.from_template(
+"""You are a helpful AI assistant tasked with identifying potential abbreviation expansion hallucinations in an AI response.
 
-Given I’m on the login page,
-When I click on “Forgot Password?”,
-Then I should be redirected to a password reset page.
+Your goal is to compare the abbreviations used in the AI response with those present in the original user request. If the AI response uses an abbreviation that was NOT present in the user request, it might be a hallucinated expansion and should be flagged.
 
-Email Input Validation
-
-Given I’m on the password reset page,
-When I enter an invalid or unregistered email,
-Then I should see an appropriate error message.
-
-Reset Email Sent
-
-Given I enter a valid and registered email,
-When I click “Send Reset Link,”
-Then I should receive a reset password email with a secure link.
-
-Secure Reset Link
-
-Given I click the link in my email,
-When I open it,
-Then I should be directed to a page to enter and confirm a new password.
-
-Password Reset Confirmation
-
-Given I enter and confirm a valid new password,
-When I submit the form,
-Then my password should be updated, and I should see a confirmation message.
-
-Login with New Password
-
-Given I have reset my password,
-When I return to the login page and use the new password,
-Then I should be able to log in successfully.
-
+Here's the user request:
