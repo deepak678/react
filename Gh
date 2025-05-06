@@ -1,28 +1,35 @@
-from openpyxl import load_workbook
-from collections import Counter
+import openpyxl
+import matplotlib.pyplot as plt
 
-file_path = 'your_file.xlsx'  # Change to your file
-wb = load_workbook(file_path)
-ws = wb.active
+# Load the workbook and sheet
+wb = openpyxl.load_workbook('your_file.xlsx')
+sheet = wb.active
 
-column_index = 2  # Column B
+# Define color codes for different themes (e.g., theme_7 is lavender, green, etc.)
+colors = {
+    'Red': 'FF0000',        # Red color
+    'Yellow': 'FFFF00',     # Yellow color
+    'Green': '00FF00',      # Green color
+    'Lavender': 'b1a0c7'    # Lavender color (light purple)
+}
 
-color_counts = Counter()
+# Initialize a dictionary to count occurrences of each color
+color_count = {key: 0 for key in colors.keys()}
 
-for row in ws.iter_rows(min_col=column_index, max_col=column_index):
+# Iterate over cells in the specified column (e.g., column A)
+for row in sheet.iter_rows(min_col=1, max_col=1):  # Adjust column as necessary
     for cell in row:
-        fill = cell.fill
-        fg = fill.fgColor
-        if fg.type == 'rgb' and fg.rgb:
-            color = fg.rgb[-6:].lower()
-        elif fg.type == 'theme':
-            color = f'theme_{fg.theme}'
-        elif fg.type == 'indexed':
-            color = f'indexed_{fg.indexed}'
-        else:
-            color = 'none'
-        color_counts[color] += 1
+        # Compare the background color of the cell with the predefined colors
+        for color_name, color_code in colors.items():
+            if cell.fill.start_color.index == color_code:
+                color_count[color_name] += 1
 
-print("Unique fill colors found in column:")
-for color, count in color_counts.items():
-    print(f"{color}: {count}")
+# Print the color counts
+print(f"Color counts: {color_count}")
+
+# Plot a histogram of the color counts
+plt.bar(color_count.keys(), color_count.values(), color=['red', 'yellow', 'green', 'lavender'])
+plt.title('Histogram of Highlighted Cells')
+plt.xlabel('Colors')
+plt.ylabel('Frequency')
+plt.show()
