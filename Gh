@@ -2,34 +2,43 @@ from openpyxl import load_workbook
 from collections import Counter
 import matplotlib.pyplot as plt
 
-# Load the Excel file
-file_path = 'your_file.xlsx'  # Replace with your actual file path
+# Load Excel file
+file_path = 'your_file.xlsx'  # Replace with your actual path
 wb = load_workbook(file_path)
-ws = wb.active  # Use a specific sheet: wb['SheetName']
+ws = wb.active
 
-# Set the column index to scan (e.g., column B = 2)
+# Choose column to analyze (e.g., column B = 2)
 column_index = 2
 
-# Count cell fill colors in that column
+# Count unique fill colors
 color_counts = Counter()
 
 for row in ws.iter_rows(min_col=column_index, max_col=column_index):
     for cell in row:
         fill = cell.fill
-        if fill and fill.fgColor.type == 'rgb' and fill.fgColor.rgb:
-            color_hex = fill.fgColor.rgb[-6:]  # Remove alpha if ARGB
-            color_counts[color_hex] += 1
+        if fill and fill.fgColor and fill.fgColor.type == 'rgb' and fill.fgColor.rgb:
+            hex_color = fill.fgColor.rgb[-6:]  # Strip alpha if ARGB
+            color_counts[hex_color] += 1
 
-# Plotting the histogram
+# Filter out cells without fill (if needed)
+color_counts = {k: v for k, v in color_counts.items() if v > 0}
+
+# Plot histogram
 colors = list(color_counts.keys())
 counts = list(color_counts.values())
 
 plt.figure(figsize=(8, 5))
-plt.bar(range(len(colors)), counts, color=[f'#{c}' for c in colors])
+bars = plt.bar(range(len(colors)), counts, color=[f'#{c}' for c in colors])
+
+# Add count labels on top of bars
+for i, bar in enumerate(bars):
+    plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
+             str(counts[i]), ha='center', va='bottom', fontsize=10)
+
 plt.xticks(range(len(colors)), [f'#{c}' for c in colors])
 plt.xlabel('Cell Fill Color (Hex)')
 plt.ylabel('Count')
-plt.title('Histogram of Highlighted Cells in Column B')
+plt.title('Histogram of Cell Highlight Colors')
 plt.grid(axis='y')
 plt.tight_layout()
 plt.show()
