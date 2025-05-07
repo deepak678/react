@@ -1,8 +1,18 @@
-from langchain.prompts import PromptTemplate
+import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-prompt_template = PromptTemplate.from_template(
-"""You are a helpful AI assistant tasked with identifying potential hallucinated abbreviation expansions in an AI response.
+# Recreate actual and predicted values from confusion matrix
+TP = 24
+TN = 259
+FP = 1
+FN = 5
 
-Your goal is to compare the abbreviations present in the original user request with any expansions of those abbreviations found in the AI response. If the AI response expands an abbreviation that was NOT present as an abbreviation in the user request, it might be a hallucinated expansion and should be flagged.
+actual = [1]*TP + [1]*FN + [0]*TN + [0]*FP
+predicted = [1]*TP + [0]*FN + [0]*TN + [1]*FP
 
-Here's the user request:
+# Generate confusion matrix
+cm = confusion_matrix(actual, predicted)
+
+# Display the confusion matrix
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negative", "Positive"])
+disp.plot(cmap="Blues")
