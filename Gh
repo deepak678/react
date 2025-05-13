@@ -1,18 +1,1 @@
-import numpy as np
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-
-# Recreate actual and predicted values from confusion matrix
-TP = 24
-TN = 259
-FP = 1
-FN = 5
-
-actual = [1]*TP + [1]*FN + [0]*TN + [0]*FP
-predicted = [1]*TP + [0]*FN + [0]*TN + [1]*FP
-
-# Generate confusion matrix
-cm = confusion_matrix(actual, predicted)
-
-# Display the confusion matrix
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negative", "Positive"])
-disp.plot(cmap="Blues")
+=IF(A2>B2, "Column A Better", IF(B2>A2, "Column B Better", "Same"))
