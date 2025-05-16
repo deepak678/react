@@ -1,52 +1,48 @@
-This section provides a high-level overview of the monitoring metrics used to evaluate the quality and performance of language model outputs. It also includes metadata about the pilot dataset used for evaluation.
+Requirement: Recalculate and Export NLP Evaluation Metrics1.  ObjectiveThe objective of this requirement is to recalculate four key Natural Language Processing (NLP) evaluation metrics – Accuracy, Completeness, Hallucination, and Semantic Relevance – for existing data using the Gemini 1.5 Pro model.  Previous calculations were performed using the GPT-4o model. The recalculated metrics will replace the existing values. The results will be exported to an Excel file for review and analysis.
+2.  Background* Currently, Accuracy, Completeness, Hallucination, and Semantic Relevance scores are calculated for a specific dataset using the GPT-4o model.
+* There is a need to evaluate these metrics using the Gemini 1.5 Pro model to assess its performance and compare it to the GPT-4o model.
+* The results of this evaluation will inform decisions regarding model selection and potential improvements to the NLP pipeline.
+3.  ScopeThis requirement includes the following:
 
-Pilot Dataset Summary
-Total Records: 289
-
-Dataset Description: The pilot dataset consists of 289 evaluation records. Each record contains the original input prompt, the corresponding model-generated response, and human annotations or ground-truth references where applicable.
-
-Use Case: The dataset has been designed to assess and monitor the performance of a language model when generating structured outputs, particularly in applications involving reasoning, summarization, or transformation of content.
-
-Evaluation Metrics
-The following metrics are calculated for each record to provide comprehensive insights into model performance:
-
-Accuracy
-
-Definition: Measures how factually correct or logically valid the model’s response is with respect to the expected output.
-
-Calculation Method: Human or LLM-generated comparison between ground truth and model output.
-
-Completeness
-
-Definition: Assesses whether the model's response includes all the essential components or required information from the input.
-
-Calculation Method: Evaluated using a checklist or predefined expectation per prompt.
-
-Hallucination
-
-Definition: Identifies instances where the model generates information not supported or implied by the input data.
-
-Calculation Method: Comparison with source input and domain-specific knowledge to flag unsupported claims.
-
-Context Relevance
-
-Definition: Measures how well the response aligns with the context or intent of the original prompt.
-
-Calculation Method: Assessed based on relevance to the prompt and whether the output deviates from the expected contextual scope.
-
-Semantic Relevance
-
-Definition: Evaluates the degree to which the response preserves the intended meaning of the input while reformulating or structuring content.
-
-Calculation Method: Computed via semantic similarity techniques or judgment-based scoring by evaluators or LLM judges.
-
-This header section is intended to provide transparency into the methodology used for monitoring and ensure traceability of evaluation standards. Each metric is tracked per record and can be aggregated to identify trends, anomalies, or performance gaps.
-
-Let me know if you'd like this structured into a UI mockup, an API doc format, or expanded for technical/engineering audiences.
-
-
-
-
-
-
-
+* **3.1 Metric Recalculation:**
+    * Recalculate the Accuracy, Completeness, Hallucination, and Semantic Relevance metrics for the designated dataset.
+    * Utilize the Gemini 1.5 Pro model for the metric calculation process.
+    * Ensure the Gemini 1.5 Pro model is correctly integrated and configured to perform these calculations.
+    * The exact methodology for calculating each metric (Accuracy, Completeness, Hallucination, and Semantic Relevance) should remain consistent with the previous implementation using GPT-4o, with the exception of the model used for the evaluation. If any changes to the methodology are necessary due to the Gemini 1.5 Pro model, these changes must be documented and approved.
+* **3.2 Data Replacement:**
+    * Replace the existing metric values (Accuracy, Completeness, Hallucination, and Semantic Relevance) in the data storage system with the newly calculated values from the Gemini 1.5 Pro model.
+    * Ensure data integrity during the replacement process.
+    * The data storage location (e.g., database table, file path) of the existing metric values is: [Specify Data Storage Location - e.g., "Table: 'nlp_evaluation_results', Schema: 'production'"].
+* **3.3 Data Export:**
+    * Export the recalculated metric data, including the associated data identifiers (e.g., record IDs, document IDs), into an Excel (.xlsx) file.
+    * The Excel file should include the following columns:
+        * Data Identifier (e.g., `record_id`, `document_id`)
+        * Accuracy (Gemini 1.5 Pro)
+        * Completeness (Gemini 1.5 Pro)
+        * Hallucination (Gemini 1.5 Pro)
+        * Semantic Relevance (Gemini 1.5 Pro)
+    * The Excel file should be saved to a designated location: [Specify Export Location - e.g., "/path/to/exports/gemini_metric_evaluation.xlsx"].
+    * The file name should be descriptive and include the model name (Gemini 1.5 Pro).
+4.  Out of Scope* Modifying the underlying data used for metric calculation (the input data).
+* Developing new metrics beyond Accuracy, Completeness, Hallucination, and Semantic Relevance.
+* Automating the review process of the exported Excel file.
+5.  Acceptance Criteria* **AC01: Metric Recalculation Accuracy:**
+    * Given the designated dataset and the Gemini 1.5 Pro model.
+    * When the metric recalculation process is complete.
+    * Then the calculated Accuracy, Completeness, Hallucination, and Semantic Relevance scores are generated for all data points in the dataset.
+    * And the calculated metrics are consistent with the defined calculation methodology.
+* **AC02: Data Replacement Success:**
+    * Given the original data storage location and the newly calculated metrics.
+    * When the data replacement process is complete.
+    * Then the original metric values in the data storage location are replaced with the new Gemini 1.5 Pro calculated values.
+    * And the data integrity of the storage location is maintained (no data loss or corruption).
+* **AC03: Excel Export Completeness:**
+    * Given the recalculated metric data.
+    * When the data export process is complete.
+    * Then an Excel file is generated at the specified location.
+    * And the Excel file contains all the recalculated metrics (Accuracy, Completeness, Hallucination, Semantic Relevance) and corresponding data identifiers.
+    * And the Excel file is formatted as specified in Section 3.3.
+* **AC04: Data Consistency:**
+    * Given the original data and the recalculated metrics.
+    * When the exported excel file is reviewed.
+    * Then, the recalculated metrics in the excel file are consistent with the data used for calculation.
