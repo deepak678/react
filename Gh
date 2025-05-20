@@ -1,9 +1,13 @@
-Please review the following document and evaluate each of its major sections. For each section:
+Review the structure of the following document. For each section and subsection, check whether it contains any content (even a few words) or is completely empty.
 
-Summarize what content is currently present.
+Your task:
 
-Evaluate whether the content is relevant and sufficient for that section’s purpose.
+List all section and subsection headings.
 
-Identify if any essential information is missing, incomplete, or vague.
+For each one, mark:
 
-Suggest what should be added or improved to make the section more complete and meaningful.
+✓ Has content
+
+✗ No content / Empty
+
+Do not evaluate the quality, relevance, or correctness of the content. Just detect whether each section has any content or not.
