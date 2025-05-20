@@ -1,1 +1,7 @@
-How do you think financial institutions should approach the 'explainability' problem in AI, particularly when using large language models like GPT-4 or other black-box models? Historically, financial firms have relied on more interpretable models such as logistic regression, decision trees, or even simpler machine learning models like random forests—where the logic of prediction could be traced and justified, especially for compliance with regulations like Basel III, SOX, and GDPR. With the advent of deep learning and now generative AI, the trade-off between performance and transparency has become more pronounced. In your opinion, what frameworks, technologies, or organizational practices should be prioritized to ensure that AI adoption doesn't compromise auditability, fairness, or trustworthiness in high-stakes financial environments?"
+You are an expert reviewer. Carefully examine the content of the document provided below. For each major section, assess whether the content is:
+
+Relevant to the section’s intended purpose,
+
+Complete in terms of expected information,
+
+Clear and coherent in presentation.
