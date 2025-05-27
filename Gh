@@ -1,1 +1,25 @@
-The candidate was enthusiastic but demonstrated a very basic understanding of core data engineering technologies. Given the level of naivety and lack of relevant experience, we don’t believe they are the right fit for this role at this time.
+limport pandas as pd
+
+# Sample data
+df = pd.DataFrame({
+    'info': [
+        '"title": content_of_title1\n"Description": content_of_description1',
+        '"title": content_of_title2\n"Description": content_of_description2'
+    ]
+})
+
+# Function to extract title and description
+def extract_info(cell):
+    lines = cell.split('\n')
+    data = {}
+    for line in lines:
+        if 'title' in line:
+            data['title'] = line.split(':', 1)[1].strip()
+        elif 'Description' in line:
+            data['description'] = line.split(':', 1)[1].strip()
+    return pd.Series(data)
+
+# Apply the function to each row
+df[['title', 'description']] = df['info'].apply(extract_info)
+
+print(df)
