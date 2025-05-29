@@ -1,18 +1,18 @@
 import pandas as pd
-import unicodedata
+import codecs
 
-# Load Excel file
+# Load the Excel file
 df = pd.read_excel("your_file.xlsx")
 
-# Apply normalization and ASCII encoding
-def unicode_to_ascii(text):
+# Function to decode escaped unicode
+def decode_unicode_escapes(text):
     if isinstance(text, str):
-        return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+        return codecs.decode(text, 'unicode_escape')
     return text
 
-# Convert specific columns
-df['Column1'] = df['Column1'].apply(unicode_to_ascii)
-df['Column2'] = df['Column2'].apply(unicode_to_ascii)
+# Apply to desired columns
+df['Column1'] = df['Column1'].apply(decode_unicode_escapes)
+df['Column2'] = df['Column2'].apply(decode_unicode_escapes)
 
-# Save to new Excel file
-df.to_excel("converted_file.xlsx", index=False)
+# Save the result
+df.to_excel("decoded_output.xlsx", index=False)
