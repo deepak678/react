@@ -1,36 +1,37 @@
 import pandas as pd
-from rapidfuzz import fuzz
+import difflib
 
-# Load your Excel files
+# Load Excel files
 df_large = pd.read_excel("large_file.xlsx")  # 17,936 rows
 df_small = pd.read_excel("small_file.xlsx")  # 285 rows
 
-# Replace with your actual column names
+# Column names (replace with actual column names)
 large_column = "LargeText"
 small_column = "SearchTerm"
 
-# Convert to string just in case
+# Convert to string
 df_large[large_column] = df_large[large_column].astype(str)
 df_small[small_column] = df_small[small_column].astype(str)
 
-# Store matches
+# Threshold for similarity (0 to 1)
+threshold = 0.9
+
 matches = []
 
-# Threshold for fuzzy match (e.g., 90%)
-threshold = 90
-
-# Loop through each small value
+# For each search term from the smaller file
 for idx, search_term in df_small[small_column].items():
     for large_idx, large_text in df_large[large_column].items():
-        score = fuzz.partial_ratio(search_term, large_text)
-        if score >= threshold:
+        # Use difflib to get similarity score
+        ratio = difflib.SequenceMatcher(None, search_term.lower(), large_text.lower()).ratio()
+        
+        if ratio >= threshold:
             matches.append({
                 "SearchTerm": search_term,
                 "MatchedText": large_text,
-                "SimilarityScore": score,
+                "SimilarityScore": round(ratio * 100, 2),
                 "LargeFile_RowIndex": large_idx
             })
 
-# Save matches
+# Save results
 matches_df = pd.DataFrame(matches)
-matches_df.to_excel("approximate_substring_matches.xlsx", index=False)
+matches_df.to_excel("approximate_matches.xlsx", index=False)
