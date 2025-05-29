@@ -1,18 +1,36 @@
 import pandas as pd
-import codecs
+from rapidfuzz import fuzz
 
-# Load the Excel file
-df = pd.read_excel("your_file.xlsx")
+# Load your Excel files
+df_large = pd.read_excel("large_file.xlsx")  # 17,936 rows
+df_small = pd.read_excel("small_file.xlsx")  # 285 rows
 
-# Function to decode escaped unicode
-def decode_unicode_escapes(text):
-    if isinstance(text, str):
-        return codecs.decode(text, 'unicode_escape')
-    return text
+# Replace with your actual column names
+large_column = "LargeText"
+small_column = "SearchTerm"
 
-# Apply to desired columns
-df['Column1'] = df['Column1'].apply(decode_unicode_escapes)
-df['Column2'] = df['Column2'].apply(decode_unicode_escapes)
+# Convert to string just in case
+df_large[large_column] = df_large[large_column].astype(str)
+df_small[small_column] = df_small[small_column].astype(str)
 
-# Save the result
-df.to_excel("decoded_output.xlsx", index=False)
+# Store matches
+matches = []
+
+# Threshold for fuzzy match (e.g., 90%)
+threshold = 90
+
+# Loop through each small value
+for idx, search_term in df_small[small_column].items():
+    for large_idx, large_text in df_large[large_column].items():
+        score = fuzz.partial_ratio(search_term, large_text)
+        if score >= threshold:
+            matches.append({
+                "SearchTerm": search_term,
+                "MatchedText": large_text,
+                "SimilarityScore": score,
+                "LargeFile_RowIndex": large_idx
+            })
+
+# Save matches
+matches_df = pd.DataFrame(matches)
+matches_df.to_excel("approximate_substring_matches.xlsx", index=False)
