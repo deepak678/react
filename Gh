@@ -1,37 +1,30 @@
 import pandas as pd
-import difflib
 
-# Load Excel files
-df_large = pd.read_excel("large_file.xlsx")  # 17,936 rows
-df_small = pd.read_excel("small_file.xlsx")  # 285 rows
+# Load both Excel files
+df_large = pd.read_excel("large_file.xlsx")   # 17,936 rows
+df_small = pd.read_excel("small_file.xlsx")   # 285 rows
 
-# Column names (replace with actual column names)
-large_column = "LargeText"
-small_column = "SearchTerm"
+# Set column names correctly
+large_column = "LargeText"    # replace with your actual column name
+small_column = "SearchTerm"   # replace with your actual column name
 
-# Convert to string
-df_large[large_column] = df_large[large_column].astype(str)
-df_small[small_column] = df_small[small_column].astype(str)
+# Ensure text format
+df_large[large_column] = df_large[large_column].astype(str).str.lower()
+df_small[small_column] = df_small[small_column].astype(str).str.lower()
 
-# Threshold for similarity (0 to 1)
-threshold = 0.9
-
+# Store matches
 matches = []
 
-# For each search term from the smaller file
-for idx, search_term in df_small[small_column].items():
+# Check for substring containment
+for idx, small_value in df_small[small_column].items():
     for large_idx, large_text in df_large[large_column].items():
-        # Use difflib to get similarity score
-        ratio = difflib.SequenceMatcher(None, search_term.lower(), large_text.lower()).ratio()
-        
-        if ratio >= threshold:
+        if small_value in large_text:
             matches.append({
-                "SearchTerm": search_term,
+                "SearchTerm": small_value,
                 "MatchedText": large_text,
-                "SimilarityScore": round(ratio * 100, 2),
                 "LargeFile_RowIndex": large_idx
             })
 
-# Save results
+# Convert to DataFrame and save
 matches_df = pd.DataFrame(matches)
-matches_df.to_excel("approximate_matches.xlsx", index=False)
+matches_df.to_excel("substring_matches.xlsx", index=False)
