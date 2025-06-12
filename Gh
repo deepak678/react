@@ -1,15 +1,8 @@
-import pandas as pd
-import re
+Your task is to verify whether any abbreviation in the output has been expanded (e.g., "AI" → "Artificial Intelligence") without that expansion being present in the input.
 
-# Example DataFrame with multiple line breaks
-df = pd.DataFrame({
-    'combined': ['title: issue title\n\nDescription: issue description']
-})
+Instructions:
+Carefully compare the input and output.
 
-# Regex to handle multiple line breaks and case-insensitive match
-df[['title', 'description']] = df['combined'].str.extract(
-    r'title:\s*(.*?)\n+Description:\s*(.*)', 
-    flags=re.IGNORECASE
-)
+If the output includes an expanded form of an abbreviation (e.g., "Artificial Intelligence") that is not explicitly mentioned in the input, mark it as a hallucination.
 
-print(df[['title', 'description']])
+Only expansions that are grounded in the input are acceptable.
