@@ -1,8 +1,90 @@
-Your task is to verify whether any abbreviation in the output has been expanded (e.g., "AI" → "Artificial Intelligence") without that expansion being present in the input.
+These are commonly used and well-understood, so their expansion is always acceptable:
 
-Instructions:
-Carefully compare the input and output.
+BAU → Business as Usual
 
-If the output includes an expanded form of an abbreviation (e.g., "Artificial Intelligence") that is not explicitly mentioned in the input, mark it as a hallucination.
+RCA → Root Cause Analysis
 
-Only expansions that are grounded in the input are acceptable.
+KPI → Key Performance Indicator
+
+SLA → Service Level Agreement
+
+TAT → Turnaround Time
+
+1LOD → First Line of Defense
+
+2LOD → Second Line of Defense
+
+3LOD → Third Line of Defense
+
+AML → Anti Money Laundering
+
+KYC → Know Your Customer
+
+CDD → Customer Due Diligence
+
+EDD → Enhanced Due Diligence
+
+SAR → Suspicious Activity Report
+
+UAT → User Acceptance Testing
+
+ITGC → IT General Controls
+
+ETL → Extract Transform Load
+
+NPA → Non-Performing Asset
+
+NIM → Net Interest Margin
+
+CRR → Cash Reserve Ratio
+
+SLR → Statutory Liquidity Ratio
+
+IFRS → International Financial Reporting Standards
+
+GAAP → Generally Accepted Accounting Principles
+
+GL → General Ledger
+
+EOD → End of Day
+
+EOM → End of Month
+
+EOP → End of Period
+
+MIS → Management Information System
+
+SME → Small and Medium Enterprises
+
+RTGS → Real-Time Gross Settlement
+
+NEFT → National Electronic Funds Transfer
+
+IMPS → Immediate Payment Service
+
+For all other abbreviations:
+
+If the expanded form appears in the output, but not in the input, and it's not in the ignore list, flag it as a hallucinated expansion.
+
+Do not count formatting differences (like "CBUAE" vs. "CB UAE") as expansion.
+
+⚠️ Important:
+Do not infer or guess meaning — only check what is explicitly present in the input and output.
+
+You must ignore any abbreviation on the ignore list even if its expansion is not in the input.
+
+✅ Output Format:
+yaml
+Copy code
+Ignored Abbreviations (Expanded in Output but Skipped in Evaluation):
+- [List: e.g., BAU, SLA]
+
+Other Expansions in Output:
+- [List: e.g., Artificial Intelligence]
+
+Hallucinated Expansions:
+- [List of expansions not in input and not in ignore list]
+
+Verdict: [Yes / No]
+Expla
+
