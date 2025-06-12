@@ -1,11 +1,15 @@
 import pandas as pd
+import re
 
-# Example DataFrame
+# Example DataFrame with multiple line breaks
 df = pd.DataFrame({
-    'combined': ['title: issue title\nDescription: issue description']
+    'combined': ['title: issue title\n\nDescription: issue description']
 })
 
-# Use regex to extract title and description
-df[['title', 'description']] = df['combined'].str.extract(r'title:\s*(.*?)\nDescription:\s*(.*)', flags=re.IGNORECASE)
+# Regex to handle multiple line breaks and case-insensitive match
+df[['title', 'description']] = df['combined'].str.extract(
+    r'title:\s*(.*?)\n+Description:\s*(.*)', 
+    flags=re.IGNORECASE
+)
 
 print(df[['title', 'description']])
