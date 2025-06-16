@@ -1,90 +1,20 @@
-These are commonly used and well-understood, so their expansion is always acceptable:
+import pandas as pd
 
-BAU → Business as Usual
+# Load substrings from text file
+with open('substrings.txt', 'r') as f:
+    substrings = [line.strip().lower() for line in f if line.strip()]
 
-RCA → Root Cause Analysis
+# Load Excel file
+df = pd.read_excel('data.xlsx')
 
-KPI → Key Performance Indicator
+# Define the column to search in
+target_column = 'Name'  # Change to your column name
 
-SLA → Service Level Agreement
+# Filter rows where any substring is found in the column
+filtered_df = df[df[target_column].astype(str).str.lower().apply(
+    lambda x: any(sub in x for sub in substrings)
+)]
 
-TAT → Turnaround Time
-
-1LOD → First Line of Defense
-
-2LOD → Second Line of Defense
-
-3LOD → Third Line of Defense
-
-AML → Anti Money Laundering
-
-KYC → Know Your Customer
-
-CDD → Customer Due Diligence
-
-EDD → Enhanced Due Diligence
-
-SAR → Suspicious Activity Report
-
-UAT → User Acceptance Testing
-
-ITGC → IT General Controls
-
-ETL → Extract Transform Load
-
-NPA → Non-Performing Asset
-
-NIM → Net Interest Margin
-
-CRR → Cash Reserve Ratio
-
-SLR → Statutory Liquidity Ratio
-
-IFRS → International Financial Reporting Standards
-
-GAAP → Generally Accepted Accounting Principles
-
-GL → General Ledger
-
-EOD → End of Day
-
-EOM → End of Month
-
-EOP → End of Period
-
-MIS → Management Information System
-
-SME → Small and Medium Enterprises
-
-RTGS → Real-Time Gross Settlement
-
-NEFT → National Electronic Funds Transfer
-
-IMPS → Immediate Payment Service
-
-For all other abbreviations:
-
-If the expanded form appears in the output, but not in the input, and it's not in the ignore list, flag it as a hallucinated expansion.
-
-Do not count formatting differences (like "CBUAE" vs. "CB UAE") as expansion.
-
-⚠️ Important:
-Do not infer or guess meaning — only check what is explicitly present in the input and output.
-
-You must ignore any abbreviation on the ignore list even if its expansion is not in the input.
-
-✅ Output Format:
-yaml
-Copy code
-Ignored Abbreviations (Expanded in Output but Skipped in Evaluation):
-- [List: e.g., BAU, SLA]
-
-Other Expansions in Output:
-- [List: e.g., Artificial Intelligence]
-
-Hallucinated Expansions:
-- [List of expansions not in input and not in ignore list]
-
-Verdict: [Yes / No]
-Expla
-
+# Save or print results
+filtered_df.to_excel('filtered_rows.xlsx', index=False)
+print(filtered_df)
