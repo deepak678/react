@@ -1,20 +1,23 @@
-import pandas as pd
+Dashboard Component Definitions
+This dashboard provides key metrics to evaluate the performance and efficiency of the model. Below is a definition of each component.
 
-# Load substrings from text file
-with open('substrings.txt', 'r') as f:
-    substrings = [line.strip().lower() for line in f if line.strip()]
+Key Performance Indicators (KPIs)
+Total Queries Processed: This metric displays the total volume of queries that the evaluation model has successfully processed.
 
-# Load Excel file
-df = pd.read_excel('data.xlsx')
+Total Erratic Feedback: This shows the number of instances where users have reported a complete failure or error in the model's response.
 
-# Define the column to search in
-target_column = 'Name'  # Change to your column name
+Average Feedback Score: This score represents the average rating provided by users on the quality and usefulness of the model's responses.
 
-# Filter rows where any substring is found in the column
-filtered_df = df[df[target_column].astype(str).str.lower().apply(
-    lambda x: any(sub in x for sub in substrings)
-)]
+Total Feedback Received: This is the total count of all feedback submissions from users for the processed queries.
 
-# Save or print results
-filtered_df.to_excel('filtered_rows.xlsx', index=False)
-print(filtered_df)
+Time Saved: This metric quantifies the efficiency gains from this use case. It is calculated by multiplying the Total Queries Processed by the standard time saved of one hour per query.
+
+Formula: Time Saved = Total Queries Processed × 1 hour
+Evaluation Metrics Status
+The following five core metrics are continuously monitored against predefined thresholds. Their current status is indicated by a color-coded traffic light system (🟢 Green, 🟡 Amber, 🔴 Red, and 🟣 Purple) to show if they are within acceptable limits.
+
+Accuracy: Measures the factual correctness of the model's response.
+Completeness: Assesses whether the response fully addresses all parts of the user's query.
+Hallucination: Indicates the presence of fabricated or non-factual information in the response.
+Context Relevance: Evaluates how well the response aligns with the context of the conversation or query.
+Semantic Relevance: Determines the logical and meaningful connection of the response to the user's intended question.
