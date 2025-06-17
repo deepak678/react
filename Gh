@@ -1,23 +1,6 @@
-Dashboard Component Definitions
-This dashboard provides key metrics to evaluate the performance and efficiency of the model. Below is a definition of each component.
+Filtering Capabilities
+All data and metrics presented on this dashboard can be dynamically filtered to provide more granular insights. You can adjust the view based on the following parameters:
 
-Key Performance Indicators (KPIs)
-Total Queries Processed: This metric displays the total volume of queries that the evaluation model has successfully processed.
-
-Total Erratic Feedback: This shows the number of instances where users have reported a complete failure or error in the model's response.
-
-Average Feedback Score: This score represents the average rating provided by users on the quality and usefulness of the model's responses.
-
-Total Feedback Received: This is the total count of all feedback submissions from users for the processed queries.
-
-Time Saved: This metric quantifies the efficiency gains from this use case. It is calculated by multiplying the Total Queries Processed by the standard time saved of one hour per query.
-
-Formula: Time Saved = Total Queries Processed × 1 hour
-Evaluation Metrics Status
-The following five core metrics are continuously monitored against predefined thresholds. Their current status is indicated by a color-coded traffic light system (🟢 Green, 🟡 Amber, 🔴 Red, and 🟣 Purple) to show if they are within acceptable limits.
-
-Accuracy: Measures the factual correctness of the model's response.
-Completeness: Assesses whether the response fully addresses all parts of the user's query.
-Hallucination: Indicates the presence of fabricated or non-factual information in the response.
-Context Relevance: Evaluates how well the response aligns with the context of the conversation or query.
-Semantic Relevance: Determines the logical and meaningful connection of the response to the user's intended question.
+Date Range: Select a specific time period to analyze performance.
+Markets: Isolate and view data for specific geographical or business markets.
+The values for all KPIs and evaluation metrics will update automatically based on your selected filters.
