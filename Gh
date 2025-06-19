@@ -1,27 +1,34 @@
 import pandas as pd
 
-# Example DataFrames
+# First DataFrame with titles and a category
 df1 = pd.DataFrame({
-    'title': ['apple', 'banana', 'cherry']
+    'title': ['apple', 'banana', 'cherry'],
+    'category': ['fruit', 'fruit', 'berry']
 })
 
+# Second DataFrame to search in
 df2 = pd.DataFrame({
     'text': ['I love apple pie', 'banana bread is great', 'no fruit here', 'cherry tart'],
     'value': [1, 2, 3, 4]
 })
 
-# Result list
+# List to collect matched rows
 results = []
 
-# Loop through titles and match with df2
-for title in df1['title']:
-    # Find rows where title is a substring of df2['text']
+# Iterate over df1 rows
+for _, row in df1.iterrows():
+    title = row['title']
+    category = row['category']
+    
+    # Find matches in df2 where title is a substring of 'text'
     matched = df2[df2['text'].str.contains(title, case=False, na=False)].copy()
+    
     if not matched.empty:
-        matched['matched_title'] = title  # Add the matched title as a new column
+        matched['matched_title'] = title
+        matched['category'] = category
         results.append(matched)
 
-# Combine all matched results
+# Combine all matched rows
 final_df = pd.concat(results, ignore_index=True)
 
 print(final_df)
