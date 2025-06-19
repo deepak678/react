@@ -1,16 +1,17 @@
 import pandas as pd
-from rapidfuzz import fuzz
 
+# Example DataFrame
 df = pd.DataFrame({
-    'text': ['apple pie', 'banana cake', 'I like cherry tart', 'baked apple with cinnamon']
+    'title': ['Data Science Basics', 'AI and Machine Learning', 'Python Guide', 'Deep Learning Tips']
 })
 
-search = "apple pie"
+# Set of substrings to check
+search_set = {'Python', 'AI', 'Data'}
 
-# Add similarity score
-df['similarity'] = df['text'].apply(lambda x: fuzz.partial_ratio(search, x))
+# Filter rows where any element from the set is a substring in the 'title' column
+mask = df['title'].apply(lambda x: any(term in x for term in search_set))
 
-# Filter rows with 80%+ match
-matches = df[df['similarity'] >= 80]
+# New DataFrame with matching rows
+filtered_df = df[mask]
 
-print(matches)
+print(filtered_df)
