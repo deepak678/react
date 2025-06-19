@@ -1,77 +1,27 @@
-Apply Threshold Logic to Average Feedback Score
+import pandas as pd
 
-Implement color coding for average feedback scores based on the following thresholds:
+# Example DataFrames
+df1 = pd.DataFrame({
+    'title': ['apple', 'banana', 'cherry']
+})
 
-Score Range	Color
-1.0 – 2.4	🔴 Red
-2.5 – 3.4	🟠 Amber
-3.5 – 4.4	🟢 Green
-4.5 – 5.0	🟣 Purple (Overconfidence)
+df2 = pd.DataFrame({
+    'text': ['I love apple pie', 'banana bread is great', 'no fruit here', 'cherry tart'],
+    'value': [1, 2, 3, 4]
+})
 
-Graph Enhancements (As per PPT Slide 2):
+# Result list
+results = []
 
-Line Graphs for Metrics:
+# Loop through titles and match with df2
+for title in df1['title']:
+    # Find rows where title is a substring of df2['text']
+    matched = df2[df2['text'].str.contains(title, case=False, na=False)].copy()
+    if not matched.empty:
+        matched['matched_title'] = title  # Add the matched title as a new column
+        results.append(matched)
 
-Create individual line graphs for each metric.
+# Combine all matched results
+final_df = pd.concat(results, ignore_index=True)
 
-Add threshold reference lines (only for Red and Green ranges).
-
-Update Histograms:
-
-Modify existing histogram charts to reflect color coding based on the metric thresholds.
-
-Default Filter Change:
-
-Modify the default date filter on the dashboard to show data for the last 7 days only.
-
-Model Performance Evaluation Enhancements:
-
-Add overall performance score to the Model Performance Evaluation page.
-
-Display the average of overall performance scores on the Home page.
-
-Apply the following thresholds to the overall performance score:
-
-Score Range	Color
-0.00 – 0.47	🔴 Red
-0.48 – 0.67	🟠 Amber
-0.68 – 0.97	🟢 Green
-> 0.97	🟣 Purple (Overconfidence)
-
-Effort Estimation Items:
-Line Graph Development
-
-Create line graphs for each metric.
-
-Add Red/Green threshold reference lines.
-
-Histogram Color Updates
-
-Modify existing histogram visuals to follow the new threshold-based coloring logic.
-
-Default Date Filter Change
-
-Update filter logic to set “last week” as the default view.
-
-Performance Score Additions
-
-Add score to model evaluation page and homepage.
-
-Apply relevant thresholds and coloring.
-
-Would you like this broken into subtasks for ticket creation or presented in a tabular format for planning?
-
-
-
-
-
-
-
-
-
-
-Tools
-
-
-
-ChatGPT can make mistakes. Check
+print(final_df)
