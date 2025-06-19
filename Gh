@@ -8,10 +8,14 @@ df = pd.DataFrame({
 # Set of substrings to check
 search_set = {'Python', 'AI', 'Data'}
 
-# Filter rows where any element from the set is a substring in the 'title' column
-mask = df['title'].apply(lambda x: any(term in x for term in search_set))
+# Function to find matching substrings
+def find_matches(text, search_terms):
+    return [term for term in search_terms if term in text]
 
-# New DataFrame with matching rows
-filtered_df = df[mask]
+# Apply the function and create a new column with matches
+df['matched_terms'] = df['title'].apply(lambda x: find_matches(x, search_set))
+
+# Filter rows where there's at least one match
+filtered_df = df[df['matched_terms'].apply(bool)]
 
 print(filtered_df)
