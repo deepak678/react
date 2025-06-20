@@ -1,83 +1,37 @@
 from pptx import Presentation
 from pptx.util import Inches, Pt
-from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
 
-# Initialize presentation
+# Create a presentation
 prs = Presentation()
-slide_layout = prs.slide_layouts[6]  # Blank slide
+
+# Set slide layout (blank)
+slide_layout = prs.slide_layouts[6]
 slide = prs.slides.add_slide(slide_layout)
 
-# Constants for layout
-card_width = Inches(2.2)
-card_height = Inches(1.1)
-card_padding_x = Inches(0.3)
-card_padding_y = Inches(0.2)
-start_x = Inches(0.3)
-start_y = Inches(1.0)
+# Parameters
+hex_width = Inches(1.2)
+hex_height = Inches(1.0)
+cols = 5
+rows = 4
+spacing_x = Inches(0.3)
+spacing_y = Inches(0.3)
 
-# Title
-title_box = slide.shapes.add_textbox(Inches(0.3), Inches(0.1), Inches(10), Inches(0.6))
-title_frame = title_box.text_frame
-title_frame.text = "LLM Evaluation Metrics Overview"
-title_frame.paragraphs[0].font.size = Pt(32)
-title_frame.paragraphs[0].font.bold = True
+start_left = Inches(1)
+start_top = Inches(1)
 
-# Category Definitions
-categories = [
-    ("Functional Metrics", 8),
-    ("Non-Functional Metrics", 9),
-    ("Content Moderation", 3)
-]
-
-# Colors for placeholder cards
-status_colors = {
-    "Implemented": RGBColor(144, 238, 144),  # Light green
-    "In Progress": RGBColor(255, 255, 153),  # Light yellow
-    "Pending": RGBColor(255, 182, 193),      # Light red
-}
-
-y_cursor = start_y
-
-# Add metric cards by category
-for category_title, metric_count in categories:
-    # Add category title
-    cat_box = slide.shapes.add_textbox(start_x, y_cursor, Inches(9), Inches(0.4))
-    cat_frame = cat_box.text_frame
-    cat_frame.text = category_title
-    cat_frame.paragraphs[0].font.size = Pt(20)
-    cat_frame.paragraphs[0].font.bold = True
-    y_cursor += Inches(0.5)
-
-    # Add cards for each metric in that category
-    for i in range(metric_count):
-        row = i // 4
-        col = i % 4
-        x = start_x + col * (card_width + card_padding_x)
-        y = y_cursor + row * (card_height + card_padding_y)
-
+count = 0
+for row in range(rows):
+    for col in range(cols):
+        if count >= 20:
+            break
+        left = start_left + col * (hex_width + spacing_x)
+        top = start_top + row * (hex_height + spacing_y)
         shape = slide.shapes.add_shape(
-            autoshape_type_id=1,  # Rectangle
-            left=x, top=y,
-            width=card_width, height=card_height
+            MSO_SHAPE.HEXAGON, left, top, hex_width, hex_height
         )
-        shape.fill.solid()
-        shape.fill.fore_color.rgb = RGBColor(230, 230, 230)  # Light gray for now
+        shape.text = f"{count + 1}"  # Optional: Add number inside
+        count += 1
 
-        text_frame = shape.text_frame
-        p = text_frame.paragraphs[0]
-        p.text = f"Metric {i + 1}"
-        p.font.size = Pt(14)
-        p.font.bold = True
-
-        # Add placeholder for sub-details
-        text_frame.add_paragraph().text = "Definition: ..."
-        text_frame.add_paragraph().text = "Methodology: ..."
-        text_frame.add_paragraph().text = "Threshold: ..."
-        text_frame.word_wrap = True
-
-    y_cursor += ((metric_count - 1) // 4 + 1) * (card_height + card_padding_y) + Inches(0.4)
-
-# Save the template presentation
-pptx_path = "/mnt/data/LLM_Metric_Overview_Template.pptx"
-prs.save(pptx_path)
-pptx_path
+# Save the presentation
+prs.save("hexagons.pptx")
