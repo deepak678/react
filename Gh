@@ -1,10 +1,7 @@
-How ADA Use Case Differs from RMC
-In RMC, all metrics are calculated in real time.
+Model monitoring is implemented through framework integration and adaptation.
 
-In ADA, metrics are calculated both in real-time and via batch processing.
+The request–response lifecycle of ADA is fully integrated with the monitoring framework to enable end‑to‑end observability.
 
-ADA interacts with the ASK RC data platform and the R&C Gen AI platform for data access and processing.
+The data ingestion pipeline is adapted to support ADA‑specific data structures, making it both reliable and scalable.
 
-Inputs come from multiple platforms, but final calculations occur within the Gen AI platform.
-
-Final results are then surfaced as views available across platforms.
+This approach allows seamless data flow and ensures consistent metric generation across platforms.
