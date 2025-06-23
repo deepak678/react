@@ -1,37 +1,10 @@
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.enum.shapes import MSO_SHAPE
+How ADA Use Case Differs from RMC
+In RMC, all metrics are calculated in real time.
 
-# Create a presentation
-prs = Presentation()
+In ADA, metrics are calculated both in real-time and via batch processing.
 
-# Set slide layout (blank)
-slide_layout = prs.slide_layouts[6]
-slide = prs.slides.add_slide(slide_layout)
+ADA interacts with the ASK RC data platform and the R&C Gen AI platform for data access and processing.
 
-# Parameters
-hex_width = Inches(1.2)
-hex_height = Inches(1.0)
-cols = 5
-rows = 4
-spacing_x = Inches(0.3)
-spacing_y = Inches(0.3)
+Inputs come from multiple platforms, but final calculations occur within the Gen AI platform.
 
-start_left = Inches(1)
-start_top = Inches(1)
-
-count = 0
-for row in range(rows):
-    for col in range(cols):
-        if count >= 20:
-            break
-        left = start_left + col * (hex_width + spacing_x)
-        top = start_top + row * (hex_height + spacing_y)
-        shape = slide.shapes.add_shape(
-            MSO_SHAPE.HEXAGON, left, top, hex_width, hex_height
-        )
-        shape.text = f"{count + 1}"  # Optional: Add number inside
-        count += 1
-
-# Save the presentation
-prs.save("hexagons.pptx")
+Final results are then surfaced as views available across platforms.
