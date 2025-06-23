@@ -1,7 +1,70 @@
-Model monitoring is implemented through framework integration and adaptation.
+ChatGPT
+You said:
+Need to write an epic where it should have epic summary goal acceptance criteria 
+Wr need to build mvp 1 of model simulation which we need to validate performance of model / evaluation model on production data it should have capacity to use historical data export the results could be evaluation results or outputs produced by llm for a use case
+We should be able to alter evaluation as well as use case prompt 
+Should have capacity to select different models 
+User should be able to select date range of data for which they want to find the results 
+If user selects job which is going to take some time it's progress should be visible it's pending failed completed
+We need to do it as there are very quick model changes 
+ChatGPT said:
+Here’s an example of how you can write this as an Epic, including its summary, goal, and acceptance criteria:
 
-The request–response lifecycle of ADA is fully integrated with the monitoring framework to enable end‑to‑end observability.
+🎯 Epic: Model Simulation and Evaluation MVP
+📝 Summary
+Build the first MVP of a Model Simulation and Evaluation Framework that allows users to validate the performance of different models on production data. The framework must enable historical data playback, run simulations, and export results. Users should be able to:
 
-The data ingestion pipeline is adapted to support ADA‑specific data structures, making it both reliable and scalable.
+Alter the evaluation prompt and use case.
 
-This approach allows seamless data flow and ensures consistent metric generation across platforms.
+Choose which model to run.
+
+Select a date range for the data.
+
+Monitor the status of long-running jobs.
+
+🥅 Goal
+Develop an MVP that provides a robust, flexible, and user-friendly way to:
+
+Evaluate different LLMs quickly,
+
+Validate their performance using actual production data,
+
+Export the results,
+
+Maintain visibility on job status,
+
+Minimize delays caused by rapid model changes.
+
+✅ Acceptance Criteria
+Data Selection:
+
+Users can select a date range from which production data will be pulled.
+
+Ability to use historical data for evaluation.
+
+Model & Prompt Management:
+
+Users can select from a list of available models.
+
+Users can customize the prompt or use case text for the evaluation.
+
+Execution & Monitoring:
+
+User can launch an evaluation job.
+
+Status of jobs is visible and includes states: Pending, In-Progress, Completed, Failed.
+
+Output Export:
+
+Results (both evaluation metrics and model outputs) can be exported/downloaded.
+
+Adaptation for New Models:
+
+Framework supports quick swaps and testing of new model versions.
+
+User Experience:
+
+Simple and intuitive user interface for selecting model, prompt, date range, and triggering jobs.
+
+Clear status indicators and error messages.
+
