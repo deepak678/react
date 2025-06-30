@@ -1,85 +1,33 @@
-What’s the difference between a list and a tuple?
-Answer: A list is mutable (you can change its elements), whereas a tuple is immutable (you can’t change its elements after creation).
+Subject: Non-Response to Grievances Regarding Ineligible EPS Contribution Since Jan 2019
 
-⚡️ 2️⃣ What’s the difference between is and ==?
-Answer:
+Dear EPFO Officer,
 
-is checks if both variables point to the same object in memory (object identity).
+I am writing to formally raise a concern regarding an issue that I have already submitted multiple grievances for, but unfortunately, I have not received any response or resolution so far.
 
-== checks if the values of the objects are equal.
+My concern pertains to the EPS (Employee Pension Scheme) contribution that has been getting deducted from my salary since January 2019. I recently came to know that I am not eligible for EPS as per the applicable EPFO guidelines. Despite this, deductions toward EPS have continued to be made from my salary every month.
 
-⚡️ 3️⃣ What is a generator in Python?
-Answer: A generator is a special function that uses yield to produce a sequence of values one at a time, allowing for iteration without storing the entire sequence in memory.
+My Request:
+I request that:
 
-⚡️ 4️⃣ What is the GIL (Global Interpreter Lock)?
-Answer: The GIL is a mutex in CPython that allows only one thread to execute Python bytecode at a time. This means threads don’t run in true parallel, although I/O‑bound threads can still benefit from multithreading.
+All EPS contributions made so far be merged into my EPF balance.
 
-⚡️ 5️⃣ What’s the difference between shallow copy and deep copy?
-Answer:
+I receive written confirmation from EPFO regarding the same, which I can submit to my current organization to stop the ongoing EPS contributions.
 
-Shallow copy: Copies the parent object, but doesn’t recursively copy nested objects (both copies share nested objects).
+Previous Grievances Raised:
+I have already submitted multiple grievances on this matter. Below are the most recent grievance IDs for your reference:
 
-Deep copy: Copies the parent object and recursively copies all nested objects.
+Grievance ID 1: [<Insert ID here>]
 
-⚡️ 6️⃣ What’s the role of the init method?
-Answer: The __init__ method is called when creating a new object of a class. It initializes the object’s attributes.
+Grievance ID 2: [<Insert ID here>]
 
-⚡️ 7️⃣ What’s the difference between class method, static method, and instance method?
-Answer:
+Despite the time that has passed, there has been no response or acknowledgement. I am now compelled to escalate this matter due to the financial and procedural implications it is causing.
 
-Instance method: Operates on an instance of the class (self is required).
+I request your urgent attention and a formal resolution on this matter. Kindly look into the issue and provide a written clarification or action plan at the earliest.
 
-Class method: Operates on the class itself (cls is required).
+Thank you for your support.
 
-Static method: Doesn’t operate on an instance or class (@staticmethod), behaves like a regular function.
-
-⚡️ 8️⃣ What are args and kwargs used for?
-Answer:
-
-args: Allows passing a variable number of positional arguments.
-
-kwargs: Allows passing a variable number of keyword arguments.
-
-⚡️ 9️⃣ What’s the difference between an error and an exception?
-Answer: An error is an issue that occurs when the interpreter can’t run the code, like syntax errors. An exception is an event that disrupts the normal flow of a program, which can be caught and handled.
-
-⚡️ 10️⃣ What’s the difference between raise and assert?
-Answer:
-
-raise: Manually triggers an exception.
-
-assert: A debugging aid that verifies a condition is True. Raises an AssertionError if not.
-
-⚡️ 11️⃣ What are decorators in Python?
-Answer: Decorators are special functions that wrap another function, allowing you to add behavior (like logging, caching, or access control) without changing the original function’s code.
-
-⚡️ 12️⃣ What is a namespace in Python?
-Answer: A namespace is a mapping between names and objects. It allows you to use the same name in different contexts (global, local, built-in) without conflict.
-
-⚡️ 13️⃣ What is the difference between a module and a package?
-Answer:
-
-A module is a single .py file.
-
-A package is a directory containing an __init__.py file, making it a collection of modules.
-
-⚡️ 14️⃣ What is the purpose of the main block?
-Answer: The if __name__ == "__main__": block allows code to be executed only when the file is run directly, and not when it’s imported as a module.
-
-⚡️ 15️⃣ What are common ways to manage virtual environments?
-Answer: Tools like venv or conda create isolated environments for Python projects, allowing you to manage dependencies without affecting the global installation.
-
-If you want, I can also:
-✅ Format these into a PDF.
-✅ Add more questions for specific roles (e.g., Data Science, Backend, DevOps).
-✅ Create a quick scoring sheet or flashcards.
-
-Would you like any of those? 🙂 Let me know!
-
-
-
-
-
-
-
-
+Sincerely,
+[Your Full Name]
+UAN: [Your UAN number]
+Contact: [Your mobile/email]
+Date: [DD/MM/YYYY]
