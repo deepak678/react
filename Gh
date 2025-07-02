@@ -1,33 +1,79 @@
-Subject: Non-Response to Grievances Regarding Ineligible EPS Contribution Since Jan 2019
+Enhance Admin Portal to Support New Request Types with Evaluation Metrics and Filtering
 
-Dear EPFO Officer,
+Epic Description
+Extend the Admin Portal to support evaluation and management of new request types. This will include evaluating each request type against five predefined metrics, and enabling filtering of requests based on these new types to support better tracking, analysis, and decision-making.
 
-I am writing to formally raise a concern regarding an issue that I have already submitted multiple grievances for, but unfortunately, I have not received any response or resolution so far.
+Goals / Acceptance Criteria
+Admin Portal supports evaluation for each new request type.
 
-My concern pertains to the EPS (Employee Pension Scheme) contribution that has been getting deducted from my salary since January 2019. I recently came to know that I am not eligible for EPS as per the applicable EPFO guidelines. Despite this, deductions toward EPS have continued to be made from my salary every month.
+Each request is evaluated against the following five metrics:
 
-My Request:
-I request that:
+Accuracy
 
-All EPS contributions made so far be merged into my EPF balance.
+Latency
 
-I receive written confirmation from EPFO regarding the same, which I can submit to my current organization to stop the ongoing EPS contributions.
+Cost
 
-Previous Grievances Raised:
-I have already submitted multiple grievances on this matter. Below are the most recent grievance IDs for your reference:
+Robustness
 
-Grievance ID 1: [<Insert ID here>]
+User Satisfaction
 
-Grievance ID 2: [<Insert ID here>]
+A new filter is added in the request listing page allowing admin users to filter requests by Request Type.
 
-Despite the time that has passed, there has been no response or acknowledgement. I am now compelled to escalate this matter due to the financial and procedural implications it is causing.
+All new request types are stored, displayed, and evaluated consistently with existing data models and UI structures.
 
-I request your urgent attention and a formal resolution on this matter. Kindly look into the issue and provide a written clarification or action plan at the earliest.
+UI/UX should be consistent with the current portal design.
 
-Thank you for your support.
+Request Types (examples – to be confirmed by product)
+Model Evaluation
 
-Sincerely,
-[Your Full Name]
-UAN: [Your UAN number]
-Contact: [Your mobile/email]
-Date: [DD/MM/YYYY]
+Content Moderation
+
+Custom Query Testing
+
+Regression Verification
+
+User Prompt Review
+
+User Stories (included in the epic)
+As an admin, I want to see all incoming request types evaluated on 5 key metrics, so that I can analyze their performance comprehensively.
+
+As an admin, I want to filter the request list by request type, so that I can easily narrow down requests based on evaluation needs.
+
+As a developer, I want to update the backend schema and logic to handle new request types, so that they can be evaluated and filtered in the UI.
+
+As a QA, I want to test that all request types are evaluated properly and filters work as expected, so that functionality remains reliable.
+
+Dependencies
+Backend schema and API updates to include new request types and evaluation metrics.
+
+Frontend changes to display metrics and enable filters.
+
+Coordination with model evaluation team for metric definition and logic.
+
+Notes
+Metrics should be modular and configurable, allowing addition or modification in the future.
+
+Consider user roles – only admins may have access to evaluation view and filtering.
+
+Let me know if you want this turned into smaller JIRA tickets or a Confluence-style version.
+
+
+
+
+
+
+
+Do you like this personality?
+
+
+
+
+
+
+
+Tools
+
+
+
+ChatGPT can make mistakes. Che
