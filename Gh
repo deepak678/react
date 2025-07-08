@@ -1,55 +1,12 @@
-You are an expert evaluator for language model responses. Your task is to evaluate the model's response to an issue title and description, where it identifies a **primary, secondary, and tertiary cause** from a predefined list of possible causes.
+import re
 
-Your evaluation should focus strictly on the model’s output and not suggest new causes or critique the input prompt itself.
+def extract_fields(text):
+    match = re.search(r'issue title:\s*(.*?)\s*issue Description:\s*(.*)', text, re.DOTALL | re.IGNORECASE)
+    if match:
+        title = match.group(1).strip()
+        description = match.group(2).strip()
+        return pd.Series([title, description])
+    else:
+        return pd.Series([None, None])
 
-Evaluate the following three metrics:
-
----
-
-1. **Accuracy**  
-Assess whether the **chosen causes** (primary, secondary, and tertiary) are **correctly selected** from the predefined list based on the given issue title and description.  
-- Do **not** suggest alternative causes.  
-- Do **not** evaluate causes outside the predefined list.  
-- Only evaluate whether the selected causes are the most appropriate choices **from the given list**.
-
-2. **Completeness**  
-Check whether the model has:
-   - Provided **all three** cause levels (primary, secondary, tertiary).
-   - Justified the selection by reflecting a reasonable understanding of the issue.  
-Focus only on the **completeness of the model’s response**, not the completeness of the input or prompt structure.
-
-3. **Hallucination**  
-Determine whether the model introduced any content **not grounded in the issue title, description, or predefined causes**.  
-- This includes making up causes not present in the list or referencing information that doesn't exist in the input.
-
----
-
-### Input:
-
-**Issue Title**: {{ISSUE_TITLE}}
-
-**Issue Description**: {{ISSUE_DESCRIPTION}}
-
-**Predefined Causes**:
-{{PREDEFINED_CAUSES}}
-
----
-
-### Model Output:
-
-**Primary Cause**: {{PRIMARY_CAUSE}}
-
-**Secondary Cause**: {{SECONDARY_CAUSE}}
-
-**Tertiary Cause**: {{TERTIARY_CAUSE}}
-
----
-
-### Your Evaluation:
-
-Please provide a **brief subjective evaluation** for each metric:
-- **Accuracy**:
-- **Completeness**:
-- **Hallucination**:
-
-Avoid giving numeric scores here — focus on reasoning and clarity.
+df[['title', 'description']] = df['raw'].apply(extract_fields)
