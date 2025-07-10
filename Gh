@@ -1,77 +1,49 @@
-Epic Goal
-To design, implement, and monitor Model Reliance metrics that measure the degree of similarity between the LLM-generated output and the final user input submitted into the system, providing insights into how much users trust and rely on AI-generated responses.
+import plotly.graph_objects as go
+import pandas as pd
+from datetime import datetime
 
-This epic will also consolidate related metrics—accuracy and completeness—into a unified framework to ensure consistency across the model performance dashboard, with appropriate thresholds and visualizations to interpret model reliance effectively.
+# Sample data
+dates = pd.date_range(start="2025-06-15", periods=4, freq='W')
+accuracy_values = [2.6, 1.8, 2.0, 2.9]
+completeness_values = [2.4, 1.6, 1.7, 2.8]
 
-Key Objectives
-Calculate Model Reliance Score by comparing final user inputs with LLM outputs using similarity techniques.
+# Thresholds
+accuracy_high = 3.2
+accuracy_low = 2.8
+completeness_high = 2.6
+completeness_low = 2.2
 
-Normalize this score between 0 and 1 (or 0–100%) to allow for thresholding and categorization.
+# Create plot
+fig = go.Figure()
 
-Combine accuracy and completeness scores in parallel to provide a full picture of model performance.
+# Accuracy
+fig.add_trace(go.Scatter(x=dates, y=accuracy_values, mode='lines+markers', name='Accuracy',
+                         line=dict(color='cyan', width=2)))
 
-Update the metrics dashboard to visualize model reliance alongside accuracy and completeness.
+# Completeness
+fig.add_trace(go.Scatter(x=dates, y=completeness_values, mode='lines+markers', name='Completeness',
+                         line=dict(color='orange', width=2)))
 
-Define and implement threshold bands (e.g., High / Medium / Low reliance).
+# Thresholds
+fig.add_trace(go.Scatter(x=dates, y=[accuracy_high]*len(dates), mode='lines', name='Accuracy High',
+                         line=dict(color='lime', dash='dash')))
+fig.add_trace(go.Scatter(x=dates, y=[accuracy_low]*len(dates), mode='lines', name='Accuracy Low',
+                         line=dict(color='red', dash='dash')))
+fig.add_trace(go.Scatter(x=dates, y=[completeness_high]*len(dates), mode='lines', name='Completeness High',
+                         line=dict(color='lime', dash='dot')))
+fig.add_trace(go.Scatter(x=dates, y=[completeness_low]*len(dates), mode='lines', name='Completeness Low',
+                         line=dict(color='red', dash='dot')))
 
-Acceptance Criteria
- Model reliance score is computed for each interaction.
+# Layout
+fig.update_layout(
+    title='Accuracy and Completeness with Thresholds',
+    xaxis_title='Date',
+    yaxis_title='Metric Value',
+    plot_bgcolor='black',
+    paper_bgcolor='black',
+    font=dict(color='white'),
+    hovermode='x unified',
+    yaxis=dict(range=[0, 3.5])
+)
 
- Reliability thresholds defined (e.g.:
-
-High Reliance: ≥ 0.75
-
-Medium Reliance: 0.50–0.74
-
-Low Reliance: < 0.50).
-
- Accuracy and completeness scores are integrated into the same dashboard section as model reliance.
-
- A time-series or distribution graph of model reliance is included on the dashboard.
-
- Ability to filter by use case, user segment, or model version.
-
- Alerting logic (optional) added for consistently low reliance across users.
-
-Metrics Involved
-Model Reliance Score (based on similarity — e.g., cosine similarity, BLEU, or semantic matching)
-
-Accuracy (whether selected causes match gold-standard labels)
-
-Completeness (whether all required causes are covered)
-
-Threshold Buckets (for each metric)
-
-Dependencies
-Access to both the LLM response and final user-entered data
-
-LLM evaluation framework in place (for accuracy and completeness)
-
-Dashboard backend and UI support for new metric visualizations
-
-Deliverables
- Algorithm/logic for model reliance computation
-
- Updated evaluation pipeline to capture model reliance
-
- Dashboard section for reliance score visualization
-
- Documentation of metric logic and usage thresholds
-
-Would you like this as a Jira-compatible format, or also split into smaller user stories?
-
-
-
-
-
-
-
-
-
-
-
-Tools
-
-
-
-ChatGPT can make m
+fig.show()
