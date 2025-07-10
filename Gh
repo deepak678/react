@@ -1,29 +1,77 @@
-Sub RefreshButtonsByName()
-    Dim ws As Worksheet
-    Dim shp As Shape
-    Dim btnNames As Variant
-    Dim name As Variant
-    Dim targetCell As Range
+Epic Goal
+To design, implement, and monitor Model Reliance metrics that measure the degree of similarity between the LLM-generated output and the final user input submitted into the system, providing insights into how much users trust and rely on AI-generated responses.
 
-    Set ws = ActiveSheet
+This epic will also consolidate related metrics—accuracy and completeness—into a unified framework to ensure consistency across the model performance dashboard, with appropriate thresholds and visualizations to interpret model reliance effectively.
 
-    ' 🔧 List of button names you want to refresh (change as needed)
-    btnNames = Array("Button_Row6", "Button_Row8")
+Key Objectives
+Calculate Model Reliance Score by comparing final user inputs with LLM outputs using similarity techniques.
 
-    For Each name In btnNames
-        On Error Resume Next
-        Set shp = ws.Shapes(name)
-        On Error GoTo 0
+Normalize this score between 0 and 1 (or 0–100%) to allow for thresholding and categorization.
 
-        If Not shp Is Nothing Then
-            Set targetCell = shp.TopLeftCell
+Combine accuracy and completeness scores in parallel to provide a full picture of model performance.
 
-            ' Nudge the shape to force refresh
-            shp.Top = targetCell.Top
-            shp.Left = targetCell.Left
+Update the metrics dashboard to visualize model reliance alongside accuracy and completeness.
 
-            ' Optional: recolor
-            shp.Fill.ForeColor.RGB = RGB(200, 200, 200)
-        End If
-    Next name
-End Sub
+Define and implement threshold bands (e.g., High / Medium / Low reliance).
+
+Acceptance Criteria
+ Model reliance score is computed for each interaction.
+
+ Reliability thresholds defined (e.g.:
+
+High Reliance: ≥ 0.75
+
+Medium Reliance: 0.50–0.74
+
+Low Reliance: < 0.50).
+
+ Accuracy and completeness scores are integrated into the same dashboard section as model reliance.
+
+ A time-series or distribution graph of model reliance is included on the dashboard.
+
+ Ability to filter by use case, user segment, or model version.
+
+ Alerting logic (optional) added for consistently low reliance across users.
+
+Metrics Involved
+Model Reliance Score (based on similarity — e.g., cosine similarity, BLEU, or semantic matching)
+
+Accuracy (whether selected causes match gold-standard labels)
+
+Completeness (whether all required causes are covered)
+
+Threshold Buckets (for each metric)
+
+Dependencies
+Access to both the LLM response and final user-entered data
+
+LLM evaluation framework in place (for accuracy and completeness)
+
+Dashboard backend and UI support for new metric visualizations
+
+Deliverables
+ Algorithm/logic for model reliance computation
+
+ Updated evaluation pipeline to capture model reliance
+
+ Dashboard section for reliance score visualization
+
+ Documentation of metric logic and usage thresholds
+
+Would you like this as a Jira-compatible format, or also split into smaller user stories?
+
+
+
+
+
+
+
+
+
+
+
+Tools
+
+
+
+ChatGPT can make m
