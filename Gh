@@ -1,42 +1,44 @@
 import plotly.graph_objects as go
-import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
-# Sample data
-dates = pd.date_range(start="2025-06-15", periods=4, freq='W')
-accuracy_values = [2.6, 1.8, 2.0, 2.9]
-completeness_values = [2.4, 1.6, 1.7, 2.8]
+# Get last 4 Sundays from July 6, 2025
+end_date = datetime.strptime("2025-07-06", "%Y-%m-%d")
+last_4_sundays = [end_date - timedelta(weeks=i) for i in range(4)][::-1]
 
-# Thresholds
+# Metric values
+accuracy = [2.6, 1.8, 2.0, 2.9]
+completeness = [2.4, 1.6, 1.7, 2.8]
+
+# Thresholds (with separation)
 accuracy_high = 3.2
 accuracy_low = 2.8
 completeness_high = 2.6
 completeness_low = 2.2
 
-# Create plot
+# Create the chart
 fig = go.Figure()
 
-# Accuracy
-fig.add_trace(go.Scatter(x=dates, y=accuracy_values, mode='lines+markers', name='Accuracy',
-                         line=dict(color='cyan', width=2)))
+fig.add_trace(go.Scatter(x=last_4_sundays, y=accuracy, mode='lines+markers',
+                         name='Accuracy', line=dict(color='cyan', width=2)))
 
-# Completeness
-fig.add_trace(go.Scatter(x=dates, y=completeness_values, mode='lines+markers', name='Completeness',
-                         line=dict(color='orange', width=2)))
+fig.add_trace(go.Scatter(x=last_4_sundays, y=completeness, mode='lines+markers',
+                         name='Completeness', line=dict(color='orange', width=2)))
 
-# Thresholds
-fig.add_trace(go.Scatter(x=dates, y=[accuracy_high]*len(dates), mode='lines', name='Accuracy High',
-                         line=dict(color='lime', dash='dash')))
-fig.add_trace(go.Scatter(x=dates, y=[accuracy_low]*len(dates), mode='lines', name='Accuracy Low',
-                         line=dict(color='red', dash='dash')))
-fig.add_trace(go.Scatter(x=dates, y=[completeness_high]*len(dates), mode='lines', name='Completeness High',
-                         line=dict(color='lime', dash='dot')))
-fig.add_trace(go.Scatter(x=dates, y=[completeness_low]*len(dates), mode='lines', name='Completeness Low',
-                         line=dict(color='red', dash='dot')))
+# Add thresholds
+fig.add_trace(go.Scatter(x=last_4_sundays, y=[accuracy_high]*4, mode='lines',
+                         name='Accuracy High Threshold', line=dict(color='lime', dash='dash')))
 
-# Layout
+fig.add_trace(go.Scatter(x=last_4_sundays, y=[accuracy_low]*4, mode='lines',
+                         name='Accuracy Low Threshold', line=dict(color='red', dash='dash')))
+
+fig.add_trace(go.Scatter(x=last_4_sundays, y=[completeness_high]*4, mode='lines',
+                         name='Completeness High Threshold', line=dict(color='lime', dash='dot')))
+
+fig.add_trace(go.Scatter(x=last_4_sundays, y=[completeness_low]*4, mode='lines',
+                         name='Completeness Low Threshold', line=dict(color='red', dash='dot')))
+
 fig.update_layout(
-    title='Accuracy and Completeness with Thresholds',
+    title='Accuracy and Completeness (Last 4 Sundays)',
     xaxis_title='Date',
     yaxis_title='Metric Value',
     plot_bgcolor='black',
