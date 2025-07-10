@@ -1,12 +1,29 @@
-import re
+Sub RefreshButtonsByName()
+    Dim ws As Worksheet
+    Dim shp As Shape
+    Dim btnNames As Variant
+    Dim name As Variant
+    Dim targetCell As Range
 
-def extract_fields(text):
-    match = re.search(r'issue title:\s*(.*?)\s*issue Description:\s*(.*)', text, re.DOTALL | re.IGNORECASE)
-    if match:
-        title = match.group(1).strip()
-        description = match.group(2).strip()
-        return pd.Series([title, description])
-    else:
-        return pd.Series([None, None])
+    Set ws = ActiveSheet
 
-df[['title', 'description']] = df['raw'].apply(extract_fields)
+    ' 🔧 List of button names you want to refresh (change as needed)
+    btnNames = Array("Button_Row6", "Button_Row8")
+
+    For Each name In btnNames
+        On Error Resume Next
+        Set shp = ws.Shapes(name)
+        On Error GoTo 0
+
+        If Not shp Is Nothing Then
+            Set targetCell = shp.TopLeftCell
+
+            ' Nudge the shape to force refresh
+            shp.Top = targetCell.Top
+            shp.Left = targetCell.Left
+
+            ' Optional: recolor
+            shp.Fill.ForeColor.RGB = RGB(200, 200, 200)
+        End If
+    Next name
+End Sub
