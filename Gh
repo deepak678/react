@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 from datetime import datetime
 
-# Manually define 4 Sundays
+# Last 4 Sundays
 sundays = [
     datetime(2025, 6, 15),
     datetime(2025, 6, 22),
@@ -9,51 +9,52 @@ sundays = [
     datetime(2025, 7, 6)
 ]
 
-# Metric values
-accuracy = [2.6, 1.8, 2.0, 2.9]
-completeness = [2.4, 1.6, 1.7, 2.8]
+# Accuracy % values
+accuracy_percent = [78, 65, 72, 88]
 
-# Thresholds
-accuracy_high = 3.2
-accuracy_low = 2.8
-completeness_high = 2.6
-completeness_low = 2.2
+# Solid threshold values
+accuracy_high = 90
+accuracy_low = 70
 
-# Create chart
+# Create plot
 fig = go.Figure()
 
-# Data lines
-fig.add_trace(go.Scatter(x=sundays, y=accuracy, name='Accuracy',
-                         mode='lines+markers', line=dict(color='cyan', width=2)))
-fig.add_trace(go.Scatter(x=sundays, y=completeness, name='Completeness',
-                         mode='lines+markers', line=dict(color='orange', width=2)))
+# Accuracy data
+fig.add_trace(go.Scatter(
+    x=sundays,
+    y=accuracy_percent,
+    mode='lines+markers+text',
+    name='Accuracy (%)',
+    line=dict(color='cyan', width=2),
+    text=[f'{v}%' for v in accuracy_percent],
+    textposition='top center'
+))
 
-# Threshold lines
-fig.add_trace(go.Scatter(x=sundays, y=[accuracy_high]*4, name='Accuracy High Threshold',
-                         mode='lines', line=dict(color='cyan', dash='dash')))
-fig.add_trace(go.Scatter(x=sundays, y=[accuracy_low]*4, name='Accuracy Low Threshold',
-                         mode='lines', line=dict(color='cyan', dash='dashdot')))
-fig.add_trace(go.Scatter(x=sundays, y=[completeness_high]*4, name='Completeness High Threshold',
-                         mode='lines', line=dict(color='orange', dash='dot')))
-fig.add_trace(go.Scatter(x=sundays, y=[completeness_low]*4, name='Completeness Low Threshold',
-                         mode='lines', line=dict(color='orange', dash='longdashdot')))
+# Solid threshold lines
+fig.add_trace(go.Scatter(x=sundays, y=[accuracy_high]*4, name='High Threshold',
+                         mode='lines', line=dict(color='lime', width=2)))
 
-# Force x-axis to only show those 4 dates
+fig.add_trace(go.Scatter(x=sundays, y=[accuracy_low]*4, name='Low Threshold',
+                         mode='lines', line=dict(color='red', width=2)))
+
+# Layout
 fig.update_layout(
-    title='Accuracy & Completeness (4 Sundays Only)',
+    title='Accuracy (%) Over Last 4 Weeks',
     xaxis_title='Date',
-    yaxis_title='Metric Value',
+    yaxis_title='Accuracy (%)',
     xaxis=dict(
         tickvals=sundays,
-        ticktext=[d.strftime('%b %d') for d in sundays],  # e.g., 'Jun 15'
+        ticktext=[d.strftime('%b %d') for d in sundays],
         tickmode='array'
     ),
-    yaxis=dict(range=[0, 3.5]),
+    yaxis=dict(range=[50, 100]),
     plot_bgcolor='black',
     paper_bgcolor='black',
     font=dict(color='white'),
     hovermode='x unified',
-    legend=dict(bgcolor='rgba(0,0,0,0)')
+    legend=dict(bgcolor='rgba(0,0,0,0)'),
+    width=700,
+    height=400
 )
 
 fig.show()
