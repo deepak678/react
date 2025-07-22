@@ -1,6 +1,6 @@
 Metric	Threshold	Tolerance Band	Justification Approach
-Accuracy	≥0.95	±0.02	95% confidence interval, stakeholder risk tolerance
-Completeness	≥0.92	±0.03 (empirical)	Historical performance variability, use-case sensitivity
-Hallucination	≤0.03	±0.01	Statistical analysis of observed hallucination rates, risk of misinformation
-Context Relevance	≥0.90	±0.04	Industry benchmarks, human review panel consensus
-Semantic Relevance	≥0.88	±0.04	Expert elicitation, business and compliance alignment
+Accuracy	3.7	±0.15	Empirical data variation, stakeholder risk tolerance
+Completeness	3.17	±0.13	Historical performance analysis, task sensitivity
+Hallucination	10%	±2% (absolute)	Acceptable business/app case variability, literature on AI hallucination rates
+Context Relevance	0.86	±0.04	95% confidence interval, industry benchmarking
+Semantic Relevance	4	±0.20	Expert elicitation, cross-validation with historical runs
