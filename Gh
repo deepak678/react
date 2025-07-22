@@ -1,60 +1,6 @@
-import plotly.graph_objects as go
-from datetime import datetime
-
-# Last 4 Sundays
-sundays = [
-    datetime(2025, 6, 15),
-    datetime(2025, 6, 22),
-    datetime(2025, 6, 29),
-    datetime(2025, 7, 6)
-]
-
-# Accuracy % values
-accuracy_percent = [78, 65, 72, 88]
-
-# Solid threshold values
-accuracy_high = 90
-accuracy_low = 70
-
-# Create plot
-fig = go.Figure()
-
-# Accuracy data
-fig.add_trace(go.Scatter(
-    x=sundays,
-    y=accuracy_percent,
-    mode='lines+markers+text',
-    name='Accuracy (%)',
-    line=dict(color='cyan', width=2),
-    text=[f'{v}%' for v in accuracy_percent],
-    textposition='top center'
-))
-
-# Solid threshold lines
-fig.add_trace(go.Scatter(x=sundays, y=[accuracy_high]*4, name='High Threshold',
-                         mode='lines', line=dict(color='lime', width=2)))
-
-fig.add_trace(go.Scatter(x=sundays, y=[accuracy_low]*4, name='Low Threshold',
-                         mode='lines', line=dict(color='red', width=2)))
-
-# Layout
-fig.update_layout(
-    title='Accuracy (%) Over Last 4 Weeks',
-    xaxis_title='Date',
-    yaxis_title='Accuracy (%)',
-    xaxis=dict(
-        tickvals=sundays,
-        ticktext=[d.strftime('%b %d') for d in sundays],
-        tickmode='array'
-    ),
-    yaxis=dict(range=[50, 100]),
-    plot_bgcolor='black',
-    paper_bgcolor='black',
-    font=dict(color='white'),
-    hovermode='x unified',
-    legend=dict(bgcolor='rgba(0,0,0,0)'),
-    width=700,
-    height=400
-)
-
-fig.show()
+Metric	Threshold	Tolerance Band	Justification Approach
+Accuracy	≥0.95	±0.02	95% confidence interval, stakeholder risk tolerance
+Completeness	≥0.92	±0.03 (empirical)	Historical performance variability, use-case sensitivity
+Hallucination	≤0.03	±0.01	Statistical analysis of observed hallucination rates, risk of misinformation
+Context Relevance	≥0.90	±0.04	Industry benchmarks, human review panel consensus
+Semantic Relevance	≥0.88	±0.04	Expert elicitation, business and compliance alignment
