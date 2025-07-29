@@ -1,6 +1,16 @@
-Metric	Threshold	Tolerance Band	Justification Approach
-Accuracy	3.7	±0.15	Empirical data variation, stakeholder risk tolerance
-Completeness	3.17	±0.13	Historical performance analysis, task sensitivity
-Hallucination	10%	±2% (absolute)	Acceptable business/app case variability, literature on AI hallucination rates
-Context Relevance	0.86	±0.04	95% confidence interval, industry benchmarking
-Semantic Relevance	4	±0.20	Expert elicitation, cross-validation with historical runs
+{
+  "application_id": "support_portal_app",
+  "user_id": "anon_7482",
+  "user_role": "end_user",
+  "prompt": "How can I change my subscription plan?",
+  "response": "You can change your plan by visiting the 'Billing' section under your account.",
+  "feedback_rating": 4,
+  "feedback_comment": "Answer was correct but could have included a direct link.",
+  "timestamp_response": "2025-07-29T05:12:34Z",
+  "timestamp_feedback": "2025-07-29T05:14:00Z",
+  "model_version": "llm-v5.3",
+  "model_parameters": {"temperature": 0.6, "max_tokens": 150},
+  "feedback_type": "feature request",
+  "use_case": "account_management",
+  "business_impact": "medium"
+}
