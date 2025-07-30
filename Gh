@@ -1,16 +1,25 @@
-{
-  "application_id": "support_portal_app",
-  "user_id": "anon_7482",
-  "user_role": "end_user",
-  "prompt": "How can I change my subscription plan?",
-  "response": "You can change your plan by visiting the 'Billing' section under your account.",
-  "feedback_rating": 4,
-  "feedback_comment": "Answer was correct but could have included a direct link.",
-  "timestamp_response": "2025-07-29T05:12:34Z",
-  "timestamp_feedback": "2025-07-29T05:14:00Z",
-  "model_version": "llm-v5.3",
-  "model_parameters": {"temperature": 0.6, "max_tokens": 150},
-  "feedback_type": "feature request",
-  "use_case": "account_management",
-  "business_impact": "medium"
-}
+import pandas as pd
+from difflib import get_close_matches
+
+# Step 1: Read the Excel files
+df1 = pd.read_excel('file1.xlsx')
+df2 = pd.read_excel('file2.xlsx')
+
+# Step 2: Select the columns to compare (replace 'ColumnA' and 'ColumnB' with your actual column names)
+col1 = df1['ColumnA']
+col2 = df2['ColumnB']
+
+# Step 3: Find closest matches for each value in col1 from col2
+matches = []
+for value in col1:
+    closest = get_close_matches(str(value), col2.astype(str), n=1, cutoff=0)
+    if closest:
+        matches.append({'ColumnA': value, 'ClosestMatch': closest[0]})
+    else:
+        matches.append({'ColumnA': value, 'ClosestMatch': None})
+
+# Step 4: Create a new DataFrame with the matches
+result_df = pd.DataFrame(matches)
+
+# Optional: Save to Excel or CSV
+result_df.to_excel('closest_matches.xlsx', index=False)
