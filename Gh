@@ -1,3 +1,18 @@
-I just spoke with Eileen and Deric regarding the countries filter implementation. According to Deric, the solution using a static backend table containing the list of countries fulfills the requirements and has Jon’s approval as well.
+Title: Create Dynamic Filter List for Markets Based on Available Records
 
-The team chose this approach since dynamically adding countries to the filter was considerably more complex and would have consumed more time and effort. Everyone agreed that the static backend table is both efficient and acceptable for our current needs.
+Description:
+As a user, I want the "Markets" filter on the platform to display only those markets that are actually present in all available records, so I can efficiently filter data based on relevant market options.
+
+Acceptance Criteria:
+
+The "Markets" filter must dynamically populate with unique market names found in the current dataset or all records.
+
+The filter list must update automatically whenever the dataset changes (e.g., additional records added or removed).
+
+Only markets with at least one corresponding record in the dataset should be shown in the filter list.
+
+The solution should not require manual updates to the filter options table; all changes should be handled programmatically.
+
+The filter functionality must remain performant, loading the markets list without noticeable delay even with large datasets.
+
+The filter UI should be tested to ensure all possible available markets in the data appear as filter options, and selecting any market filters the records correctly.
