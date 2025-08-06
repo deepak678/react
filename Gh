@@ -1,18 +1,25 @@
-Title: Create Dynamic Filter List for Markets Based on Available Records
+import pandas as pd
+import re
 
-Description:
-As a user, I want the "Markets" filter on the platform to display only those markets that are actually present in all available records, so I can efficiently filter data based on relevant market options.
+# Example DataFrame
+df = pd.DataFrame({
+    'details': [
+        '''"title": Fix login bug
+"description": User is unable to log in on Safari.
+Steps to reproduce:
+1. Open browser
+2. Go to login page
+3. Submit credentials'''
+    ]
+})
 
-Acceptance Criteria:
+# Function to extract title and description using multi-line regex
+def extract_title_description(text):
+    title_match = re.search(r'"title":(.*)\n"description":', text, re.DOTALL)
+    description_match = re.search(r'"description":(.*)', text, re.DOTALL)
+    
+    title = title_match.group(1).strip() if title_match else None
+    description = description_match.group(1).strip() if description_match else None
+    return pd.Series([title, description])
 
-The "Markets" filter must dynamically populate with unique market names found in the current dataset or all records.
-
-The filter list must update automatically whenever the dataset changes (e.g., additional records added or removed).
-
-Only markets with at least one corresponding record in the dataset should be shown in the filter list.
-
-The solution should not require manual updates to the filter options table; all changes should be handled programmatically.
-
-The filter functionality must remain performant, loading the markets list without noticeable delay even with large datasets.
-
-The filter UI should be tested to ensure all possible available markets in the data appear as filter options, and selecting any market filters the records correctly.
+df[['title', 'description']] = df['details'].apply(extract_title_description)
