@@ -1,48 +1,52 @@
 import pandas as pd
 from rapidfuzz.distance import Levenshtein
 
-# Sample DataFrame structure:
-# | LLM_output               | final_output                      |
-# |--------------------------|-----------------------------------|
-# | "Hello, I'm a bot."      | "Hi, I'm a bot."                  |
-# | "The result is correct." | "The answer is mostly correct."  |
-
-# Example data
-data = {
+# ───── Sample: Two DataFrames ─────
+llm_df = pd.DataFrame({
     "LLM_output": [
         "The Eiffel Tower is located in Paris.",
         "Python is a programming language.",
         "Climate change is caused by greenhouse gases."
-    ],
+    ]
+})
+
+final_df = pd.DataFrame({
     "final_output": [
         "The Eiffel Tower is in Paris.",
         "Python is a versatile programming language.",
         "Greenhouse gases contribute to climate change."
     ]
-}
+})
 
-df = pd.DataFrame(data)
+# ───── Compute Best Match & Similarity ─────
 
-# Function to compute normalized similarity score
-def compute_similarity(llm_text, final_text):
-    if not llm_text or not final_text:
-        return 0.0
-    # Levenshtein ratio: 1 - (edit_distance / max_len)
-    distance = Levenshtein.distance(llm_text, final_text)
-    max_len = max(len(llm_text), len(final_text))
-    similarity = 1 - (distance / max_len)
-    return round(similarity, 4)
+def compute_similarity(s1, s2):
+    distance = Levenshtein.distance(s1, s2)
+    max_len = max(len(s1), len(s2))
+    return 1 - (distance / max_len) if max_len > 0 else 0
 
-# Apply to each row
-df["similarity_score"] = df.apply(
-    lambda row: compute_similarity(row["LLM_output"], row["final_output"]),
-    axis=1
+def find_best_llm_match(final_text, llm_outputs):
+    best_score = -1
+    best_match = None
+    for llm_text in llm_outputs:
+        score = compute_similarity(final_text, llm_text)
+        if score > best_score:
+            best_score = score
+            best_match = llm_text
+    return best_match, round(best_score, 4)
+
+# Apply matching across final_df
+matched_outputs = final_df['final_output'].apply(
+    lambda x: find_best_llm_match(x, llm_df['LLM_output'])
 )
 
-# Compute average score as "model reliance"
-model_reliance = df["similarity_score"].mean()
+# Split into separate columns
+final_df[['matched_LLM_output', 'similarity_score']] = pd.DataFrame(matched_outputs.tolist(), index=final_df.index)
 
-# Output results
-print("🔍 Scored DataFrame:")
-print(df[["LLM_output", "final_output", "similarity_score"]])
-print(f"\n📊 Average Model Reliance: {model_reliance:.4f}")
+# Average model reliance:
+model_reliance = final_df['similarity_score'].mean()
+
+# ───── Results ─────
+print("🔍 Matched Output:")
+print(final_df[['final_output', 'matched_LLM_output', 'similarity_score']])
+print(f"\n📊 Average Model Reliance Score: {model_reliance:.4f}")
