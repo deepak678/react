@@ -1,22 +1,48 @@
 import pandas as pd
+from rapidfuzz.distance import Levenshtein
 
-# Load sheets from Excel
-df1 = pd.read_excel("your_file.xlsx", sheet_name="Sheet1")  # contains 'id'
-df2 = pd.read_excel("your_file.xlsx", sheet_name="Sheet2")  # contains 'ref_id'
+# Sample DataFrame structure:
+# | LLM_output               | final_output                      |
+# |--------------------------|-----------------------------------|
+# | "Hello, I'm a bot."      | "Hi, I'm a bot."                  |
+# | "The result is correct." | "The answer is mostly correct."  |
 
-# Convert to sets for matching
-set1 = set(df1['id'].dropna())
-set2 = set(df2['ref_id'].dropna())
+# Example data
+data = {
+    "LLM_output": [
+        "The Eiffel Tower is located in Paris.",
+        "Python is a programming language.",
+        "Climate change is caused by greenhouse gases."
+    ],
+    "final_output": [
+        "The Eiffel Tower is in Paris.",
+        "Python is a versatile programming language.",
+        "Greenhouse gases contribute to climate change."
+    ]
+}
 
-# Find intersection (matching values)
-matching_values = set1 & set2  # or use set1.intersection(set2)
+df = pd.DataFrame(data)
 
-# Filter rows in df1 (or df2) with matching values
-matched_df1 = df1[df1['id'].isin(matching_values)]
-matched_df2 = df2[df2['ref_id'].isin(matching_values)]
+# Function to compute normalized similarity score
+def compute_similarity(llm_text, final_text):
+    if not llm_text or not final_text:
+        return 0.0
+    # Levenshtein ratio: 1 - (edit_distance / max_len)
+    distance = Levenshtein.distance(llm_text, final_text)
+    max_len = max(len(llm_text), len(final_text))
+    similarity = 1 - (distance / max_len)
+    return round(similarity, 4)
 
-# Optional: Merge both matched results (if needed)
-result = pd.merge(matched_df1, matched_df2, left_on='id', right_on='ref_id', how='inner')
+# Apply to each row
+df["similarity_score"] = df.apply(
+    lambda row: compute_similarity(row["LLM_output"], row["final_output"]),
+    axis=1
+)
 
-print("Matched Rows:")
-print(result)
+# Compute average score as "model reliance"
+model_reliance = df["similarity_score"].mean()
+
+# Output results
+print("🔍 Scored DataFrame:")
+print(df[["LLM_output", "final_output", "similarity_score"]])
+print(f"\n📊 Average Model Reliance: {model_reliance:.4f}")
