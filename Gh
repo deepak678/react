@@ -1,25 +1,22 @@
 import pandas as pd
-import re
 
-# Example DataFrame
-df = pd.DataFrame({
-    'details': [
-        '''"title": Fix login bug
-"description": User is unable to log in on Safari.
-Steps to reproduce:
-1. Open browser
-2. Go to login page
-3. Submit credentials'''
-    ]
-})
+# Load sheets from Excel
+df1 = pd.read_excel("your_file.xlsx", sheet_name="Sheet1")  # contains 'id'
+df2 = pd.read_excel("your_file.xlsx", sheet_name="Sheet2")  # contains 'ref_id'
 
-# Function to extract title and description using multi-line regex
-def extract_title_description(text):
-    title_match = re.search(r'"title":(.*)\n"description":', text, re.DOTALL)
-    description_match = re.search(r'"description":(.*)', text, re.DOTALL)
-    
-    title = title_match.group(1).strip() if title_match else None
-    description = description_match.group(1).strip() if description_match else None
-    return pd.Series([title, description])
+# Convert to sets for matching
+set1 = set(df1['id'].dropna())
+set2 = set(df2['ref_id'].dropna())
 
-df[['title', 'description']] = df['details'].apply(extract_title_description)
+# Find intersection (matching values)
+matching_values = set1 & set2  # or use set1.intersection(set2)
+
+# Filter rows in df1 (or df2) with matching values
+matched_df1 = df1[df1['id'].isin(matching_values)]
+matched_df2 = df2[df2['ref_id'].isin(matching_values)]
+
+# Optional: Merge both matched results (if needed)
+result = pd.merge(matched_df1, matched_df2, left_on='id', right_on='ref_id', how='inner')
+
+print("Matched Rows:")
+print(result)
