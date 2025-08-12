@@ -1,1 +1,63 @@
-We should consider scenarios where the market filter—currently populated using all unique markets from the available records—may need to be adjusted. For example, due to data retention policies or business requirements, a specific market might be removed from the source records. In such cases, it's important that the filter dynamically reflects this change and removes the corresponding market option from the filter list to avoid user confusion or invalid selections
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# ==== CONFIG ====
+LLM_FILE = "llm_responses.xlsx"       # Path to LLM output Excel file
+HUMAN_FILE = "human_responses.xlsx"   # Path to human-edited Excel file
+LLM_COLUMN = "response"               # Column name containing the text in LLM file
+HUMAN_COLUMN = "response"             # Column name containing the text in human file
+MATCH_THRESHOLD = 0.8                  # Similarity threshold for considering a match
+OUTPUT_FILE = "comparison_results.xlsx" # Output Excel report
+# ====
+
+# Function to clean text
+def clean_text(text):
+    if pd.isna(text):
+        return ""
+    return " ".join(str(text).split())  # Removes extra spaces/newlines
+
+# 1. Read Excel files
+llm_df = pd.read_excel(LLM_FILE)
+human_df = pd.read_excel(HUMAN_FILE)
+
+# 2. Data cleaning
+llm_df[LLM_COLUMN] = llm_df[LLM_COLUMN].apply(clean_text)
+human_df[HUMAN_COLUMN] = human_df[HUMAN_COLUMN].apply(clean_text)
+
+# Remove empty rows after cleaning
+llm_df = llm_df[llm_df[LLM_COLUMN] != ""].reset_index(drop=True)
+human_df = human_df[human_df[HUMAN_COLUMN] != ""].reset_index(drop=True)
+
+# 3. TF-IDF vectorization
+vectorizer = TfidfVectorizer()
+vectorizer.fit(pd.concat([llm_df[LLM_COLUMN], human_df[HUMAN_COLUMN]]))
+
+llm_tfidf = vectorizer.transform(llm_df[LLM_COLUMN])
+human_tfidf = vectorizer.transform(human_df[HUMAN_COLUMN])
+
+# 4. Compare every LLM response to every human response
+results = []
+match_count = 0
+for i, llm_vec in enumerate(llm_tfidf):
+    similarities = cosine_similarity(llm_vec, human_tfidf)[0]
+    best_match_idx = similarities.argmax()
+    best_score = similarities[best_match_idx]
+    
+    if best_score >= MATCH_THRESHOLD:
+        match_count += 1
+    
+    results.append({
+        "LLM_Index": i,
+        "LLM_Response": llm_df.loc[i, LLM_COLUMN],
+        "Best_Human_Index": best_match_idx,
+        "Best_Human_Response": human_df.loc[best_match_idx, HUMAN_COLUMN],
+        "Similarity_Score": round(best_score, 4)
+    })
+
+# 5. Convert results to DataFrame and save
+results_df = pd.DataFrame(results)
+results_df.to_excel(OUTPUT_FILE, index=False)
+
+print(f"✅ Matching complete. Found {match_count} matches above threshold {MATCH_THRESHOLD}.")
+print(f"Results saved to: {OUTPUT_FILE}")
