@@ -1,15 +1,69 @@
-Extract safely
-def extract_list_element(json_str, key, idx):
-    try:
-        data = json.loads(json_str) if isinstance(json_str, str) else json_str
-        if isinstance(data, dict) and key in data and isinstance(data[key], list):
-            return data[key][idx] if len(data[key]) > idx else np.nan
-        else:
-            return np.nan
-    except Exception:
-        return np.nan
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy.optimize import linear_sum_assignment
+import numpy as np
 
-df['fourth_score'] = df['info_json'].apply(lambda x: extract_list_element(x, key_name, index_to_extract))
+# ==== CONFIG ====
+LLM_FILE = "llm_responses.xlsx"
+HUMAN_FILE = "human_responses.xlsx"
+LLM_COLUMN = "response"
+HUMAN_COLUMN = "response"
+MATCH_THRESHOLD = 0.8
+OUTPUT_FILE = "human_to_llm_mapping.xlsx"
+# ====
 
-print("\nResult DF:")
-print(df)
+# Clean text
+def clean_text(text):
+    if pd.isna(text):
+        return ""
+    return " ".join(str(text).split())
+
+# Read Excel
+llm_df = pd.read_excel(LLM_FILE)
+human_df = pd.read_excel(HUMAN_FILE)
+
+# Cleaning
+llm_df[LLM_COLUMN] = llm_df[LLM_COLUMN].apply(clean_text)
+human_df[HUMAN_COLUMN] = human_df[HUMAN_COLUMN].apply(clean_text)
+
+# Remove blanks
+llm_df = llm_df[llm_df[LLM_COLUMN] != ""].reset_index(drop=True)
+human_df = human_df[human_df[HUMAN_COLUMN] != ""].reset_index(drop=True)
+
+# Create TF-IDF
+vectorizer = TfidfVectorizer()
+vectorizer.fit(pd.concat([llm_df[LLM_COLUMN], human_df[HUMAN_COLUMN]]))
+
+llm_tfidf = vectorizer.transform(llm_df[LLM_COLUMN])
+human_tfidf = vectorizer.transform(human_df[HUMAN_COLUMN])
+
+# Compute similarity matrix (human x llm)
+similarity_matrix = cosine_similarity(human_tfidf, llm_tfidf)
+
+# Hungarian algorithm finds MINIMUM cost → we pass negative similarity for MAXIMUM matching
+cost_matrix = -similarity_matrix
+row_ind, col_ind = linear_sum_assignment(cost_matrix)
+
+# Collect results
+results = []
+match_count = 0
+for human_idx, llm_idx in zip(row_ind, col_ind):
+    score = similarity_matrix[human_idx, llm_idx]
+    if score >= MATCH_THRESHOLD:
+        match_count += 1
+    results.append({
+        "Human_Index": human_idx,
+        "Human_Response": human_df.loc[human_idx, HUMAN_COLUMN],
+        "Matched_LLM_Index": llm_idx,
+        "Matched_LLM_Response": llm_df.loc[llm_idx, LLM_COLUMN],
+        "Similarity_Score": round(score, 4)
+    })
+
+# Save results
+results_df = pd.DataFrame(results)
+results_df.to_excel(OUTPUT_FILE, index=False)
+
+print(f"✅ One-to-one best matches complete.")
+print(f"✔ Matches above threshold: {match_count}/{len(human_df)} (>{MATCH_THRESHOLD})")
+print(f"📁 Results saved to {OUTPUT_FILE}")
