@@ -1,41 +1,12 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+. Text Vectorization
+Convert text into TF‑IDF vectors (Term Frequency–Inverse Document Frequency), which represent the importance of each word in a response relative to all responses.
 
-# Assuming your dataframe after filtering is named `matched_df`
-# And it already contains a "Similarity_Score" column
+3. Similarity Measurement
+Use cosine similarity between each LLM vector and each human vector.
 
-# Convert similarity column to float just in case
-matched_df["Similarity_Score"] = matched_df["Similarity_Score"].astype(float)
+Cosine similarity ranges from 0 (completely different) to 1 (identical).
 
-# Step 1: Calculate thresholds from distribution
-red_threshold = np.percentile(matched_df["Similarity_Score"], 25)    # 25th percentile
-green_threshold = np.percentile(matched_df["Similarity_Score"], 75)  # 75th percentile
+4. Matching Approaches
+We used two main styles depending on the requirement:
 
-print(f"📊 Red threshold (25th percentile): {red_threshold:.4f}")
-print(f"📊 Green threshold (75th percentile): {green_threshold:.4f}")
-
-# Step 2: Categorize into Red / Amber / Green
-def classify(score):
-    if score >= green_threshold:
-        return "Green"
-    elif score >= red_threshold:
-        return "Amber"
-    else:
-        return "Red"
-
-matched_df["Match_Level"] = matched_df["Similarity_Score"].apply(classify)
-
-# Step 3: (Optional) Visualize distribution and thresholds
-plt.figure(figsize=(10, 6))
-plt.hist(matched_df["Similarity_Score"], bins=30, color="skyblue", edgecolor="black")
-plt.axvline(red_threshold, color="red", linestyle="--", label=f"Red threshold ({red_threshold:.2f})")
-plt.axvline(green_threshold, color="green", linestyle="--", label=f"Green threshold ({green_threshold:.2f})")
-plt.title("Similarity Scores Distribution (Matched Rows)")
-plt.xlabel("Similarity Score")
-plt.ylabel("Frequency")
-plt.legend()
-plt.show()
-
-# Step 4: Save the classified dataframe if needed
-matched_df.to_excel("matched_with_thresholds.xlsx", index=False)
+Greedy Best Match — for each row from one dataset, find the highest similarity match in the other dataset (allows duplicates).
