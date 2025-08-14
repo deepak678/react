@@ -37,4 +37,14 @@ for i in range(len(llm_df)):
     matched_human_response = human_df.loc[best_human_idx, HUMAN_COLUMN] if best_score >= MATCH_THRESHOLD else ""
     results.append({
         "LLM_Index": i,
-        "LLM_Response":
+        "LLM_Response": llm_df.loc[i, LLM_COLUMN],
+        "Matched_Human_Index": best_human_idx if best_score >= MATCH_THRESHOLD else "",
+        "Matched_Human_Response": matched_human_response,
+        "Similarity_Score": round(best_score, 4)
+    })
+
+results_df = pd.DataFrame(results)
+results_df.to_excel(OUTPUT_FILE, index=False)
+
+print(f"✅ All LLM responses mapped. Human response only shown if similarity ≥ {MATCH_THRESHOLD}.")
+print(f"📁 Results saved to {OUTPUT_FILE}")
