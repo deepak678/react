@@ -1,12 +1,65 @@
-. Text Vectorization
-Convert text into TF‑IDF vectors (Term Frequency–Inverse Document Frequency), which represent the importance of each word in a response relative to all responses.
+Measures the number of character-level edits (insertions, deletions, substitutions) needed to transform one string into another.
 
-3. Similarity Measurement
-Use cosine similarity between each LLM vector and each human vector.
+Normalized similarity is computed as:
 
-Cosine similarity ranges from 0 (completely different) to 1 (identical).
+Similarity
+=
+1
+−
+Levenshtein Distance
+max
+⁡
+(
+len
+(
+s
+1
+)
+,
+len
+(
+s
+2
+)
+)
+Similarity=1− 
+max(len(s 
+1
+ ),len(s 
+2
+ ))
+Levenshtein Distance
+ 
+Scores range from 0 (completely different) to 1 (identical).
 
-4. Matching Approaches
-We used two main styles depending on the requirement:
+This captures exact character-level differences in a sequence.
 
-Greedy Best Match — for each row from one dataset, find the highest similarity match in the other dataset (allows duplicates).
+B. Cosine Similarity
+Measures similarity by angle between two vectors in a high-dimensional vector space.
+
+For TF-IDF vectors 
+A
+A and 
+B
+B:
+
+Cosine similarity
+=
+A
+⋅
+B
+∥
+A
+∥
+∥
+B
+∥
+Cosine similarity= 
+∥A∥∥B∥
+A⋅B
+ 
+A value between 0 and 1 (for non-negative vectors), where 1 means exactly same vector directions (very similar texts in terms of word usage).
+
+Captures semantic and lexical overlap based on word frequency.
+
+Less sensitive to order or small typos, more robust to some rephrasings or synonym substitutions if captured in vocabulary.
