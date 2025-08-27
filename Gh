@@ -1,1 +1,14 @@
-We matched all RMC logs with Helios data using fuzzy logic, identifying the best one-to-one matches. We then computed similarity scores for these pairs to assess consistency and estimate model reliance
+import pandas as pd
+
+data = {
+    'order_details': [
+        "Order 101, Amount $250, Additional Information: urgent delivery before noon.",
+        "Order 102, Amount $150.",
+        "Order 103, Amount $320, Additional Information: fragile item, handle with care."
+    ]
+}
+
+df = pd.DataFrame(data)
+
+df['cleaned_details'] = df['order_details'].apply(remove_after_additional_info)
+print(df)
