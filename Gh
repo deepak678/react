@@ -1,80 +1,22 @@
-from langchain_openai import AzureChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain, SequentialChain
+import json
+import re
 
-# Step 1: Setup Azure OpenAI model
-llm = AzureChatOpenAI(
-    deployment_name="your-deployment-name",
-    temperature=0,
-    openai_api_version="2023-05-15",
-    openai_api_base="https://your-azure-endpoint.openai.azure.com",
-    openai_api_key="your-azure-api-key"
-)
-
-# --- Prompt 1: Generate evaluation table ---
-table_prompt = PromptTemplate(
-    input_variables=["query", "claims"],
-    template="""
-You are an evaluator. 
-Evaluate the following claims against the query response.
-
-Query: {query}
-Claims: {claims}
-
-Return the result in a markdown table with columns: claim_id, claim_text, judgment, score (1/0).
-"""
-)
-
-table_chain = LLMChain(llm=llm, prompt=table_prompt, output_key="table_output")
-
-# --- Prompt 2: Convert table to JSON ---
-json_prompt = PromptTemplate(
-    input_variables=["table_output", "metric", "query_id"],
-    template="""
-You are a data converter.
-Convert the following evaluation table into JSON schema:
-
-Table:
-{table_output}
-
-Schema:
+raw_output = """'''json
 {
-  "metric": "{metric}",
-  "query_id": "{query_id}",
-  "total_items": <number_of_rows>,
-  "matched_items": <count_of_score_1_rows>,
-  "final_score": <matched_items/total_items>,
-  "details": [
-    {
-      "claim_id": "<from table>",
-      "claim_text": "<from table>",
-      "judgment": "<from table>",
-      "score": <from table>
-    }
-  ]
+  "metric": "completeness",
+  "query_id": "Q1",
+  "total_items": 3,
+  "matched_items": 2,
+  "final_score": 0.67,
+  "details": []
 }
-"""
-)
+'''"""
 
-json_chain = LLMChain(llm=llm, prompt=json_prompt, output_key="json_output")
+# 1. Remove triple quotes and optional "json" tag
+cleaned = re.sub(r"^```json|^'''json|```$|'''$", "", raw_output.strip(), flags=re.MULTILINE).strip()
 
-# --- Combine into SequentialChain ---
-chain = SequentialChain(
-    chains=[table_chain, json_chain],
-    input_variables=["query", "claims", "metric", "query_id"],
-    output_variables=["json_output"]
-)
+# 2. Parse into dict
+parsed = json.loads(cleaned)
 
-# --- Run ---
-result = chain.run({
-    "query": "What does the insurance policy cover?",
-    "claims": [
-        "The policy covers accidental damage",
-        "The policy covers theft",
-        "The policy covers fire damage"
-    ],
-    "metric": "completeness",
-    "query_id": "Q1"
-})
-
-print(result)
+print(parsed)
+print(parsed["final_score"])  # Access values
