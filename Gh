@@ -1,1 +1,9 @@
-We cannot depend on a separate Python script to calculate scores on the LLM’s output because the model’s responses are non-deterministic. This means the same request may produce slightly different answers each time, which can cause the Python script to misread or mis-score the results, leading to unreliable metrics. Instead, it is more effective to let the LLM itself provide the final scores in a controlled format. This ensures scoring is consistent, aligned with the model’s own understanding, and reduces the risk of incorrect evaluations.”
+addresses concerns around complexity, scalability, and score consistency.
+
+Instead of storing granular details for each monitoring metric in multiple distinct tables, our solution proposes consolidating all metric details into a single JSON record per monitored instance. This structure enables us to reduce storage overhead, simplify data management, query aggregated summaries efficiently, and perform detailed analyses only on-demand in an analytics environment. This also simplifies schema evolution and improves data consistency.
+
+Additionally, rather than aggregating scores for each metric across these tables using a Python script, we propose leveraging the LLM itself to produce the final composite score. Using the LLM to aggregate scores helps mitigate the impact of its inherent non-deterministic nature, where running the script separately risks inconsistencies due to varying outputs from repeated LLM calls. By invoking the LLM directly for final score computation, we maintain interpretability and reduce potential variability, yielding more reliable monitoring results.
+
+This approach balances operational efficiency with flexible detailed analysis and improved score stability, making it more scalable and maintainable for our evolving model monitoring needs.
+
+I would be happy to discuss this proposal further or demonstrate a prototype implementation. Please let me know your availability for a follow-up call.
