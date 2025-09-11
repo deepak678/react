@@ -1,1 +1,17 @@
-EPS contribution has been deducted though I joined after 01/09/2014 with basic > 15,000. Request to transfer EPS balance to EPF and enable merging of passbooks.”
+Collaborative Enhancement via Admin Portal
+Enhancing the existing Node.js admin portal requires contributors to have technical knowledge of Node.js and its stack.
+
+This approach centralizes monitoring features, giving all teams a unified UI and experience, but collaboration barriers trend higher if other teams lack Node.js expertise.
+
+Challenges include: codebase maintenance across teams with varying skillsets, risk of technical debt, and inconsistent application structure unless rigorous processes and documentation are enforced.
+
+Administrative dashboards can offer flexible real-time features, but knowledge transfer and onboarding complexity can slow down the process for non-Node.js developers.
+
+Shared Data Layer with Authorized Views
+By exposing the data layer or view via APIs/streams, other teams can integrate model monitoring into their own dashboards leveraging their familiar platforms (such as Grafana, Streamlit, PowerBI, or proprietary monitoring tools).
+
+Benefits include: minimal changes to existing UI frameworks, improved agility, and ease of adoption for vertical teams with differing technical stacks.
+
+This architecture reduces network integration points, eliminates data duplication, and supports scalability and modularity, with open APIs allowing plug-and-play installation across platforms.
+
+Drawbacks: possible increased coupling between data sources and consumers, security risks due to data exposure, and more complexity in managing data governance and authorization.
