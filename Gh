@@ -1,17 +1,1 @@
-Collaborative Enhancement via Admin Portal
-Enhancing the existing Node.js admin portal requires contributors to have technical knowledge of Node.js and its stack.
-
-This approach centralizes monitoring features, giving all teams a unified UI and experience, but collaboration barriers trend higher if other teams lack Node.js expertise.
-
-Challenges include: codebase maintenance across teams with varying skillsets, risk of technical debt, and inconsistent application structure unless rigorous processes and documentation are enforced.
-
-Administrative dashboards can offer flexible real-time features, but knowledge transfer and onboarding complexity can slow down the process for non-Node.js developers.
-
-Shared Data Layer with Authorized Views
-By exposing the data layer or view via APIs/streams, other teams can integrate model monitoring into their own dashboards leveraging their familiar platforms (such as Grafana, Streamlit, PowerBI, or proprietary monitoring tools).
-
-Benefits include: minimal changes to existing UI frameworks, improved agility, and ease of adoption for vertical teams with differing technical stacks.
-
-This architecture reduces network integration points, eliminates data duplication, and supports scalability and modularity, with open APIs allowing plug-and-play installation across platforms.
-
-Drawbacks: possible increased coupling between data sources and consumers, security risks due to data exposure, and more complexity in managing data governance and authorization.
+We cannot depend on a separate Python script to calculate scores on the LLM’s output because the model’s responses are non-deterministic. This means the same request may produce slightly different answers each time, which can cause the Python script to misread or mis-score the results, leading to unreliable metrics. Instead, it is more effective to let the LLM itself provide the final scores in a controlled format. This ensures scoring is consistent, aligned with the model’s own understanding, and reduces the risk of incorrect evaluations.”
