@@ -1,9 +1,83 @@
-addresses concerns around complexity, scalability, and score consistency.
 
-Instead of storing granular details for each monitoring metric in multiple distinct tables, our solution proposes consolidating all metric details into a single JSON record per monitored instance. This structure enables us to reduce storage overhead, simplify data management, query aggregated summaries efficiently, and perform detailed analyses only on-demand in an analytics environment. This also simplifies schema evolution and improves data consistency.
 
-Additionally, rather than aggregating scores for each metric across these tables using a Python script, we propose leveraging the LLM itself to produce the final composite score. Using the LLM to aggregate scores helps mitigate the impact of its inherent non-deterministic nature, where running the script separately risks inconsistencies due to varying outputs from repeated LLM calls. By invoking the LLM directly for final score computation, we maintain interpretability and reduce potential variability, yielding more reliable monitoring results.
+ChatGPT
+You said:
+Create an epic to implement model reliance on the production this calculation will be done between final issue recorded in helios with the ai response generated the model reliance metric 
+The calculation logic is defined as a cosine similarity between these response logic of which will be provided 
+That value needs to be shown in the admin portal and average of value with a trend graph how it is happening for other metrics in RMC and in model evaluation performance a column needs to be added to show model reliance for their respective row
+ChatGPT said:
 
-This approach balances operational efficiency with flexible detailed analysis and improved score stability, making it more scalable and maintainable for our evolving model monitoring needs.
+Thought for a couple of seconds
+Epic: Implement Model Reliance metric in production (Helios → Admin Portal / RMC / Model Evaluation)
+Epic ID: MR-EPIC-001
+Owner: (Product/Model Monitoring)
+Stakeholders: Data Engineering, ML Engineering, Backend, Frontend (Admin Portal), RMC team, QA, Analytics
 
-I would be happy to discuss this proposal further or demonstrate a prototype implementation. Please let me know your availability for a follow-up call.
+Summary
+Introduce Model Reliance — a production metric that measures similarity between the final issue recorded in Helios and the AI response generated. The metric will be calculated as a cosine similarity over vectorized representations (vectorization logic to be provided). Display the per-request model reliance value in the Admin Portal, show an aggregated average + trend graph (same style as existing RMC metrics), and add a Model Reliance column to Model Evaluation Performance tables.
+
+Goals
+Compute a reliable, auditable model_reliance score (0–1) per production request.
+
+Surface per-request score and aggregated views (average and trend) in the Admin Portal and RMC dashboards.
+
+Add model_reliance to the model evaluation performance dataset and UI table.
+
+Ensure traceability (Helios request id ↔ AI response ↔ computed score).
+
+Monitoring, alerting and tests to ensure correctness and stability.
+
+Scope (in-scope / out-of-scope)
+In-scope
+
+Implementation of cosine-similarity calculation pipeline for each processed pair (Helios final issue ↔ AI response).
+
+Storage of per-request model_reliance value and metadata.
+
+Admin Portal: per-request view, average metric, trend graph (time-series), and a column in model evaluation performance table.
+
+Backfill historic values (optional — included as a task).
+
+Unit/integration tests, dashboards for telemetry.
+
+Out-of-scope
+
+Changing vectorization model/embedding generation logic (unless requested).
+
+Re-architecting Helios or AI generation systems beyond required instrumentation.
+
+Fine-grained UX redesign of dashboards beyond adding graph & column.
+
+Assumptions & Inputs
+Vectorization & cosine similarity logic (embedding model, normalization, pooling, pre-processing) will be provided by the ML team (or will be chosen per their guidance).
+
+Helios final issue text and AI response text are available and durable (or can be captured) for each request.
+
+Existing RMC trend graph component / time-series pipeline can be re-used for the new metric styling and aggregation.
+
+Timezone: Asia/Kolkata (use absolute timestamps for clarity in dashboards).
+
+Acceptance Criteria (top-level)
+For every processed Helios record with an AI response, a numeric model_reliance score (float between 0 and 1) is produced and stored.
+
+Admin Portal per-request details page shows the model_reliance score and the underlying inputs (Helios final issue text & AI response text) with timestamp and request id.
+
+Admin Portal RMC dashboard shows:
+
+A trend chart (daily/week/month selectable) of average model_reliance (same style/filters as other RMC metrics).
+
+A KPI card showing the current average model_reliance for the selected time window.
+
+Model Evaluation Performance table includes a Model Reliance column for each row, populated for all rows where data exists.
+
+Aggregations (average, standard deviation, count) computed for model_reliance are available via API and dashboard filters: reporting month, request type, request location, date range.
+
+Unit tests for cosine similarity calculation (including edge cases: missing text, very short texts).
+
+Integration tests ensuring traceability of request → computed score → UI display.
+
+Backfill script (if run) populates historical model_reliance values without duplications and with a configurable batch size.
+
+Telemetry (success/failure counts, latency histogram for metric calculation) is emitted; alerts exist for failure rate > X% (TBD) or calc latency > Y ms.
+
+Documentation updated (calculation spec with exact preprocessing, embedding model + version, and sample calculations).
