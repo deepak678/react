@@ -1,163 +1,78 @@
-Goals
 
-Display total erratic feedback count prominently on Admin Portal Home.
 
-Provide direct navigation to Model Evaluation Performance page filtered by erratic feedback records.
+ChatGPT
+You said:
+Need to create an epic for admin portal for cause action and action mitigation to show their evaluation results 
+Would be needing this epic which was introduced for making the admin portal to be scalable acceptance would be for all these three prompts within RMC to have their dedicated evaluation page under RMC along with existing issue description page
+ChatGPT said:
+Here’s a well-structured draft for your epic based on what you described:
 
-Ensure consistency between the count displayed on the Home page and the list of records shown after drill-down.
+Epic: Enhance Admin Portal with Cause Action and Action Mitigation Evaluation Results
+Epic Description
+As part of making the Admin Portal scalable, we need to expand its functionality by introducing dedicated evaluation pages for Cause Action and Action Mitigation. Currently, the portal supports displaying issue description evaluations under RMC (Root Monitoring Console). To achieve full visibility and consistency, Cause Action and Action Mitigation evaluation results must also be accessible within RMC, each with its own dedicated evaluation page.
 
-Enable stakeholders to quickly track and investigate erratic feedback cases.
+This will ensure admins can seamlessly monitor evaluation outcomes across all three prompts (Issue Description, Cause Action, and Action Mitigation), enhancing transparency, usability, and scalability of the system.
+
+Business Value
+Improves visibility into model evaluation results across multiple dimensions.
+
+Supports scalability by modularizing evaluations into separate pages.
+
+Enables faster troubleshooting and governance by having dedicated views for each evaluation type.
+
+Increases trust and adoption of the Admin Portal by offering a comprehensive evaluation framework.
 
 Scope
+Introduce dedicated evaluation result pages for:
 
-In-scope
+Issue Description (existing)
 
-Backend: Aggregate erratic feedback count.
+Cause Action (new)
 
-Frontend: Add KPI card on Admin Portal Home, clickable with redirect.
+Action Mitigation (new)
 
-Model Evaluation Performance page: Add filtering support for erratic_feedback.
+Each page should display evaluation results aligned with current framework used in RMC.
 
-Ensure filters work with other metrics (request type, reporting month, request location, date range).
+Ensure consistency of UI/UX across all three pages.
 
-Out-of-scope
-
-Defining “erratic feedback” logic (assumes flag already exists in DB).
-
-Enhancing feedback classification logic (only display & drill-down functionality).
+Integrate navigation within RMC to switch between evaluation types seamlessly.
 
 Acceptance Criteria
+Dedicated Pages
 
-Home Page Card
+Admin portal should display three separate evaluation result pages within RMC:
 
-A KPI card titled “Erratic Feedback” is shown on Admin Portal Home.
+Issue Description (existing)
 
-It displays the total count of erratic feedback records within the selected time range (default: last 30 days).
+Cause Action (new)
 
-Clickable Navigation
+Action Mitigation (new)
 
-Clicking the card redirects user to Model Evaluation Performance page.
+Evaluation Results Display
 
-The page is pre-filtered to show only erratic_feedback = true records.
+Each page should show evaluation results (accuracy, completeness, hallucination, etc.) relevant to its prompt type.
+
+Data should be pulled from the evaluation framework already in place.
+
+Scalable Navigation
+
+A navigation panel or tab system should allow switching between these evaluation pages easily.
+
+UI should follow existing Admin Portal design patterns.
 
 Consistency
 
-Count on the Home Page matches the number of rows returned on the Model Evaluation Performance page (for the same filters).
+Layout, filtering, and metrics display should be consistent across all three pages.
 
-Filters
+Error handling and empty state messages should match existing patterns.
 
-Default filters (reporting month, request type, request location, date range) apply to erratic feedback counts.
+Performance & Scalability
 
-Users can modify filters on the Model Evaluation page to widen/narrow results.
+System should support increased load as more evaluations are added in future without degrading performance.
 
-UI/UX
+Dependencies
+Evaluation framework must already support Cause Action and Action Mitigation.
 
-KPI card styled consistently with other dashboard metrics (rounded corners, shadow, trend indicator).
+Data ingestion pipeline must feed results into the Admin Portal backend.
 
-Tooltip: “Total count of erratic feedback cases flagged by evaluation logic.”
-
-Testing
-
-Unit tests for count calculation API.
-
-Integration tests validating card ↔ drill-down navigation.
-
-Manual test case: card count equals table rows.
-
-User Stories & Tasks
-A. Backend
-
-Story A1 — API for Erratic Feedback Count
-
-Task A1.1: Extend metrics API: GET /metrics/erratic_feedback?filters... → {count: 123}.
-
-Task A1.2: Ensure query respects filters (reporting month, request type, request location, date range).
-
-Story A2 — Model Evaluation Data API
-
-Task A2.1: Add query parameter erratic_feedback=true to existing /model_evaluation endpoint.
-
-Task A2.2: Ensure pagination + sorting work with filter.
-
-B. Frontend
-
-Story B1 — Home Page Card
-
-Task B1.1: Add KPI card “Erratic Feedback” alongside other metrics.
-
-Task B1.2: Display count with trend (optional: % change vs previous period).
-
-Task B1.3: Add tooltip with definition.
-
-Story B2 — Navigation to Drill-down
-
-Task B2.1: Make card clickable → redirect to Model Evaluation Performance page.
-
-Task B2.2: Pre-apply filter erratic_feedback = true.
-
-Story B3 — Model Evaluation Page Update
-
-Task B3.1: Add filter toggle for erratic_feedback.
-
-Task B3.2: Ensure UI updates (badge/tag on filters to show “Erratic Feedback applied”).
-
-Task B3.3: Display rows in table with same styling as other metrics.
-
-C. QA / Observability
-
-Test: Card count = number of rows on drill-down (with same filters).
-
-Test: Removing filter shows all rows.
-
-Telemetry: log click-throughs from card → drill-down for usage analytics.
-
-Data Model (assumption)
-
-If not already available, flag in DB:
-
-ALTER TABLE model_evaluation
-ADD COLUMN erratic_feedback BOOLEAN DEFAULT false;
-
-API Contract (examples)
-
-Erratic Feedback Count
-GET /api/v1/metrics/erratic_feedback?start=2025-09-01&end=2025-09-14&filters=...
-→ {count: 48}
-
-Model Evaluation Drill-down
-GET /api/v1/model_evaluation?erratic_feedback=true&filters=...
-→ [ {id: "...", request_id: "...", erratic_feedback: true, ...}, ...]
-
-Deliverables
-
-Home page KPI card (Erratic Feedback).
-
-Backend API for count & drill-down.
-
-Model Evaluation Performance page with erratic feedback filter.
-
-Tests & validation ensuring data consistency.
-
-Documentation update (Admin Portal user guide).
-
-Risks & Mitigations
-
-Mismatch between Home count and drill-down list → enforce same filters & date range for both.
-
-Performance overhead for count query → add DB index on erratic_feedback, computed_at.
-
-User confusion on definition → provide tooltip + docs.
-
-Rollout Plan
-
-Backend API ready.
-
-Frontend KPI card added in staging.
-
-End-to-end test: click card → drill-down matches count.
-
-UAT with business stakeholders.
-
-Production rollout + monitor telemetry.
-
-Do you want me to also merge this new epic with the earlier “Model Reliance” epic into a single Release Epic (Release 3 expansion of Admin Portal), or keep them separate epics under one parent initiative
+Existing Issue Description page serves as reference for layout and design.
