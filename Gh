@@ -1,78 +1,16 @@
+from langchain_openai import ChatOpenAI
 
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="YOUR_API_KEY",
+    base_url="https://your-fpt-proxy.example.com/v1",  # FPT proxy endpoint
+    temperature=0
+)
 
-ChatGPT
-You said:
-Need to create an epic for admin portal for cause action and action mitigation to show their evaluation results 
-Would be needing this epic which was introduced for making the admin portal to be scalable acceptance would be for all these three prompts within RMC to have their dedicated evaluation page under RMC along with existing issue description page
-ChatGPT said:
-Here’s a well-structured draft for your epic based on what you described:
+messages = [
+    ("system", "You are a helpful assistant."),
+    ("human", "How do I use LangChain with GPT-4o proxy?")
+]
 
-Epic: Enhance Admin Portal with Cause Action and Action Mitigation Evaluation Results
-Epic Description
-As part of making the Admin Portal scalable, we need to expand its functionality by introducing dedicated evaluation pages for Cause Action and Action Mitigation. Currently, the portal supports displaying issue description evaluations under RMC (Root Monitoring Console). To achieve full visibility and consistency, Cause Action and Action Mitigation evaluation results must also be accessible within RMC, each with its own dedicated evaluation page.
-
-This will ensure admins can seamlessly monitor evaluation outcomes across all three prompts (Issue Description, Cause Action, and Action Mitigation), enhancing transparency, usability, and scalability of the system.
-
-Business Value
-Improves visibility into model evaluation results across multiple dimensions.
-
-Supports scalability by modularizing evaluations into separate pages.
-
-Enables faster troubleshooting and governance by having dedicated views for each evaluation type.
-
-Increases trust and adoption of the Admin Portal by offering a comprehensive evaluation framework.
-
-Scope
-Introduce dedicated evaluation result pages for:
-
-Issue Description (existing)
-
-Cause Action (new)
-
-Action Mitigation (new)
-
-Each page should display evaluation results aligned with current framework used in RMC.
-
-Ensure consistency of UI/UX across all three pages.
-
-Integrate navigation within RMC to switch between evaluation types seamlessly.
-
-Acceptance Criteria
-Dedicated Pages
-
-Admin portal should display three separate evaluation result pages within RMC:
-
-Issue Description (existing)
-
-Cause Action (new)
-
-Action Mitigation (new)
-
-Evaluation Results Display
-
-Each page should show evaluation results (accuracy, completeness, hallucination, etc.) relevant to its prompt type.
-
-Data should be pulled from the evaluation framework already in place.
-
-Scalable Navigation
-
-A navigation panel or tab system should allow switching between these evaluation pages easily.
-
-UI should follow existing Admin Portal design patterns.
-
-Consistency
-
-Layout, filtering, and metrics display should be consistent across all three pages.
-
-Error handling and empty state messages should match existing patterns.
-
-Performance & Scalability
-
-System should support increased load as more evaluations are added in future without degrading performance.
-
-Dependencies
-Evaluation framework must already support Cause Action and Action Mitigation.
-
-Data ingestion pipeline must feed results into the Admin Portal backend.
-
-Existing Issue Description page serves as reference for layout and design.
+output = llm.invoke(messages)
+print(output)
