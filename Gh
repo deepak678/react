@@ -1,16 +1,2 @@
-from langchain_openai import ChatOpenAI
-
-llm = ChatOpenAI(
-    model="gpt-4o",
-    api_key="YOUR_API_KEY",
-    base_url="https://your-fpt-proxy.example.com/v1",  # FPT proxy endpoint
-    temperature=0
-)
-
-messages = [
-    ("system", "You are a helpful assistant."),
-    ("human", "How do I use LangChain with GPT-4o proxy?")
-]
-
-output = llm.invoke(messages)
-print(output)
+Fluency has been considered and marked as “Not Applicable” for this LLM use case.
+The model’s primary function is to restructure and populate predefined analytical fields (e.g., issue, severity, rationale) rather than to generate free-form text. Therefore, metrics focused on linguistic quality, such as fluency or grammatical coherence, are not meaningful indicators of model performance. Instead, accuracy, completeness, and hallucination metrics are better suited to assess the model’s output quality within its structured generation scope
