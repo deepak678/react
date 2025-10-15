@@ -1,2 +1,34 @@
-Fluency has been considered and marked as “Not Applicable” for this LLM use case.
-The model’s primary function is to restructure and populate predefined analytical fields (e.g., issue, severity, rationale) rather than to generate free-form text. Therefore, metrics focused on linguistic quality, such as fluency or grammatical coherence, are not meaningful indicators of model performance. Instead, accuracy, completeness, and hallucination metrics are better suited to assess the model’s output quality within its structured generation scope
+Team,
+
+After reviewing the implementation flow for model evaluation and considering our current setup with a human-in-the-loop, I recommend that we initially stick to a reactive evaluation approach rather than enforcing a fully proactive gating mechanism.
+
+Here’s the rationale:
+
+Human oversight already provides quality control.
+Since outputs are being reviewed and validated downstream, we already have a built-in safeguard to catch low-quality or hallucinated responses. Running all evaluations before returning a response would duplicate effort and increase latency without proportionate benefit at this stage.
+
+Reactive evaluation enables faster iteration.
+By evaluating responses asynchronously, we can continuously log accuracy, completeness, hallucination, and other metrics — then use these insights to refine prompts, thresholds, and model configurations. This gives us the flexibility to tune thresholds over time rather than hard-blocking responses prematurely.
+
+Proactive approach should be selective, not exhaustive.
+If we do move toward proactive gating in later phases, the best approach would be to apply thresholds only on a few critical metrics — for example:
+
+Hallucination (to avoid factual inaccuracies)
+
+Accuracy or policy adherence (to prevent wrong or non-compliant outputs)
+
+These can act as lightweight guardrails to maintain response quality without blocking or delaying the user unnecessarily.
+More complex evaluations like completeness, fluency, or semantic relevance can continue running reactively in the background for monitoring and model improvement.
+
+Balance between speed and governance.
+Starting with reactive evaluation ensures a balance between performance and oversight. As we stabilize our evaluation framework and fine-tune metric thresholds, we can progressively move certain checks upstream to proactive mode once we’re confident in their stability and correlation with human judgment.
+
+Proposed next steps:
+
+Continue with reactive evaluation for all metrics to collect sufficient baseline data.
+
+Gradually identify critical metrics that show strong alignment with human review outcomes.
+
+Later, transition only those metrics to a proactive threshold-based check if latency and accuracy trade-offs justify it.
+
+This approach gives us the right balance between speed, reliability, and flexibility, while keeping the human-in-loop as our primary quality gate for now
