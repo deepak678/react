@@ -1,34 +1,32 @@
-Team,
 
-After reviewing the implementation flow for model evaluation and considering our current setup with a human-in-the-loop, I recommend that we initially stick to a reactive evaluation approach rather than enforcing a fully proactive gating mechanism.
 
-Here’s the rationale:
+ChatGPT
+You said:
+Need to record around 2 min video highlighting importance of model monitoring for Model risk management from the perspective of gen ai/ai models need to record it for ai for everyone frogram in risk and compliance for hsbc highlighting what it is a simple understandable example why it is needed and at end encourage everyone to come together and walk in this ai journey together 
+ChatGPT said:
+Here’s a 2-minute script you can use for your video — clear, professional, and engaging, tailored for the HSBC “AI for Everyone” program under Risk and Compliance, focusing on Model Monitoring for Model Risk Management.
 
-Human oversight already provides quality control.
-Since outputs are being reviewed and validated downstream, we already have a built-in safeguard to catch low-quality or hallucinated responses. Running all evaluations before returning a response would duplicate effort and increase latency without proportionate benefit at this stage.
+🎥 Script: Model Monitoring for Model Risk Management (2 minutes)
 
-Reactive evaluation enables faster iteration.
-By evaluating responses asynchronously, we can continuously log accuracy, completeness, hallucination, and other metrics — then use these insights to refine prompts, thresholds, and model configurations. This gives us the flexibility to tune thresholds over time rather than hard-blocking responses prematurely.
+👋 [Warm tone]
+Hello everyone,
+I’m [Your Name], and today I’d like to talk about something that’s becoming increasingly important as we embrace Artificial Intelligence across HSBC — Model Monitoring for Model Risk Management, especially in the era of Generative AI.
 
-Proactive approach should be selective, not exhaustive.
-If we do move toward proactive gating in later phases, the best approach would be to apply thresholds only on a few critical metrics — for example:
+🧠 What it is:
+In simple terms, model monitoring means continuously keeping an eye on how our AI and machine learning models behave once they are deployed. Just like we monitor a car’s performance to ensure it runs smoothly, model monitoring helps us ensure our AI systems remain accurate, fair, and reliable over time.
 
-Hallucination (to avoid factual inaccuracies)
+⚙️ Why it matters:
+AI models — especially generative models — learn from large and dynamic data. Over time, data patterns change, customer behaviors evolve, or business rules are updated. If we don’t monitor our models, they can start producing inaccurate, biased, or even risky outputs — something that can directly affect decisions, customer trust, and regulatory compliance.
 
-Accuracy or policy adherence (to prevent wrong or non-compliant outputs)
+💡 Simple example:
+Imagine we have a generative AI model summarizing customer feedback to identify potential service issues. Initially, it performs very well. But six months later, customers start using new terms or slang that the model wasn’t trained on. Without monitoring, the model might start missing important signals — giving a false sense that everything’s fine.
+Model monitoring would catch this drift early, helping us retrain or fine-tune before it impacts business or compliance outcomes.
 
-These can act as lightweight guardrails to maintain response quality without blocking or delaying the user unnecessarily.
-More complex evaluations like completeness, fluency, or semantic relevance can continue running reactively in the background for monitoring and model improvement.
+🤝 The bigger picture:
+Model monitoring isn’t just a technical task — it’s a shared responsibility across risk, compliance, and technology teams. It helps ensure that AI is transparent, explainable, and trustworthy — aligning perfectly with HSBC’s risk management culture and our regulatory commitments.
 
-Balance between speed and governance.
-Starting with reactive evaluation ensures a balance between performance and oversight. As we stabilize our evaluation framework and fine-tune metric thresholds, we can progressively move certain checks upstream to proactive mode once we’re confident in their stability and correlation with human judgment.
+🚀 Closing (inspirational tone):
+As we move forward in this exciting AI journey, let’s come together — risk professionals, technologists, and business teams — to make sure our AI systems remain safe, reliable, and aligned with our values.
+Because responsible AI isn’t just about innovation — it’s about trust.
 
-Proposed next steps:
-
-Continue with reactive evaluation for all metrics to collect sufficient baseline data.
-
-Gradually identify critical metrics that show strong alignment with human review outcomes.
-
-Later, transition only those metrics to a proactive threshold-based check if latency and accuracy trade-offs justify it.
-
-This approach gives us the right balance between speed, reliability, and flexibility, while keeping the human-in-loop as our primary quality gate for now
+Thank you.
