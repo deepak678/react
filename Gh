@@ -1,3 +1,55 @@
-I have been a key contributor to multiple high-impact initiatives, particularly in building and enabling model monitoring capabilities across critical programs. I independently designed and implemented the Model Monitoring Framework for RMC — a mandatory requirement to secure MRM approval — which was essential for the model to progress to production. I also played a vital role in establishing and running the monitoring processes for ADA, and I am currently driving the same effort for Luma, ensuring these programs meet all governance standards for pilot and production rollout.
+Summarize the key objectives of the EU AI Act in simple language,
+so a business leader without legal background can understand it.
 
-Throughout these engagements, I have collaborated closely with cross-functional stakeholders and multiple engineering, governance, and business teams to achieve our shared objectives. My contributions have directly supported the successful deployment and operationalization of key models while enhancing risk compliance and long-term sustainability of our solutions.
+
+Extract the main rights granted to EU citizens under the EU AI Act.
+Present the answer as bullet points grouped by category.
+
+
+Explain why the EU considers certain AI systems as "high-risk".
+Provide 3 real-world examples for each risk category.
+
+
+How is the EU AI Act different from the GDPR in terms of enforcement and scope?
+Present the output in a table.
+
+
+If a company uses AI for biometric identification in public spaces,
+what parts of the EU AI Act apply?
+
+Classify the following use case based on the EU AI Act risk categories:
+“An AI system predicting employee performance and disciplinary actions.”
+Explain your reasoning with references to the Act.
+
+
+Generate a one-page executive briefing for my management team
+on what urgent actions we must take to comply with the EU AI Act.
+
+
+Example Flow 6 — Traceability + Governance
+
+You:
+
+What documentation is required to prove compliance for high-risk AI?
+
+Follow-up:
+
+Convert these into acceptance criteria for an internal governance process.
+
+Follow-up:
+
+Provide a simple audit template we can use.
+
+Example Flow 2 — Policy Question → Compliance Guidance
+
+You:
+
+What obligations apply to high-risk AI system providers under the EU AI Act?
+
+Follow-up:
+
+Convert those obligations into a checklist format for compliance tracking.
+
+Follow-up:
+
+Which stakeholders typically own each checkpoint in a bank? (e.g., Model Risk, Compliance, IT Security)
