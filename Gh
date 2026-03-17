@@ -6,3 +6,22 @@ WHERE category = :classified_category
 ORDER BY (semantic_score * 0.7 + keyword_score * 0.3) DESC
 LIMIT 5;
 This ensures that if the "keyword" (WCR) is present, that document jumps to the top, even if the "semantic" vibe is slightly off.Improved Workflow SummaryStageCurrentRecommended Better WayClassificationVector query on SummaryKeyword + Vector on Metadata TagsSearch PrepSyntax CheckQuery Expansion (Acronym expansion)RetrievalKnowledge DB (Summary?)Chunk-level Search with Parent RetrievalRankingCosine SimilarityHybrid Ranking (Semantic + Keyword)Why this is better for "Huge" document counts:By using Postgres partitioning on the category column, your search remains lightning-fast regardless of total volume. You only search the "WCR" partition when the category tool identifies it, keeping the index small and the results precise.Would you like me to provide the specific PostgreSQL schema and query for setting up this Hybrid Search (Vector + Full-Text)?
+
+
+i will tell you the current architecture and please guide how can i do it better the vector db uses postgresql with pgvector plugin and contains collections it has pdf policies for multiple categories like wcr rsr orra storing them in vector store
+
+the flow works like this
+
+user asks a question it calls category tool to classify the question into categories it classifies the category by quering the summary vector db
+
+if yes it calls syntax tool to check syntax of question
+
+Checks the completeness of the question
+
+call knowledge search tool to search for relevant info
+
+search for relevant info by querying the knowledge vector db
+
+call ans tool to generate an answer based on question category search result
+
+generate an ans and returnm
