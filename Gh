@@ -1,27 +1,45 @@
-. Upgrade the "Category Tool" (The Classification Gap)Currently, you query a "summary vector DB" to find the category. If the summary is generic, "WCR" (Working Capital) might look like "RSR" (Risk) to an embedding model.The Fix: Hybrid Metadata Filtering.Instead of just a vector search, use PostgreSQL's Full-Text Search (TSVector) alongside pgvector.Logic: If the query contains "WCR", a keyword match in Postgres should override or heavily weight the vector result.Implementation: Store a keywords column in your collections table. Use a SQL query that combines ST_Distance (vector) with @@ (text search).2. Implement "Small-to-Big" Retrieval (Parent-Child)Since you are using Postgres, you can easily link chunks to parent documents using a simple Foreign Key.The Issue: Matching against a whole PDF summary is "blurry."The Fix: 1.  Break the PDF into 300-token chunks (the "Children").2.  Index each chunk in pgvector.3.  When a user asks about "WCR," the system finds the specific paragraph mentioning it.4.  The Pivot: Your query returns the parent_id. You then fetch the Summary + Relevant Chunks of that parent document to feed the Answer Tool.3. Replace the "Syntax Tool" with "Query Expansion"Checking syntax is defensive, but it doesn't help the search.The Fix: Turn the "Syntax Tool" into a "Query Optimizer."If the user asks "What is the WCR policy?", the tool should rewrite it to: "Working Capital Requirement (WCR) policy guidelines and compliance limits."Searching for this expanded string in pgvector will yield much more stable results than searching for "WCR" alone.4. Move to Hybrid Search in pgvectorSince you are on Postgres, you shouldn't rely on vector_cosine_ops alone. You can combine semantic search with BM25-style ranking directly in one database.Revised SQL Logic for your Knowledge Search Tool:SQLSELECT document_content, 
-       (1 - (embedding <=> :query_embedding)) AS semantic_score,
-       ts_rank_cd(text_search_vector, plainto_tsquery(:raw_query)) AS keyword_score
-FROM knowledge_vector_db
-WHERE category = :classified_category
-ORDER BY (semantic_score * 0.7 + keyword_score * 0.3) DESC
-LIMIT 5;
-This ensures that if the "keyword" (WCR) is present, that document jumps to the top, even if the "semantic" vibe is slightly off.Improved Workflow SummaryStageCurrentRecommended Better WayClassificationVector query on SummaryKeyword + Vector on Metadata TagsSearch PrepSyntax CheckQuery Expansion (Acronym expansion)RetrievalKnowledge DB (Summary?)Chunk-level Search with Parent RetrievalRankingCosine SimilarityHybrid Ranking (Semantic + Keyword)Why this is better for "Huge" document counts:By using Postgres partitioning on the category column, your search remains lightning-fast regardless of total volume. You only search the "WCR" partition when the category tool identifies it, keeping the index small and the results precise.Would you like me to provide the specific PostgreSQL schema and query for setting up this Hybrid Search (Vector + Full-Text)?
+import os
+from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
 
+# 1. SETUP: Replace with the actual path to your JSON file
+CREDENTIALS_PATH = "path/to/your/service-account-file.json"
 
-i will tell you the current architecture and please guide how can i do it better the vector db uses postgresql with pgvector plugin and contains collections it has pdf policies for multiple categories like wcr rsr orra storing them in vector store
+if not os.path.exists(CREDENTIALS_PATH):
+    print(f"❌ Error: File not found at {CREDENTIALS_PATH}")
+else:
+    # Set the environment variable so Google Cloud SDK can find it
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIALS_PATH
+    print("✅ Credentials path set successfully.")
 
-the flow works like this
+# 2. TEST GEMINI LLM
+try:
+    print("\n--- Testing Gemini 2.5 Flash ---")
+    llm = ChatVertexAI(
+        model_name="gemini-2.5-flash",
+        location="europe-west2",
+        temperature=0,
+        max_output_tokens=5000
+    )
+    
+    # Simple test prompt
+    response = llm.invoke("Say 'Credentials working' if you can read this.")
+    print(f"🤖 Model Response: {response.content}")
+    
+except Exception as e:
+    print(f"❌ LLM Test Failed: {e}")
 
-user asks a question it calls category tool to classify the question into categories it classifies the category by quering the summary vector db
-
-if yes it calls syntax tool to check syntax of question
-
-Checks the completeness of the question
-
-call knowledge search tool to search for relevant info
-
-search for relevant info by querying the knowledge vector db
-
-call ans tool to generate an answer based on question category search result
-
-generate an ans and returnm
+# 3. TEST EMBEDDINGS (Critical for your RAG system)
+try:
+    print("\n--- Testing Vertex AI Embeddings ---")
+    # Using the latest multimodal embedding model released March 2026
+    embeddings = VertexAIEmbeddings(
+        model_name="gemini-embedding-2-preview", 
+        location="europe-west2"
+    )
+    
+    test_vector = embeddings.embed_query("Testing my policy repository search.")
+    print(f"📈 Embedding Successful! Vector length: {len(test_vector)}")
+    print(f"First 5 dimensions: {test_vector[:5]}")
+    
+except Exception as e:
+    print(f"❌ Embeddings Test Failed: {e}")
