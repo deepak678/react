@@ -1,45 +1,39 @@
-import os
-from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
+import yaml
+from rapidfuzz import process
 
-# 1. SETUP: Replace with the actual path to your JSON file
-CREDENTIALS_PATH = "path/to/your/service-account-file.json"
+def compose_user_prompt(input_header, chapter_content, yaml_path="prompts.yaml"):
+    with open(yaml_path, 'r') as f:
+        config = yaml.safe_load(f)
 
-if not os.path.exists(CREDENTIALS_PATH):
-    print(f"❌ Error: File not found at {CREDENTIALS_PATH}")
-else:
-    # Set the environment variable so Google Cloud SDK can find it
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIALS_PATH
-    print("✅ Credentials path set successfully.")
+    # 1. Find the best header match
+    header_names = [h['name'] for h in config['headers']]
+    match = process.extractOne(input_header, header_names)
+    
+    # 2. Get rules for that header (default to empty if match is poor)
+    if match and match[1] > 75:
+        matched_header = match[0]
+        header_data = next(h for h in config['headers'] if h['name'] == matched_header)
+        rules_list = header_data.get('rules', [])
+    else:
+        matched_header = input_header
+        rules_list = ["Process the text standardly."]
 
-# 2. TEST GEMINI LLM
-try:
-    print("\n--- Testing Gemini 2.5 Flash ---")
-    llm = ChatVertexAI(
-        model_name="gemini-2.5-flash",
-        location="europe-west2",
-        temperature=0,
-        max_output_tokens=5000
+    # 3. Format the rules as a string
+    # We turn the list into: "- Rule 1\n- Rule 2"
+    rules_string = "\n".join([f"- {r}" for r in rules_list])
+
+    # 4. Inject into the middle of the prompt
+    final_prompt = config['user_prompt_template'].format(
+        header=matched_header,
+        dynamic_rules=rules_string,
+        chapter_text=chapter_content
     )
     
-    # Simple test prompt
-    response = llm.invoke("Say 'Credentials working' if you can read this.")
-    print(f"🤖 Model Response: {response.content}")
-    
-except Exception as e:
-    print(f"❌ LLM Test Failed: {e}")
+    return final_prompt
 
-# 3. TEST EMBEDDINGS (Critical for your RAG system)
-try:
-    print("\n--- Testing Vertex AI Embeddings ---")
-    # Using the latest multimodal embedding model released March 2026
-    embeddings = VertexAIEmbeddings(
-        model_name="gemini-embedding-2-preview", 
-        location="europe-west2"
-    )
-    
-    test_vector = embeddings.embed_query("Testing my policy repository search.")
-    print(f"📈 Embedding Successful! Vector length: {len(test_vector)}")
-    print(f"First 5 dimensions: {test_vector[:5]}")
-    
-except Exception as e:
-    print(f"❌ Embeddings Test Failed: {e}")
+# Example Execution
+final_output = compose_user_prompt(
+    input_header="Data Arch", 
+    chapter_content="The system uses pgvector and LangChain..."
+)
+print(final_output)
