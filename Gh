@@ -95,4 +95,55 @@ Implement the method generate_system_prompt(self, risk_type: str, location: str)
 
 The manager must use yaml.safe_load() to dynamically fetch the file matching the parsed lowercase risk_type (e.g., "Market Risk" resolves to market_risk.yaml) and perform standard string interpolation to inject the location.
 
-Write a basic unit test ensuring that running this engine loader returns a cleanly formatted prompt string without throwing parsing errors.
+Write a basic unit test ensuring that running this engine loader returns a cleanly formatted prompt string without throwing parsing errors.Z
+
+🎫 Story 3: Base Infrastructure Client Abstraction (base.py)
+Epic: Phase 2 - Agent Mechanics
+
+Description:
+
+As a developer, I want to establish the baseline asynchronous infrastructure client configuration so that individual agent scripts can inherit connection channels without duplicating configuration profiles.
+
+Acceptance Criteria:
+
+Create ai_engine/agents/base.py defining an abstract BaseAgent class.
+
+The initializer must verify that the environment variable OPENAI_API_KEY exists. If missing, it must immediately throw an explicit RuntimeError on application boot.
+
+Initialize the centralized connection client using openai.AsyncOpenAI().
+
+Set a default model parameter configuration value (model_name: str = "gpt-4o") as an instance variable.
+
+🎫 Story 4: Narrative Commentary Generator Agent (generator.py)
+Epic: Phase 2 - Agent Mechanics
+
+Description:
+
+As a developer, I want to implement the primary narrative generation step so that we can programmatically generate comprehensive, data-backed metric summaries.
+
+Acceptance Criteria:
+
+Create ai_engine/agents/generator.py containing the CommentaryGeneratorAgent class inheriting from BaseAgent.
+
+Implement a state-driven functional node matching this exact signature:
+
+Python
+async def generate_commentary_step(self, state: dict) -> dict:
+The function must extract system_prompt, metric_details, and user_commentary directly from the incoming state dictionary payload.
+
+Make an asynchronous call to the inherited OpenAI client using temperature=0.2 and max_tokens=4000 (allowing ample ceiling for the target 3,000-word output capacity).
+
+The node must output a simple dictionary containing only the new field it is responsible for modifying: {"ai_draft": "<generated narrative response string>"}.
+
+🎫 Story 5: Automated Compliance Critic Agent (critic.py)
+Epic: Phase 2 - Agent Mechanics
+
+Description:
+
+As a developer, I want to implement the automated validator layer utilizing LLM Structured Outputs so that generated summaries are rigorously audited against market risk standards programmatically.
+
+Acceptance Criteria:
+
+Create ai_engine/agents/critic.py containing the ComplianceCriticAgent class inheriting from BaseAgent.
+
+Define a structural Pydantic parsing schema within this module:
