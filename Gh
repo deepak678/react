@@ -37,3 +37,62 @@ risk_compliance_engine/
 ├── .env.example                    # Template for API keys & deployment endpoints
 ├── pyproject.toml                  # Package dependencies and project metadata
 └── README.md
+
+
+Story 1: Centralized Runtime State Definition (state.py)
+Epic: Phase 1 - Foundations
+
+Description:
+
+As a developer, I want to define the core centralized data schema so that the orchestration layer and all downstream multi-agent nodes have a single, strictly typed source of truth for execution memory.
+
+Acceptance Criteria:
+
+Create a directory at ai_engine/schemas/ containing an empty __init__.py.
+
+Inside that directory, create state.py and define a Pydantic V2 class named WorkflowState inheriting from BaseModel.
+
+The schema must enforce strict data types for the following execution variables:
+
+metric_id: str
+
+risk_type: str
+
+location: str
+
+metric_details: Dict[str, Any]
+
+user_commentary: str
+
+guidelines: List[str]
+
+system_prompt: str (Default: "")
+
+ai_draft: str (Default: "")
+
+validation_passed: bool (Default: False)
+
+validation_errors: List[str] (Default: [])
+
+Provide a quick usage example in the code or comments showing how this model cleanly exports back to a mutable runtime dictionary using .model_dump().
+
+🎫 Story 2: Dynamic YAML Prompt Template Manager (prompts/)
+Epic: Phase 1 - Foundations
+
+Description:
+
+As a developer, I want to create a file-based prompt template loading system using YAML so that we can isolate complex human-language engineering parameters from our core execution code.
+
+Acceptance Criteria:
+
+Create a directory structure at ai_engine/prompts/templates/.
+
+Create an initial configuration file named market_risk.yaml using multi-line literal blocks (|) to store the baseline system instructions. Ensure it contains a token for string injection like {location}.
+
+Implement PromptTemplateManager class inside ai_engine/prompts/manager.py.
+
+Implement the method generate_system_prompt(self, risk_type: str, location: str) -> str.
+
+The manager must use yaml.safe_load() to dynamically fetch the file matching the parsed lowercase risk_type (e.g., "Market Risk" resolves to market_risk.yaml) and perform standard string interpolation to inject the location.
+
+Write a basic unit test ensuring that running this engine loader returns a cleanly formatted prompt string without throwing parsing errors.
