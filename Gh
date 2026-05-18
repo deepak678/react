@@ -1,39 +1,39 @@
-import yaml
-from rapidfuzz import process
-
-def compose_user_prompt(input_header, chapter_content, yaml_path="prompts.yaml"):
-    with open(yaml_path, 'r') as f:
-        config = yaml.safe_load(f)
-
-    # 1. Find the best header match
-    header_names = [h['name'] for h in config['headers']]
-    match = process.extractOne(input_header, header_names)
-    
-    # 2. Get rules for that header (default to empty if match is poor)
-    if match and match[1] > 75:
-        matched_header = match[0]
-        header_data = next(h for h in config['headers'] if h['name'] == matched_header)
-        rules_list = header_data.get('rules', [])
-    else:
-        matched_header = input_header
-        rules_list = ["Process the text standardly."]
-
-    # 3. Format the rules as a string
-    # We turn the list into: "- Rule 1\n- Rule 2"
-    rules_string = "\n".join([f"- {r}" for r in rules_list])
-
-    # 4. Inject into the middle of the prompt
-    final_prompt = config['user_prompt_template'].format(
-        header=matched_header,
-        dynamic_rules=rules_string,
-        chapter_text=chapter_content
-    )
-    
-    return final_prompt
-
-# Example Execution
-final_output = compose_user_prompt(
-    input_header="Data Arch", 
-    chapter_content="The system uses pgvector and LangChain..."
-)
-print(final_output)
+risk_compliance_engine/
+├── app/                            # LAYER 1: Delivery / Web API Layer
+│   ├── api/
+│   │   ├── v1/
+│   │   │   ├── endpoints/
+│   │   │   │   └── commentary.py   # FastAPI route definitions (POST /generate)
+│   │   │   └── router.py           # Aggregates all v1 version endpoints
+│   │   └── dependencies.py         # FastAPI shared deps (Auth, Clients, Rate-limiting)
+│   ├── core/
+│   │   ├── config.py               # Pydantic-settings to manage env vars (.env)
+│   │   └── exceptions.py           # Maps business/AI errors to HTTP status codes
+│   ├── schemas/
+│   │   └── commentary.py           # Pydantic request/response validation schemas
+│   ├── services/
+│   │   └── commentary_service.py   # Bridge: Maps API payloads to AI Orchestrators
+│   └── main.py                     # App entrypoint, CORS setup, Middleware
+│
+├── ai_engine/                      # LAYER 2: Reusable & Abstract Agent Framework
+│   ├── agents/
+│   │   ├── base.py                 # Abstract Base Agent (Handles LLM call abstractions)
+│   │   ├── generator.py            # Commentary Agent implementation
+│   │   └── critic.py               # Validation / Guardrail Agent implementation
+│   ├── prompts/
+│   │   ├── templates/              # Dynamic JSON/YAML files for different risk/locations
+│   │   │   ├── market_risk_uk.json
+│   │   │   └── model_risk_us.json
+│   │   └── manager.py              # Logic to dynamically read and inject templates
+│   └── orchestrators/
+│       ├── base.py                 # Abstract Workflow Interface
+│       └── linear_async.py         # Your current async linear workflow implementation
+│                                   # (Can add langgraph_flow.py here later)
+│
+├── tests/                          # Automated Testing Suite
+│   ├── unit/                       # Test individual components (e.g., prompt parsing)
+│   └── integration/                # Test end-to-end API flows with mocked LLM outputs
+│
+├── .env.example                    # Template for API keys & deployment endpoints
+├── pyproject.toml                  # Package dependencies and project metadata
+└── README.md
