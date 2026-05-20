@@ -1,149 +1,30 @@
-risk_compliance_engine/
-├── app/                            # LAYER 1: Delivery / Web API Layer
-│   ├── api/
-│   │   ├── v1/
-│   │   │   ├── endpoints/
-│   │   │   │   └── commentary.py   # FastAPI route definitions (POST /generate)
-│   │   │   └── router.py           # Aggregates all v1 version endpoints
-│   │   └── dependencies.py         # FastAPI shared deps (Auth, Clients, Rate-limiting)
-│   ├── core/
-│   │   ├── config.py               # Pydantic-settings to manage env vars (.env)
-│   │   └── exceptions.py           # Maps business/AI errors to HTTP status codes
-│   ├── schemas/
-│   │   └── commentary.py           # Pydantic request/response validation schemas
-│   ├── services/
-│   │   └── commentary_service.py   # Bridge: Maps API payloads to AI Orchestrators
-│   └── main.py                     # App entrypoint, CORS setup, Middleware
-│
-├── ai_engine/                      # LAYER 2: Reusable & Abstract Agent Framework
-│   ├── agents/
-│   │   ├── base.py                 # Abstract Base Agent (Handles LLM call abstractions)
-│   │   ├── generator.py            # Commentary Agent implementation
-│   │   └── critic.py               # Validation / Guardrail Agent implementation
-│   ├── prompts/
-│   │   ├── templates/              # Dynamic JSON/YAML files for different risk/locations
-│   │   │   ├── market_risk_uk.json
-│   │   │   └── model_risk_us.json
-│   │   └── manager.py              # Logic to dynamically read and inject templates
-│   └── orchestrators/
-│       ├── base.py                 # Abstract Workflow Interface
-│       └── linear_async.py         # Your current async linear workflow implementation
-│                                   # (Can add langgraph_flow.py here later)
-│
-├── tests/                          # Automated Testing Suite
-│   ├── unit/                       # Test individual components (e.g., prompt parsing)
-│   └── integration/                # Test end-to-end API flows with mocked LLM outputs
-│
-├── .env.example                    # Template for API keys & deployment endpoints
-├── pyproject.toml                  # Package dependencies and project metadata
-└── README.md
+import yaml
+from pathlib import Path
 
+class PromptTemplateManager:
+    def __init__(self, templates_dir: str = "ai_engine/prompts/templates"):
+        # Resolve path dynamically relative to file location if needed
+        self.templates_dir = Path(templates_dir)
 
-Story 1: Centralized Runtime State Definition (state.py)
-Epic: Phase 1 - Foundations
+    def generate_system_prompt(self, risk_type: str, location: str) -> str:
+        """
+        Dynamically maps a risk type string to its corresponding YAML file 
+        and executes token interpolation for local compliance routing.
+        """
+        # Normalize: "Market Risk" -> "market_risk.yaml"
+        file_name = f"{risk_type.lower().replace(' ', '_')}.yaml"
+        file_path = self.templates_dir / file_name
 
-Description:
+        if not file_path.exists():
+            raise FileNotFoundError(
+                f"Configuration mapping failure: No prompt template YAML found "
+                f"at {file_path} for Risk Type: '{risk_type}'."
+            )
 
-As a developer, I want to define the core centralized data schema so that the orchestration layer and all downstream multi-agent nodes have a single, strictly typed source of truth for execution memory.
+        with open(file_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
 
-Acceptance Criteria:
-
-Create a directory at ai_engine/schemas/ containing an empty __init__.py.
-
-Inside that directory, create state.py and define a Pydantic V2 class named WorkflowState inheriting from BaseModel.
-
-The schema must enforce strict data types for the following execution variables:
-
-metric_id: str
-
-risk_type: str
-
-location: str
-
-metric_details: Dict[str, Any]
-
-user_commentary: str
-
-guidelines: List[str]
-
-system_prompt: str (Default: "")
-
-ai_draft: str (Default: "")
-
-validation_passed: bool (Default: False)
-
-validation_errors: List[str] (Default: [])
-
-Provide a quick usage example in the code or comments showing how this model cleanly exports back to a mutable runtime dictionary using .model_dump().
-
-🎫 Story 2: Dynamic YAML Prompt Template Manager (prompts/)
-Epic: Phase 1 - Foundations
-
-Description:
-
-As a developer, I want to create a file-based prompt template loading system using YAML so that we can isolate complex human-language engineering parameters from our core execution code.
-
-Acceptance Criteria:
-
-Create a directory structure at ai_engine/prompts/templates/.
-
-Create an initial configuration file named market_risk.yaml using multi-line literal blocks (|) to store the baseline system instructions. Ensure it contains a token for string injection like {location}.
-
-Implement PromptTemplateManager class inside ai_engine/prompts/manager.py.
-
-Implement the method generate_system_prompt(self, risk_type: str, location: str) -> str.
-
-The manager must use yaml.safe_load() to dynamically fetch the file matching the parsed lowercase risk_type (e.g., "Market Risk" resolves to market_risk.yaml) and perform standard string interpolation to inject the location.
-
-Write a basic unit test ensuring that running this engine loader returns a cleanly formatted prompt string without throwing parsing errors.Z
-
-🎫 Story 3: Base Infrastructure Client Abstraction (base.py)
-Epic: Phase 2 - Agent Mechanics
-
-Description:
-
-As a developer, I want to establish the baseline asynchronous infrastructure client configuration so that individual agent scripts can inherit connection channels without duplicating configuration profiles.
-
-Acceptance Criteria:
-
-Create ai_engine/agents/base.py defining an abstract BaseAgent class.
-
-The initializer must verify that the environment variable OPENAI_API_KEY exists. If missing, it must immediately throw an explicit RuntimeError on application boot.
-
-Initialize the centralized connection client using openai.AsyncOpenAI().
-
-Set a default model parameter configuration value (model_name: str = "gpt-4o") as an instance variable.
-
-🎫 Story 4: Narrative Commentary Generator Agent (generator.py)
-Epic: Phase 2 - Agent Mechanics
-
-Description:
-
-As a developer, I want to implement the primary narrative generation step so that we can programmatically generate comprehensive, data-backed metric summaries.
-
-Acceptance Criteria:
-
-Create ai_engine/agents/generator.py containing the CommentaryGeneratorAgent class inheriting from BaseAgent.
-
-Implement a state-driven functional node matching this exact signature:
-
-Python
-async def generate_commentary_step(self, state: dict) -> dict:
-The function must extract system_prompt, metric_details, and user_commentary directly from the incoming state dictionary payload.
-
-Make an asynchronous call to the inherited OpenAI client using temperature=0.2 and max_tokens=4000 (allowing ample ceiling for the target 3,000-word output capacity).
-
-The node must output a simple dictionary containing only the new field it is responsible for modifying: {"ai_draft": "<generated narrative response string>"}.
-
-🎫 Story 5: Automated Compliance Critic Agent (critic.py)
-Epic: Phase 2 - Agent Mechanics
-
-Description:
-
-As a developer, I want to implement the automated validator layer utilizing LLM Structured Outputs so that generated summaries are rigorously audited against market risk standards programmatically.
-
-Acceptance Criteria:
-
-Create ai_engine/agents/critic.py containing the ComplianceCriticAgent class inheriting from BaseAgent.
-
-Define a structural Pydantic parsing schema within this module:
+        base_persona = config.get("system_persona", "")
+        
+        # Inject dynamic runtime variables safely
+        return base_persona.format(location=location)
