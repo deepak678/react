@@ -1,3 +1,5 @@
+ai_engine/config/agents.yaml
+
 # Global defaults to prevent duplication
 defaults:
   provider: "openai"
