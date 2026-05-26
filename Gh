@@ -1,147 +1,26 @@
-import yaml
-from pathlib import Path
+# Global defaults to prevent duplication
+defaults:
+  provider: "openai"
+  model_name: "gpt-4o"
+  temperature: 0.2
+  max_tokens: 1500
 
-class PromptTemplateManager:
-    def __init__(self, templates_dir: str = "ai_engine/prompts/templates"):
-        # Resolve path dynamically relative to file location if needed
-        self.templates_dir = Path(templates_dir)
+# Agent-specific overrides based on their specialized tasks
+agents:
+  commentary_generator:
+    provider: "openai"
+    model_name: "gpt-4o"
+    temperature: 0.3         # Slightly higher for narrative fluidity
+    max_tokens: 4000         # High ceiling to support up to 3k words
 
-    def generate_system_prompt(self, risk_type: str, location: str) -> str:
-        """
-        Dynamically maps a risk type string to its corresponding YAML file 
-        and executes token interpolation for local compliance routing.
-        """
-        # Normalize: "Market Risk" -> "market_risk.yaml"
-        file_name = f"{risk_type.lower().replace(' ', '_')}.yaml"
-        file_path = self.templates_dir / file_name
+  compliance_critic:
+    provider: "anthropic"    # Can effortlessly mix and match providers
+    model_name: "claude-3-5-sonnet"
+    temperature: 0.0         # Hard zero for strict deterministic auditing
+    max_tokens: 2000
 
-        if not file_path.exists():
-            raise FileNotFoundError(
-                f"Configuration mapping failure: No prompt template YAML found "
-                f"at {file_path} for Risk Type: '{risk_type}'."
-            )
-
-        with open(file_path, "r", encoding="utf-8") as f:
-            config = yaml.safe_load(f)
-
-        base_persona = config.get("system_persona", "")
-        
-        # Inject dynamic runtime variables safely
-        return base_persona.format(location=location)
-
-
-We will use the Dynamic Schema Approach by defining our expected JSON schema as a Pydantic class, then passing it dynamically into our unified execution engine. When we want a raw string response, we simply pass None to the schema parameter.
-
-1. Define the Dynamic Pydantic Schema
-First, we create the strict structural model for the JSON variation using Pydantic.
-
-Python
-from pydantic import BaseModel, Field
-from typing import List
-
-class ComplexCommentarySchema(BaseModel):
-    suggested_draft: str = Field(..., description="The main AI-generated risk commentary narrative block.")
-    changes_made: List[str] = Field(..., description="Bullet points detailing what modifications were made from the raw input.")
-    missing_information: List[str] = Field(..., description="Items identified as missing or required by the guidelines.")
-    validation: str = Field(..., description="A summary statement regarding the compliance health of the draft.")
-2. The Universal Executer Service
-Next, we write a core execution method that dynamically toggles its logic based on whether a response_schema is supplied.
-
-Python
-import os
-from typing import Optional, Type, Any
-from openai import AsyncOpenAI
-from pydantic import BaseModel
-
-class DynamicAIEngine:
-    def __init__(self, model_name: str = "gpt-4o"):
-        self.model_name = model_name
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        if not self.api_key:
-            raise RuntimeError("Missing OPENAI_API_KEY environment variable.")
-        self.client = AsyncOpenAI(api_key=self.api_key)
-
-    async def execute_task(
-        self, 
-        system_prompt: str, 
-        user_context: str, 
-        response_schema: Optional[Type[BaseModel]] = None
-    ) -> Any:
-        """
-        Executes a call to OpenAI. 
-        If response_schema is provided, it forces a structured JSON object response.
-        If response_schema is None, it returns a plain text string.
-        """
-        
-        # Scenario A: Dynamic JSON Structure Requested
-        if response_schema:
-            response = await self.client.beta.chat.completions.parse(
-                model=self.model_name,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_context}
-                ],
-                temperature=0.2,
-                response_format=response_schema  # <-- Dynamic payload typing
-            )
-            # Returns the native, validated Pydantic model object
-            return response.choices[0].message.parsed
-
-        # Scenario B: Raw String Narrative Requested
-        response = await self.client.chat.completions.create(
-            model=self.model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_context}
-            ],
-            temperature=0.7 # Higher temperature for creative/fluid textual summaries
-        )
-        # Returns raw string text
-        return response.choices[0].message.content
-3. Execution Script (Running Both Variations)
-Here is how your orchestrator execution layer calls the same method using both formatting types back-to-back:
-
-Python
-import asyncio
-
-async def main():
-    engine = DynamicAIEngine()
-    
-    # Shared Test Mock Inputs
-    system_instruction = "You are a Risk compliance assistant. Analyze the metrics against rules."
-    data_payload = "Metric ID: MX-901. Status: Breached by 14%. Initial Note: Volatility peak over weekend."
-
-    print("=== EXECUTING EXAMPLE 1: DYNAMIC STRUCTURED JSON ===")
-    # We pass our ComplexCommentarySchema class directly into the method parameter
-    json_result = await engine.execute_task(
-        system_prompt=system_instruction,
-        user_context=data_payload,
-        response_schema=ComplexCommentarySchema
-    )
-    
-    # The output is a cleanly compiled Pydantic instance object
-    print(f"Returned Data Type: {type(json_result)}")
-    print(f"Suggested Draft: {json_result.suggested_draft}\n")
-    print(f"Changes Made: {json_result.changes_made}\n")
-    print(f"Missing Info: {json_result.missing_information}\n")
-    print(f"Validation Note: {json_result.validation}\n")
-    
-    print("-" * 50)
-
-    print("=== EXECUTING EXAMPLE 2: RAW TEXT STRING ===")
-    # We explicitly pass None as the response_schema
-    string_result = await engine.execute_task(
-        system_prompt=system_instruction,
-        user_context=data_payload,
-        response_schema=None
-    )
-    
-    # The output is a standard, flat text block
-    print(f"Returned Data Type: {type(string_result)}")
-    print(f"Raw Narrative Output:\n{string_result}")
-
-if __name__ == "__main__":
-    # Ensure your OPENAI_API_KEY environment variable is set before executing
-    asyncio.run(main())
-Why this fits your abstract blueprint
-Notice that DynamicAIEngine does not have any code specifics tied to "Market Risk" or "Traded Risk." It is a completely abstract utility tool. Tomorrow, if another team builds an operational risk module that requires an entirely different JSON schema with keys like impact_score and remediation_date, they can pass that new Pydantic class right into this exact same method without modifying a single line of your infrastructure code.
+  json_fixer:
+    provider: "openai"
+    model_name: "gpt-4o-mini" # Cheaper, faster model for simple syntax corrections
+    temperature: 0.0
+    max_tokens: 1000
