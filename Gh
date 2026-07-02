@@ -1,79 +1,51 @@
-Let me build this out — first I'll explain the architecture, then render the full flowchart.
-Here's how everything fits together in Compass:
-Two request sources: The Compass UI and external apps are the two entry points. The UI path is richer — it runs through a RAG (Retrieval-Augmented Generation) pipeline that pulls in metric definitions, news articles, and writing guidelines to enrich the prompt before sending it to the LLM. External apps, by contrast, pass a prompt_id to identify which prompt template to use, and Compass resolves the template and calls the LLM directly — no RAG, just clean API-style execution.
-Prompt management lives as a dedicated layer with its own CRUD endpoints (POST /prompts, GET /prompts/{id}, PUT /prompts/{id}, DELETE /prompts/{id}). Every prompt has a prompt_id, a template body (with variable slots like {{metric_value}}, {{risk_type}}), version history, and metadata. When an external app calls Compass, it sends its prompt_id + runtime variables; Compass fetches the template, injects the variables, and fires the LLM call. When the UI calls Compass, the resolved prompt also gets enriched by RAG context before the LLM sees it.
-RAG pipeline (UI-only): the user's metric context triggers three retrieval paths — a vector DB lookup for metric definitions, a news/context search, and a guidelines store — all three chunks get merged and appended to the system prompt as context before generation.
-Multi-app, multi-prompt support: Each external app (App A, App B, App C...) can maintain multiple prompt_ids for different commentary styles (brief summary, detailed narrative, risk-adjusted tone, etc.). They just pass the right prompt_id at call time.
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.25s;
-    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
-  }
-VvisualizeVvisualize show_widgetHere's a breakdown of each layer in the flow:
-Request entry (top)
 
-The two sources are clearly separated. The Compass UI sends metric context (which BAM/KRI, which risk type, time period). External apps send a prompt_id alongside runtime variables — they can each maintain multiple prompt IDs for different commentary styles (e.g. executive_summary, detailed_narrative, red_flag_alert).
-Gateway & routing
 
-The API gateway receives all requests and routes based on source. This is also where auth, rate limiting, and logging live.
-UI path → RAG pipeline
+## Helios AI Non-Financial Risk Intelligence System
 
-Three retrieval legs run (ideally in parallel): metric definitions from a vector DB, relevant news/market context, and writing guidelines. All three chunks are merged and appended as context to the prompt before it reaches the LLM. This is what makes UI-generated commentary richer and more grounded.
-App path → prompt resolution
+**Overview:** This is an operational risk intelligence prototype that analyzes risk issues and provides AI-driven insights. It combines a FastAPI backend with a Streamlit dashboard.
 
-The prompt_id is used to look up the stored template from the prompt management store. Runtime variables (metric value, threshold, risk type, date range, etc.) are injected into the template slots. No RAG — apps get speed and determinism instead.
-Prompt management (right panel)
+### Core Functionality
 
-This is a standalone capability Compass exposes via its own endpoints. Teams can create new prompt templates, edit them with version history, view what's active, and delete old ones. When an app registers a new commentary use case, they create a prompt template here and get back a prompt_id to hardcode in their app.
-Prompt builder → LLM
+**1. Data Ingestion & Embeddings**
+- Loads risk issue data from a CSV file (sample issues included)
+- Generates semantic embeddings for issue descriptions using Azure OpenAI's `text-embedding-ada-002` model
+- Stores embeddings in a local DuckDB vector database for fast similarity search
 
-Both paths converge here. The final prompt is assembled and sent to the LLM. The only difference is that UI prompts carry RAG context in the system message.
-Post-processing & delivery
+**2. Thematic Clustering**
+- Groups similar issues into 4 risk themes using KMeans clustering on embeddings
+- Helps identify patterns and categorize related risks
 
-Output is validated (format checks, length guardrails, sensitive content flags). UI callers get the commentary rendered inline with edit/save/audit capabilities. App callers get a JSON response with the commentary text, the prompt_id used, and generation metadata for traceability.
-Click any node in the diagram to dive deeper into a specific part!You said: should compass ui not send prompt id?should compass ui not send prompt id?17:18Claude responded: Great point — yes, the Compass UI should also send a prompt ID.Great point — yes, the Compass UI should also send a prompt ID. The UI isn't free-form; it still needs to know which prompt template to use as the base (e.g. "standard BAM commentary", "KRI risk narrative", "executive summary style"). The difference between UI and App paths isn't about whether a prompt ID is used — it's about what happens after the template is resolved.
-Here's the corrected mental model:
-Both sources send a prompt ID. The UI selects it (e.g. from a dropdown in the interface — "Commentary style: Detailed Narrative"), and apps pass it programmatically.
-The UI path additionally triggers RAG. After resolving the template via prompt ID, the UI enriches it with metric definitions, news context, and writing guidelines before sending to the LLM. Apps skip this step for speed and determinism.
-So the real distinguishing factor is:
-Compass UIExternal AppsSends prompt ID✅✅User selects it✅ (UI dropdown/picker)❌ (hardcoded in app)RAG enrichment✅❌Runtime variable injection✅✅
-Let me update the flowchart to reflect this:
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.25s;
-    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
-  }
-VvisualizeVvisualize show_widgetThe key change: both sources now send prompt_id + vars from the top. The decision diamond now only governs whether RAG enrichment runs — not whether a prompt ID is involved. The prompt template resolution step has been pulled up into a shared layer that runs for everyone before the split happens, which is architecturally cleaner too.You said: from where model configurations are going to be fetched like which model and configurations and add that too in the flow how prompt management will be done by …from where model configurations are going to be fetched like which model and configurations and add that too in the flow how prompt management will be done by different apps ui will not have prompt management17:51Claude responded: Great clarifications!Great clarifications! Here's the updated mental model before we re-draw:
-Model configuration — a dedicated model config store sits alongside the prompt store. When the prompt template is resolved, the model config is fetched alongside it (either bound to the prompt itself, or to the app/risk-type). This tells Compass which LLM to use, temperature, max tokens, top-p, etc. This way different prompts or apps can use different models/settings without code changes.
-Prompt management — apps only, not UI. The UI is a consumer of prompts, not a manager. Only external apps (or an admin panel backing those apps) interact with the prompt management endpoints. The UI just picks from whatever prompts exist via a read-only list endpoint (GET /prompts to populate the picker dropdown).
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.25s;
-    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
-  }
-VvisualizeVvisualize show_widgetHere's what changed and why each decision makes sense:
-Prompt management is now apps-only. The dashed "App prompt mgmt" panel sits exclusively on the external apps side. The UI only ever calls GET /prompts to populate its picker — it's a read-only consumer. This keeps the UI clean and prevents accidental prompt changes from the UI surface.
-Model config lives in the same store as prompts. When an app registers a prompt template, it also binds a model config to it — which model (GPT-4o, Claude, etc.), temperature, max tokens, top-p. This means different prompts can drive completely different model behaviours without any code changes. The dashed amber line shows the model config being read at LLM call time.
-Resolution is a single shared step. Both UI and app requests hit the same "Resolve prompt template + model config" box — both get the template and the config in one fetch. The split only happens after that, to decide whether RAG runs.
-The LLM box now shows that model config is applied there — the specific model and parameters from the store are what actually drive the API call, not a hardcoded default.You said: how should we manage this I want to maintain history of prompts and model used should i allow the updates to happen or not and in the prod environment should t…how should we manage this I want to maintain history of prompts and model used should i allow the updates to happen or not and in the prod environment should the consumer app create UI to manege all of these operations18:25Claude responded: These are three really important design decisions.These are three really important design decisions. Let me give you my take on each:
+**3. Duplicate Detection**
+- Identifies similar/duplicate issue pairs using cosine similarity between embeddings
+- Returns pairs exceeding a 0.85 similarity threshold
+- Useful for data quality and deduplication
 
-1. Should you allow updates to prompts, or be immutable?
-Don't allow in-place updates. Go immutable with versioning. Every change creates a new version; the old one is preserved forever. Here's why this matters for Compass specifically:
-If a KRI commentary was generated 3 months ago and someone asks "why did we write this?" — you need to be able to reproduce the exact prompt + model config that was used. If you allow overwrites, that audit trail is gone. In risk management, that's a serious problem.
-The pattern to use:
+**4. Issue Hygiene Scoring**
+- Uses OpenAI/Azure OpenAI (GPT-3.5-Turbo) to evaluate issue descriptions for:
+  - **Clarity**: How well-explained is the risk?
+  - **Completeness**: Does it cover all relevant aspects?
+  - **Risk justification**: Is the risk properly justified?
+- Returns scores (1-10) and specific improvement suggestions
 
-Each prompt gets a prompt_id (stable, never changes) and a version number
-Apps reference a prompt by prompt_id + optional version. If they pin v3, they always get v3. If they reference latest, they get the newest
-A status field controls what's live: draft → review → active → deprecated
-Only one version can be active at a time per prompt_id
-Deprecating a version doesn't delete it — it stays queryable forever
+**5. Interactive Dashboard**
+- Streamlit-based UI displaying:
+  - Issue table with cluster assignments
+  - Cluster distribution visualizations
+  - Detected duplicate pairs with similarity scores
+  - Hygiene review feedback and recommendations
 
-2. How should history be stored?
-Every generation event (commentary request) should write an audit log record containing: prompt_id, version, model_id, model_config snapshot, timestamp, input variables, and the output. The model config snapshot is critical — even if the config changes later, you have what was actually used for that specific call frozen in the log.
-3. Should consumer apps build their own UI for management?
-No — that would be a mistake. You'd end up with 5 different apps building 5 inconsistent UIs for the same operations, and no central visibility into what prompts exist across the system. Instead:
-Compass itself should own a central admin UI (separate from the commentary UI that analysts use). Only prompt authors / admins access it. Apps interact exclusively via API. This gives you one place to see all prompts, all versions, all active configs, and the full audit history.
-Here's how the full picture fits together:
+### Architecture
+
+- **Backend**: FastAPI with `/analyze` endpoint that orchestrates the full analysis pipeline
+- **Storage**: Local DuckDB for embeddings and vector search
+- **AI Services**: Azure OpenAI (embeddings & hygiene evaluation) with standard OpenAI as fallback
+- **Frontend**: Streamlit dashboard for visualization and exploration
+
+### Key Dependencies
+
+- FastAPI/Uvicorn (backend)
+- Azure OpenAI & OpenAI SDKs (embeddings & AI analysis)
+- DuckDB (vector database)
+- scikit-learn (clustering & similarity)
+- Streamlit (dashboard UI)
+- Pandas & Plotly (data processing & visualization)
