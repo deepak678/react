@@ -1,51 +1,56 @@
+IRA Ticket: [FE/BE] Omnibox Chat Interface: Contextual Predefined Actions & LLM Intent Routing
+📝 User Story
+As a User looking at a data-dense page,
 
+I want to trigger contextual actions (like generating commentary or summaries) either by clicking a predefined button or by typing my request in natural language,
 
-## Helios AI Non-Financial Risk Intelligence System
+So that I can speed up my workflow using my preferred interaction method without losing conversational continuity.
 
-**Overview:** This is an operational risk intelligence prototype that analyzes risk issues and provides AI-driven insights. It combines a FastAPI backend with a Streamlit dashboard.
+📋 Background / Context
+The application top bar features a unified Chat/Action interface ("Omnibox"). Depending on the active page context, specific "Quick Action" buttons (chips) are rendered (e.g., Generate Commentary for Selected Rows).
+To optimize performance and user experience, clicking a button should trigger the downstream business logic immediately (bypassing LLM interpretation), while typing a conversational equivalent should leverage LLM Function Calling to trigger the exact same downstream logic.
 
-### Core Functionality
+⚙️ Technical Approach & Routing Logic
+Lane A (Direct Action UI Click):
 
-**1. Data Ingestion & Embeddings**
-- Loads risk issue data from a CSV file (sample issues included)
-- Generates semantic embeddings for issue descriptions using Azure OpenAI's `text-embedding-ada-002` model
-- Stores embeddings in a local DuckDB vector database for fast similarity search
+User clicks a contextual button chip.
 
-**2. Thematic Clustering**
-- Groups similar issues into 4 risk themes using KMeans clustering on embeddings
-- Helps identify patterns and categorize related risks
+Frontend bypasses LLM text classification entirely.
 
-**3. Duplicate Detection**
-- Identifies similar/duplicate issue pairs using cosine similarity between embeddings
-- Returns pairs exceeding a 0.85 similarity threshold
-- Useful for data quality and deduplication
+Frontend dispatches a direct API payload to the execution gateway containing the action_id and active page/row state payload.
 
-**4. Issue Hygiene Scoring**
-- Uses OpenAI/Azure OpenAI (GPT-3.5-Turbo) to evaluate issue descriptions for:
-  - **Clarity**: How well-explained is the risk?
-  - **Completeness**: Does it cover all relevant aspects?
-  - **Risk justification**: Is the risk properly justified?
-- Returns scores (1-10) and specific improvement suggestions
+Lane B (Conversational Text Input):
 
-**5. Interactive Dashboard**
-- Streamlit-based UI displaying:
-  - Issue table with cluster assignments
-  - Cluster distribution visualizations
-  - Detected duplicate pairs with similarity scores
-  - Hygiene review feedback and recommendations
+User types natural language text into the chat bar.
 
-### Architecture
+Backend dispatches text to the LLM agent.
 
-- **Backend**: FastAPI with `/analyze` endpoint that orchestrates the full analysis pipeline
-- **Storage**: Local DuckDB for embeddings and vector search
-- **AI Services**: Azure OpenAI (embeddings & hygiene evaluation) with standard OpenAI as fallback
-- **Frontend**: Streamlit dashboard for visualization and exploration
+The LLM agent is provisioned with system tools matching the available page actions (e.g., generate_commentary()).
 
-### Key Dependencies
+If the LLM triggers the function/tool call, the backend routes execution to the identical service used in Lane A.
 
-- FastAPI/Uvicorn (backend)
-- Azure OpenAI & OpenAI SDKs (embeddings & AI analysis)
-- DuckDB (vector database)
-- scikit-learn (clustering & similarity)
-- Streamlit (dashboard UI)
-- Pandas & Plotly (data processing & visualization)
+✅ Acceptance Criteria
+1. UI/UX & Interaction
+[ ] Contextual Chips: Predefined action chips must render dynamically based on the current page context and state (e.g., "Generate Commentary" appears when rows are selected, or shows a validation state if missing).
+
+[ ] Chat History Injection: When a predefined button chip is clicked, a visual message indicator must be injected into the chat timeline (e.g., "System Action: Generating Commentary...") to preserve conversational context.
+
+[ ] Loading States: The input field and action chips must enter a loading/disabled state while an action is processing to prevent double-submitting.
+
+2. Functional & Routing
+[ ] Direct Execution (Bypass Lane): Verification that clicking an action button invokes the target service without calling the LLM orchestrator endpoint, minimizing latency.
+
+[ ] Natural Language Parsing: Typing variations of the action (e.g., "help me write commentary for selected row", "summarize these rows") must successfully resolve to the correct backend function call via the LLM agent.
+
+[ ] State Payload Delivery: Both paths (button click and LLM tool call) must feed the exact same data schema (active page_id, selected_row_ids, and filter states) to the processing engine.
+
+[ ] Graceful Error Handling: If an action is triggered (via button or text) but mandatory state criteria are not met (e.g., no rows selected), the system must handle it gracefully:
+
+Button path: Explicit UI banner warning.
+
+Text path: LLM responds conversationally asking the user to select rows.
+
+🧪 Out of Scope (For This Ticket)
+Enhancing or changing the underlying commentary/summary generation algorithm itself.
+
+Persistent storage of the chat history across browser sessions (handled in a separate state-persistence ticket).
