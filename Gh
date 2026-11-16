@@ -1,56 +1,99 @@
-IRA Ticket: [FE/BE] Omnibox Chat Interface: Contextual Predefined Actions & LLM Intent Routing
-📝 User Story
-As a User looking at a data-dense page,
+Epic: Compass AI Copilot (MCP-based navigation, data and page-aware assistant)
+Summary
 
-I want to trigger contextual actions (like generating commentary or summaries) either by clicking a predefined button or by typing my request in natural language,
+Build an MCP server that lets users of Compass ask questions in natural language and get answers or actions in return: navigating the app, fetching data from Compass APIs for trend and comparison analysis, and explaining or analysing what is currently on screen. Build it as reusable platform components so other projects can adopt it with configuration only.
 
-So that I can speed up my workflow using my preferred interaction method without losing conversational continuity.
+Background / Problem Statement
 
-📋 Background / Context
-The application top bar features a unified Chat/Action interface ("Omnibox"). Depending on the active page context, specific "Quick Action" buttons (chips) are rendered (e.g., Generate Commentary for Selected Rows).
-To optimize performance and user experience, clicking a button should trigger the downstream business logic immediately (bypassing LLM interpretation), while typing a conversational equivalent should leverage LLM Function Calling to trigger the exact same downstream logic.
+Compass users currently have to find the right page, apply filters, read charts and work out insights themselves. [Add pain points: e.g. a steep learning curve, time spent on monthly reviews, repeated support questions.]
 
-⚙️ Technical Approach & Routing Logic
-Lane A (Direct Action UI Click):
+Goals
+Let users reach any Compass page by intent (“take me to the regional sales breakdown”).
+Let users get data-backed answers: past-month trends, month-to-date vs the previous period, period comparisons.
+Let users get explanations and analysis of the content they are currently viewing.
+Deliver the capability as generic, versioned components reusable across projects, with Compass as the first adopter.
+Non-Goals (v1)
+Write operations (create, update or delete) in Compass.
+Autonomous multi-step actions without user confirmation.
+Support for projects other than Compass (the design must allow it, but onboarding is a later phase).
+Compass-Specific Requirements
+Navigation: Expose all in-scope Compass routes with descriptions, parameters and example intents. Navigation is allowlisted and driven by config.
+Data access: Integrate with Compass APIs [list: API names / OpenAPI specs] using the logged-in user’s token, so users only see data they are entitled to.
+Metrics: Define the Compass metric catalog [list key metrics] with definitions, synonyms, granularity and “good direction” (up or down).
+Page awareness: Each key Compass page [list pages] provides structured context (filters, selected entities, table and chart data) to the assistant.
+Analysis: Trend (last N months), period comparison, and current-month status with a projected month-end, all computed in code, with the LLM only narrating.
+Channel: [Embedded Compass chat widget / external MCP client]
+Reusable Components (platform layer)
+Component	Responsibility	Project-specific input
+mcp-core	Server bootstrap, auth passthrough, session handling, logging, caching, module registry	None
+mcp-manifest	Loads and validates the project manifest (routes, APIs, metrics)	Manifest file
+mcp-nav	list_destinations, navigate_to, get_current_location	Route definitions
+mcp-browser-bridge	JS SDK embedded in the site; WebSocket/SSE link to the server; executes navigation and returns page context	Embed and context providers
+mcp-page-context	Context-provider registry plus a DOM/accessibility-tree fallback, with PII redaction	Per-page providers
+mcp-api-connector	Generates tools from OpenAPI specs; handles auth forwarding, retries and rate limits	API specs
+mcp-metrics	Metric catalog and list_metrics, query_metric	Metric definitions
+mcp-analytics	get_trend, compare_periods, current_month_status, with anomaly detection	None (driven by the metric catalog)
+mcp-prompts-resources	Reusable prompts (“explain this page”, “monthly review”), site map and glossary resources	Glossary text
+mcp-security	Prompt-injection guards, allowlists, read-only enforcement, audit log	Policy config
+Child Stories
 
-User clicks a contextual button chip.
+Story 1: Core server and manifest loader
+Set up the MCP server (TypeScript, official MCP SDK), a module registration interface and the manifest schema with startup validation.
+AC: The server starts only with a valid manifest; invalid configs fail with clear errors; the manifest schema is versioned.
 
-Frontend bypasses LLM text classification entirely.
+Story 2: Navigation module
+Implement list_destinations, navigate_to and get_current_location for Compass routes.
+AC: Only manifest-listed routes are navigable; route parameters are validated; unknown intents return suggestions rather than errors.
 
-Frontend dispatches a direct API payload to the execution gateway containing the action_id and active page/row state payload.
+Story 3: Browser bridge SDK
+Build the embeddable script with a secure channel to the server, navigation execution and a heartbeat/reconnect.
+AC: The bridge authenticates per user session; navigation commands execute within 1s; it works in Compass’s supported browsers.
 
-Lane B (Conversational Text Input):
+Story 4: Page context providers
+Create the provider registry and implement providers for [top N Compass pages], with a DOM fallback.
+AC: get_page_context returns the URL, filters and structured table/chart data; PII fields are redacted; page text is tagged as untrusted data.
 
-User types natural language text into the chat bar.
+Story 5: API connector and metric catalog
+Ingest Compass OpenAPI specs, define the metric catalog and implement list_metrics and query_metric.
+AC: Calls use the user’s forwarded token; read-only by default; metric synonyms resolve (“sales” → “revenue”).
 
-Backend dispatches text to the LLM agent.
+Story 6: Analysis module
+Implement get_trend, compare_periods and current_month_status.
+AC: Calculations are deterministic and unit-tested; outputs include the series, absolute and percent change, and flagged anomalies; edge cases (partial months, missing data) are handled.
 
-The LLM agent is provisioned with system tools matching the available page actions (e.g., generate_commentary()).
+Story 7: Prompts and resources
+Add the site map, metric glossary and prompt templates.
+AC: The assistant answers “what does this page show?” using the glossary definitions.
 
-If the LLM triggers the function/tool call, the backend routes execution to the identical service used in Lane A.
+Story 8: Security, observability and guardrails
+Add injection guards, an audit log of tool calls, rate limiting and write-confirmation hooks.
+AC: Page content cannot trigger tool calls on its own; every tool call is logged with user, tool and parameters; PII does not reach logs.
 
-✅ Acceptance Criteria
-1. UI/UX & Interaction
-[ ] Contextual Chips: Predefined action chips must render dynamically based on the current page context and state (e.g., "Generate Commentary" appears when rows are selected, or shows a validation state if missing).
+Story 9: Packaging and documentation
+Split into versioned packages, publish to the internal registry, and write an onboarding guide.
+AC: A sample project can be onboarded using only a manifest and the bridge embed, in under [X] days.
 
-[ ] Chat History Injection: When a predefined button chip is clicked, a visual message indicator must be injected into the chat timeline (e.g., "System Action: Generating Commentary...") to preserve conversational context.
+Story 10: Evaluation and rollout
+Build a test set of real user intents and track accuracy; run a pilot with [user group].
+AC: Intent-to-tool accuracy ≥ [X]%; analysis outputs verified against the source data; pilot feedback captured.
 
-[ ] Loading States: The input field and action chips must enter a loading/disabled state while an action is processing to prevent double-submitting.
-
-2. Functional & Routing
-[ ] Direct Execution (Bypass Lane): Verification that clicking an action button invokes the target service without calling the LLM orchestrator endpoint, minimizing latency.
-
-[ ] Natural Language Parsing: Typing variations of the action (e.g., "help me write commentary for selected row", "summarize these rows") must successfully resolve to the correct backend function call via the LLM agent.
-
-[ ] State Payload Delivery: Both paths (button click and LLM tool call) must feed the exact same data schema (active page_id, selected_row_ids, and filter states) to the processing engine.
-
-[ ] Graceful Error Handling: If an action is triggered (via button or text) but mandatory state criteria are not met (e.g., no rows selected), the system must handle it gracefully:
-
-Button path: Explicit UI banner warning.
-
-Text path: LLM responds conversationally asking the user to select rows.
-
-🧪 Out of Scope (For This Ticket)
-Enhancing or changing the underlying commentary/summary generation algorithm itself.
-
-Persistent storage of the chat history across browser sessions (handled in a separate state-persistence ticket).
+Non-Functional Requirements
+Response latency: [e.g. p95 < 5s for analysis queries]
+Security review and penetration test before release
+Data privacy: no storage of page content beyond the session [confirm with policy]
+Observability: dashboards for tool usage, errors and latency
+Dependencies
+Compass API specs and access for [team]
+Frontend team capacity to embed the bridge and build context providers
+Auth/token forwarding approach confirmed with [security/platform team]
+LLM client/host decision
+Open Questions
+Will users interact through an embedded Compass widget or an external client?
+Which Compass pages and APIs are in scope for v1?
+Which metrics are priority for trend and comparison analysis?
+Where will the shared packages live (internal registry, repo)?
+Suggested Phasing
+Phase 1: Stories 1-3 (navigation end to end)
+Phase 2: Stories 4-5 (page awareness and data)
+Phase 3: Stories 6-8 (analysis, guardrails)
+Phase 4: Stories 9-10 (packaging, pilot, second-project onboarding)
