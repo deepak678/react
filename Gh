@@ -1,119 +1,25 @@
-Epic: Knowledge Studio Integration Kit (reusable RAG integration for [Application name])
-Summary
+SYSTEM_PROMPT = """
+You are a deterministic resource scheduler. Assign each task to an eligible worker 
+while strictly obeying all rules. Output ONLY valid JSON in this exact format:
+{"assignments": {"task_id": "worker_name"}, "unassigned": ["task_id"]}
 
-Integrate [Application name] with the group AI platform’s Knowledge Studio so users can ask questions grounded in our content and get cited answers. Build the integration as a reusable, config-driven kit, so another application can connect to its own Knowledge Studio pipeline by writing configuration rather than new integration code.
+Rules:
+1. A worker can take at most 2 tasks.
+2. Tasks marked [CRITICAL] cannot be assigned to a worker who also has a [LOW] priority task.
+3. No worker can handle two tasks that share the same tag.
+4. Maximize the total number of assigned tasks. If a tie exists, prioritize [CRITICAL] tasks.
+"""
 
-Background / Problem Statement
+USER_PROMPT = """
+Workers:
+- Alice (Skills: python, sql)
+- Bob (Skills: python, cloud)
+- Charlie (Skills: sql, cloud)
 
-Knowledge Studio lets teams build and run RAG pipelines, but each application currently has to write its own glue code for authentication, ingestion, querying, citations and UI. This leads to duplicated effort and inconsistent behaviour. [Add specifics: which content is hard to find today, support load, user pain points.]
-
-Goals
-Give [Application name] users grounded, cited answers from [content sources: docs, policies, tickets, reports, etc.] via Knowledge Studio.
-Keep the integration code generic and separate from use-case configuration (pipeline, data source, prompts).
-Support multiple pipelines per application and multiple applications per pipeline.
-Enforce user-level access control so people only retrieve content they are entitled to.
-Publish the kit as versioned packages for other teams to adopt.
-Non-Goals (v1)
-Building or modifying the Knowledge Studio platform itself.
-Write-back to source systems.
-Onboarding applications other than [Application name] (the design must allow it).
-Application-Specific Requirements
-Use cases in scope: [e.g. policy Q&A, document search, support deflection].
-Data sources and pipelines: [list sources and the Knowledge Studio pipeline for each].
-Experience: [Chat panel / search bar / contextual “ask about this page”].
-Access control: Retrieval respects the logged-in user’s roles and entitlements [define model: document-level, collection-level].
-Answer quality: Every answer includes source citations; the assistant says so when it has no grounded answer.
-Freshness: Source changes are reflected in the index within [X hours].
-Reusable Components (platform layer)
-Component	Responsibility	Use-case-specific input
-ks-client	Typed SDK for Knowledge Studio APIs: auth, retries, timeouts, error mapping, version handling	Environment and credentials
-ks-config	Schema and loader for use-case config: pipeline ID, retrieval settings, prompt templates, filters, access rules	Config file per use case
-ks-ingestion	Connector interface plus a scheduler for pushing or syncing content, with chunk/metadata mapping and deletion handling	Source connectors and metadata mapping
-ks-retrieval	Query API: query rewriting, filters, top-k, reranking options, streaming responses	Pipeline settings
-ks-access-control	Passes user identity and entitlements into retrieval filters; audit hooks	Entitlement mapping
-ks-citations	Normalises sources into a standard citation format (title, link, snippet, page) and grounding checks	Link templates
-ks-ui	Embeddable chat/search components with citations, feedback (thumbs up/down) and loading and error states	Theme and placement
-ks-mcp-tools	Exposes retrieval as MCP tools (search_knowledge, ask_knowledge) so the copilot can use it alongside navigation and data tools	Tool descriptions per use case
-ks-eval	Test-set runner for retrieval and answer quality (relevance, groundedness, latency)	Golden question set
-ks-observability	Structured logs, metrics, tracing, cost and token tracking, PII redaction	Dashboard config
-Child Stories
-
-Story 1: Discovery and integration design
-Document the Knowledge Studio APIs, auth model, rate limits, supported connectors and pipeline lifecycle. Produce a design covering the reusable/specific split.
-AC: Design reviewed by the Knowledge Studio team; the config schema and package boundaries agreed.
-
-Story 2: Knowledge Studio client SDK (ks-client)
-Build a typed client with authentication, retry/backoff, timeouts and normalised errors.
-AC: Works against the sandbox environment; contract tests cover all endpoints used; errors are mapped to a common set of codes.
-
-Story 3: Use-case configuration layer (ks-config)
-Define a versioned schema for pipeline settings, prompts, filters and access rules, with startup validation.
-AC: Switching from one pipeline to another requires only a config change; invalid configs fail with clear messages.
-
-Story 4: Ingestion connectors and sync
-Implement the connector interface and the first connector(s) for [sources], with metadata mapping, incremental sync and deletion handling.
-AC: Initial load and incremental updates succeed; deleted source items disappear from results within [X hours]; failures are retried and surfaced.
-
-Story 5: Retrieval and answer API (ks-retrieval)
-Implement query, filtering and streaming answers, with timeout and fallback behaviour.
-AC: p95 latency under [X s]; streaming works end to end; graceful message when the platform is unavailable.
-
-Story 6: Access control and data isolation
-Pass user identity and entitlements to retrieval, with a test matrix across roles.
-AC: A user cannot retrieve or see citations from content they are not entitled to; verified by automated tests and a security review.
-
-Story 7: Citations and grounding
-Standardise citations, link back to source records and handle “no answer found” responses.
-AC: Every answer shows at least one source or an explicit no-answer message; citation links open the correct record.
-
-Story 8: UI components (ks-ui)
-Build the chat/search component and integrate it into [Application name].
-AC: Accessible (WCAG [level]), supports streaming, citations, feedback capture and error states.
-
-Story 9: MCP tool wrapper (ks-mcp-tools)
-Expose retrieval as MCP tools so the Compass-style copilot can answer knowledge questions alongside navigation and data analysis.
-AC: The tools are described clearly enough for the LLM to choose them correctly; retrieved text is treated as untrusted data and cannot trigger actions.
-
-Story 10: Evaluation framework (ks-eval)
-Create the golden question set and automated runs for relevance, groundedness and latency.
-AC: Baseline scores recorded; regressions are flagged in CI when pipeline or prompt config changes.
-
-Story 11: Observability, cost and security hardening
-Add logging, metrics, token and cost tracking, PII redaction, rate limiting and an audit trail.
-AC: Dashboards live; no PII in logs; usage per user and per pipeline visible.
-
-Story 12: Packaging, documentation and second-use-case validation
-Publish versioned packages, write an onboarding guide and onboard one more pipeline or application using only config.
-AC: Onboarding completed with no changes to core packages; effort recorded for future estimates.
-
-Non-Functional Requirements
-Performance: [p95 latency target], [concurrency target]
-Availability: graceful degradation if Knowledge Studio is down
-Security: group security review, secrets in a vault, least-privilege service credentials
-Compliance: data residency and retention per [group policy]
-Quality gate: minimum evaluation scores before each release
-Dependencies
-Knowledge Studio team: sandbox access, API documentation, support channel, roadmap visibility
-Identity/platform team: how user identity and entitlements are passed through
-Content owners: source access and metadata quality
-Frontend capacity for the UI integration
-Risks
-Poor source content quality or metadata limits answer quality, so schedule a content readiness check early.
-Knowledge Studio API changes break the integration; mitigate with contract tests and version pinning.
-Entitlement mismatch between source systems and the index causes data leakage; treat as a release blocker.
-Hallucinated or ungrounded answers erode trust; enforce citations and a no-answer behaviour.
-Open Questions
-Which Knowledge Studio capabilities are available to us: ingestion APIs, managed connectors, reranking, evaluation tools?
-Do we push content into Knowledge Studio, or does it pull from the sources?
-How does Knowledge Studio handle document-level permissions?
-Is the shared kit owned by our team or by the AI platform team?
-Should this ship under the same epic as the MCP copilot, or as a linked epic?
-Suggested Phasing
-Phase 1: Stories 1-3 (design, client SDK, config)
-Phase 2: Stories 4-7 (ingestion, retrieval, access control, citations)
-Phase 3: Stories 8-9 (UI and MCP tools)
-Phase 4: Stories 10-12 (evaluation, hardening, packaging, second use case)
-
-Story 9 is the link to your earlier MCP epic: it makes Knowledge Studio one more module in the same copilot, so I’d suggest linking the two epics in Jira.
-
-If you share what Knowledge Studio exposes (API docs or a feature list) and the content sources for [Application name], I can replace the placeholders with specifics.
+Tasks (Workers must possess the required skill):
+- T1: [CRITICAL] | Skill: python | Tag: billing
+- T2: [CRITICAL] | Skill: sql    | Tag: billing
+- T3: [MEDIUM]   | Skill: python | Tag: auth
+- T4: [LOW]      | Skill: cloud  | Tag: billing
+- T5: [LOW]      | Skill: sql    | Tag: auth
+"""
